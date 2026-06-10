@@ -259,8 +259,20 @@ const copyHistory = [];
 
 
 // ===== DATA LOADING (from ./data.json) =====
+let _loadTimeout = null;
+
 async function loadData() {
   showDatasourceStatus('loading', '正在加载数据...');
+
+  // Auto-fallback after 5 seconds
+  if (_loadTimeout) clearTimeout(_loadTimeout);
+  _loadTimeout = setTimeout(() => {
+    if (!DATA_READY) {
+      console.warn('Data loading timed out, using embedded fallback');
+      loadFallback();
+      showDatasourceStatus('error', '加载超时，已使用内置备用数据（点击 [REFRESH] 重试）');
+    }
+  }, 5000);
 
   try {
     const resp = await fetch(DATA_URL + '?t=' + Date.now());
@@ -281,10 +293,12 @@ async function loadData() {
 
     renderAllFields();
     DATA_READY = true;
+    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
     showDatasourceStatus('ok', '数据已加载 (' + Object.keys(OPTIONS).length + ' 字段, ' + totalVals + ' 枚举值)');
   } catch(err) {
     console.warn('Data fetch failed, using embedded fallback:', err);
+    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     loadFallback();
     showDatasourceStatus('error', '无法加载 data.json，已使用内置备用数据');
   }
