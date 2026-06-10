@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ad Campaign 命名生成器 · Campaign Name Builder</title>
+  <title>Campaign Name Builder</title>
   <style>
 :root{--primary:#4F46E5;--primary-light:#EEF2FF;--primary-hover:#4338CA;--success:#10B981;--danger:#EF4444;--danger-light:#FEF2F2;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--bg:#F3F4F6;--card:#FFF;--shadow:0 1px 3px rgba(0,0,0,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;gap:14px}
 .header-icon{font-size:26px;line-height:1}
 .header-title{font-size:18px;font-weight:700;color:#fff}
@@ -23,6 +23,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.fields-grid{grid-template-columns:1fr}}
 .field-full{grid-column:1/-1}
+/* Compact row for Market + Product Type */
+.field-compact{display:contents}
+.field-compact .field{margin-bottom:0}
+.field-compact .field-label{font-size:11px}
+.field-compact .select-search{padding:7px 32px 7px 10px;font-size:13px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
@@ -31,6 +36,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .tag{display:inline-flex;align-items:center;padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--muted);background:var(--bg);user-select:none;white-space:nowrap}
 .tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 .tag.active{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:600}
+.tag.disabled{opacity:.35;pointer-events:none;cursor:not-allowed}
 .select-wrap{position:relative}
 .select-search{width:100%;padding:9px 36px 9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card);transition:border-color .15s,box-shadow .15s;cursor:pointer}
 .select-search::placeholder{color:#9CA3AF;font-size:13px}
@@ -59,8 +65,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .custom-help-header:hover{background:#E5E7EB}
 .custom-help-toggle{font-size:11px;transition:transform .2s}
 .custom-help-toggle.open{transform:rotate(180deg)}
-.custom-help-body{display:none;padding:12px 14px 14px}
-.custom-help-body.show{display:block}
+.custom-help-body{display:block;padding:12px 14px 14px}
+.custom-help-body.collapsed{display:none}
 .help-group{margin-bottom:12px}
 .help-group:last-child{margin-bottom:0}
 .help-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:7px}
@@ -79,11 +85,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .btn-primary{width:100%;padding:11px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--primary);color:#fff;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-primary:hover{background:var(--primary-hover)}
 .btn-primary.copied{background:var(--success)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
 .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .btn-secondary{padding:9px 10px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .btn-secondary:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.btn-download{width:100%;padding:8px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px dashed var(--border);background:transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px}
-.btn-download:hover{border-color:var(--primary);color:var(--primary)}
 .breakdown-list{display:flex;flex-direction:column;gap:7px}
 .breakdown-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg)}
 .breakdown-num{width:20px;height:20px;border-radius:5px;background:var(--primary-light);color:var(--primary);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -91,6 +96,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .breakdown-val{font-size:13px;font-weight:600;color:var(--text)}
 .breakdown-val.custom-val{color:var(--success)}
 .empty-hint{font-size:13px;color:var(--muted);text-align:center;padding:14px 0}
+.validation-warning{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:#991B1B;display:none}
+.validation-warning.show{display:block;font-weight:500}
 .history-scroller{max-height:200px;overflow-y:auto}
 .history-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
 .history-row:hover{background:var(--primary-light)}
@@ -118,94 +125,98 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
-  <div class="header-icon">TAG</div>
+  <div class="header-icon">📋</div>
   <div>
-    <div class="header-title">Ad Campaign 命名生成器 · Campaign Name Builder</div>
-    <div class="header-sub">煨保规范快速生成广告系列命名，支持复制 / 导出 · 数据来源：data.json（GitHub 在线维护）</div>
+    <div class="header-title">Campaign Name Builder</div>
+    <div class="header-sub">Follow naming conventions to generate campaign names. Data source: data.json (GitHub)</div>
   </div>
 </div>
 
+<!-- Main Layout -->
 <div class="layout">
 
+  <!-- Left Panel -->
   <div>
     <div class="card">
       <div class="card-header">
-        <div class="card-icon">&#128203;</div>
+        <div class="card-icon">📝</div>
         <div>
-          <div class="card-title">填写字段信息</div>
-          <div class="card-desc">每个字段选择枚举值，或在 Custom 列自定义填写</div>
+          <div class="card-title">Select Fields</div>
+          <div class="card-desc">Choose enum values for each field, or type in Custom.</div>
         </div>
       </div>
 
       <div id="datasource-status" class="datasource-bar loading">
         <span class="ds-dot"></span>
-        <span class="ds-msg">正在加载数据...</span>
+        <span class="ds-msg">Loading data...</span>
         <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>
       </div>
 
       <div id="fields-container">
         <div style="padding:40px 0;text-align:center">
-          <div class="skeleton" style="height:44px;width:100%;margin-bottom:16px"></div>
-          <div class="skeleton" style="height:44px;width:48%;display:inline-block;margin-right:2%"></div>
-          <div class="skeleton" style="height:44px;width:48%;display:inline-block"></div>
-          <div class="skeleton" style="height:44px;width:100%;margin-top:16px"></div>
+          <div class="skeleton" style="height:40px;width:100%;margin-bottom:16px"></div>
+          <div class="skeleton" style="height:40px;width:48%;display:inline-block;margin-right:2%"></div>
+          <div class="skeleton" style="height:40px;width:48%;display:inline-block"></div>
+          <div class="skeleton" style="height:40px;width:100%;margin-top:16px"></div>
         </div>
       </div>
 
+      <div id="validation-warning" class="validation-warning"></div>
     </div>
 
     <div style="display:flex;justify-content:flex-end;margin-top:12px">
       <button class="btn-secondary" onclick="resetAll()" style="padding:8px 18px;border-radius:8px">
-        &#x1F504; 重置所有字段
+        🔁 Reset All Fields
       </button>
     </div>
   </div>
 
+  <!-- Right Panel -->
   <div class="result-sticky">
     <div class="card">
       <div class="card-header">
-        <div class="card-icon">&#9733;</div>
+        <div class="card-icon">⭐</div>
         <div>
-          <div class="card-title">命名预览</div>
-          <div class="card-desc">字段用 <code>_</code> 连接，字段内空格保持原样</div>
+          <div class="card-title">Preview</div>
+          <div class="card-desc">Fields joined with <code>_</code>. Spaces within values preserved.</div>
         </div>
       </div>
       <div class="result-dark">
-        <div class="result-dark-label">生成结果</div>
+        <div class="result-dark-label">Result</div>
         <div class="result-name-display" id="preview-output">
-          <span class="seg-empty">加载中…</span>
+          <span class="seg-empty">Loading...</span>
         </div>
         <div class="result-len" id="preview-len"></div>
       </div>
       <button class="btn-primary" id="copy-main-btn" onclick="copyMain()">
-        [COPY] 复制命名
+        [COPY] Copy Name
       </button>
       <div class="btn-row">
-        <button class="btn-secondary" onclick="exportTXT()">[TXT] 导出 TXT</button>
-        <button class="btn-secondary" onclick="exportCSV()">[CSV] 导出 CSV</button>
+        <button class="btn-secondary" onclick="exportTXT()">[TXT] Export TXT</button>
+        <button class="btn-secondary" onclick="exportCSV()">[CSV] Export CSV</button>
       </div>
-      <button class="btn-download" onclick="downloadTool()">[DL] 下载此工具（离线 / 发给同事）</button>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">
-        <div class="card-icon">&#128269;</div>
-        <div class="card-title">字段解析</div>
+        <div class="card-icon">📑</div>
+        <div class="card-title">Field Breakdown</div>
       </div>
       <div class="breakdown-list" id="breakdown-list">
-        <div class="empty-hint">填写字段后自动解析…</div>
+        <div class="empty-hint">Fill fields to see breakdown...</div>
       </div>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:10px">
-          <div class="card-icon">&#128337;</div>
-          <div class="card-title">复制历史</div>
+          <div class="card-icon">📰</div>
+          <div class="card-title">Copy History</div>
         </div>
-        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">清除</span>
+        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">Clear</span>
       </div>
       <div class="history-scroller" id="history-scroller">
-        <div class="empty-hint">暂无记录…</div>
+        <div class="empty-hint">No history yet...</div>
       </div>
     </div>
   </div>
@@ -223,6 +234,16 @@ let FIELD_LABELS = {};
 let OPTIONS = {};
 let DATA_READY = false;
 
+// Required fields (all except Custom)
+const REQUIRED_FIELDS = new Set();
+
+// Funnel -> Goal mapping for cross-filtering
+const FUNNEL_GOAL_MAP = {
+  "awareness":    ["impression","reach"],
+  "consideration":["click","view","pageview","signup","atc","checkout","engagement","dpv","follow"],
+  "conversion":   ["sales"],
+};
+
 const sel = {};
 let customValid = true;
 const copyHistory = [];
@@ -232,14 +253,14 @@ const copyHistory = [];
 let _loadTimeout = null;
 
 async function loadData() {
-  showDatasourceStatus('loading', '正在加载数据...');
+  showDatasourceStatus('loading', 'Loading data...');
 
   if (_loadTimeout) clearTimeout(_loadTimeout);
   _loadTimeout = setTimeout(() => {
     if (!DATA_READY) {
       console.warn('Data loading timed out, using embedded fallback');
       loadFallback();
-      showDatasourceStatus('error', '加载超时，已使用内置备用数据（点击 [REFRESH] 重试）');
+      showDatasourceStatus('error', 'Loading timed out. Using built-in fallback data. Click [REFRESH] to retry.');
     }
   }, 5000);
 
@@ -251,24 +272,26 @@ async function loadData() {
     FIELDS_ORDER = [];
     FIELD_LABELS = {};
     OPTIONS = {};
+    REQUIRED_FIELDS.clear();
 
     for (const [colName, vals] of Object.entries(json)) {
       const key = colName.toLowerCase().replace(/ /g, '-');
       FIELDS_ORDER.push(key);
       FIELD_LABELS[key] = colName;
       OPTIONS[key] = vals;
+      if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
     }
 
     renderAllFields();
     DATA_READY = true;
     if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
-    showDatasourceStatus('ok', '\u6570\u636e\u5df2\u52a0\u8f7d (' + Object.keys(OPTIONS).length + ' \u5b57\u6bb5, ' + totalVals + ' \u679a\u4e3e\u503c)');
+    showDatasourceStatus('ok', 'Data loaded (' + Object.keys(OPTIONS).length + ' fields, ' + totalVals + ' values)');
   } catch(err) {
     console.warn('Data fetch failed, using embedded fallback:', err);
     if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     loadFallback();
-    showDatasourceStatus('error', '\u65e0\u6cd5\u52a0\u8f7d data.json\uff0c\u5df2\u4f7f\u7528\u5185\u7f6e\u5907\u7528\u6570\u636e');
+    showDatasourceStatus('error', 'Failed to load data.json. Using built-in fallback.');
   }
 }
 
@@ -276,11 +299,13 @@ function loadFallback() {
   FIELDS_ORDER = [];
   FIELD_LABELS = {};
   OPTIONS = {};
+  REQUIRED_FIELDS.clear();
   for (const [colName, vals] of Object.entries(FALLBACK_DATA)) {
     const key = colName.toLowerCase().replace(/ /g, '-');
     FIELDS_ORDER.push(key);
     FIELD_LABELS[key] = colName;
     OPTIONS[key] = vals;
+    if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
   }
   renderAllFields();
   DATA_READY = true;
@@ -294,20 +319,25 @@ function showDatasourceStatus(state, msg) {
 }
 
 
-// ===== RENDER FIELDS（模板字符串版本，无引号嵌套问题）=====
+// ===== RENDER FIELDS =====
 function renderAllFields() {
   const container = document.getElementById('fields-container');
   let html = '';
 
   for (const f of FIELDS_ORDER) {
+    // Compact row: Market + Product Type side by side
+    if (f === 'market') {
+      html += `<div class="field-compact">`;
+    }
+
     const ft = FIELD_TYPES[f] || 'tag';
     const label = FIELD_LABELS[f];
     const opts = OPTIONS[f] || [];
 
     if (ft === 'dropdown') {
       const isFullWidth = (f === 'product-code' || opts.length > 30);
-      const phMap = {'market':'\u641c\u7d22\u6216\u9009\u62e9\u5e02\u573a...','product-type':'\u641c\u7d22\u4ea7\u54c1\u7c7b\u578b...','product-code':'\u641c\u7d22\u4ea7\u54c1\u578b\u53ef\uff08\u5982 argus 4\u3001rlc-410\uff09...'};
-      const ph = phMap[f] || '\u641c\u7d22' + label + '...';
+      const phMap = {'market':'Search or select market...','product-type':'Search product type...','product-code':'Search product model (e.g. argus 4, rlc-410)...'};
+      const ph = phMap[f] || 'Search ' + label + '...';
       html += `<div class="field${isFullWidth ? ' field-full' : ''}">
         <div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
         <div class="select-wrap" id="wrap-${f}">
@@ -317,19 +347,71 @@ function renderAllFields() {
           <div class="dropdown" id="drop-${f}"></div>
         </div></div>`;
     } else if (ft === 'tag') {
-      const tags = opts.map(v =>
-        `<div class="tag" data-val="${escAttr(v)}" onclick="selectTag('${f}','${escJs(v)}')">${escHtml(v)}</div>`
-      ).join('');
+      const tags = renderTagOptions(f, opts);
       html += `<div class="field"><div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
         <div class="tag-wrap" id="tags-${f}">${tags}</div></div>`;
     } else if (ft === 'custom') {
+      // Close compact div before custom section
+      if (FIELDS_ORDER.includes('Market')) {
+        html += `</div>`; // close field-compact
+      }
       html += makeCustomHTML();
+    }
+
+    // Close compact div after Product Type
+    if (f === 'product-type') {
+      html += `</div>`; // close field-compact
     }
   }
 
   container.innerHTML = `<div class="fields-grid">${html}</div>`;
+
+  // Apply current funnel filter if already selected
+  applyFunnelFilter();
 }
 
+// Render tag options with optional disabled state based on funnel selection
+function renderTagOptions(fieldKey, opts) {
+  let disabledGoals = null;
+  if (fieldKey === 'bidding-goal' && sel['media-funnel']) {
+    disabledGoals = FUNNEL_GOAL_MAP[sel['media-funnel']] || null;
+  }
+
+  return opts.map(v => {
+    const isDisabled = disabledGoals && !disabledGoals.includes(v);
+    return `<div class="tag${isDisabled ? ' disabled' : ''}" data-val="${escAttr(v)}" onclick="${isDisabled ? '' : `selectTag('${fieldKey}','${escJs(v)}')`}">${escHtml(v)}</div>`;
+  }).join('');
+}
+
+// Apply funnel-based filtering to bidding goals
+function applyFunnelFilter() {
+  const funnelVal = sel['media-funnel'];
+  const goalContainer = document.getElementById('tags-bidding-goal');
+  if (!goalContainer) return;
+
+  const goalOpts = OPTIONS['bidding-goal'] || [];
+  goalContainer.innerHTML = renderTagOptions('bidding-goal', goalOpts);
+
+  // Re-apply active state if current goal is still valid
+  if (sel['bidding-goal']) {
+    const allowed = FUNNEL_GOAL_MAP[funnelVal];
+    if (allowed && !allowed.includes(sel['bidding-goal'])) {
+      // Current goal no longer valid, clear it
+      delete sel['bidding-goal'];
+      updatePreview();
+    } else {
+      // Re-activate the tag
+      goalContainer.querySelectorAll('.tag').forEach(t => {
+        t.classList.toggle('active', t.dataset.val === sel['bidding-goal']);
+      });
+    }
+  } else {
+    updatePreview();
+  }
+}
+
+
+// ===== CUSTOM SECTION =====
 function makeCustomHTML() {
   const searchAds = ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'];
   const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
@@ -342,23 +424,30 @@ function makeCustomHTML() {
     `</div></div>`;
 
   return `<div class="field field-full">
-    <div class="field-label">Custom<span class="optional">\u53ef\u9009</span></div>
+    <div class="field-label">Custom<span class="optional">Optional</span></div>
     <div class="custom-input-wrap">
-      <input type="text" class="custom-input" id="custom-input" placeholder="\u81ea\u5b9a\u4e49\u5185\u5bb9\uff0c\u5982 rm\u3001aon..."
+      <input type="text" class="custom-input" id="custom-input" placeholder="e.g., rm, aon..."
         oninput="validateCustom(this)" maxlength="50">
     </div>
     <div class="custom-error-msg" id="custom-error"></div>
     <div class="custom-rules" id="custom-rules-hint">
-      <div class="rule" id="rule-lower">&#9675; \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09</div>
-      <div class="rule" id="rule-no-underscore">&#9675; \u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf <code>_</code>\uff0c\u7528 <code>-</code> \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed</div>
+      <div class="rule" id="rule-lower">&#9675; Lowercase letters, digits, hyphens &amp; spaces only</div>
+      <div class="rule" id="rule-no-underscore">&#9675; No underscores <code>_</code>, use <code>-</code> or space instead</div>
     </div>
     <div class="custom-help">
       <div class="custom-help-header" onclick="toggleHelp()">
-        &#128161; \u5e38\u7528 Custom \u503c\u53c2\u8003
-        <span class="custom-help-toggle" id="help-toggle">&#9662;</span>
+        &#128161; Common Custom Values Reference
+        <span class="custom-help-toggle open" id="help-toggle">&#9662;</span>
       </div>
       <div class="custom-help-body" id="help-body">${groups}</div>
     </div></div>`;
+}
+
+function toggleHelp() {
+  const body = document.getElementById('help-body');
+  const toggle = document.getElementById('help-toggle');
+  body.classList.toggle('collapsed');
+  toggle.classList.toggle('open');
 }
 
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -390,7 +479,7 @@ function filterDropdown(field, q) {
   drop.classList.add('open');
   const filtered = q.trim() === '' ? opts : opts.filter(v => v.toLowerCase().includes(q.toLowerCase()));
   if (filtered.length === 0) {
-    drop.innerHTML = '<div class="dropdown-item no-match">\u65e0\u5339\u914d\u7ed3\u679c</div>';
+    drop.innerHTML = '<div class="dropdown-item no-match">No matches found</div>';
   } else {
     drop.innerHTML = filtered.map(v =>
       `<div class="dropdown-item${sel[field]===v ? ' selected' : ''}" data-val="${escAttr(v)}"
@@ -406,6 +495,8 @@ function pickDropdown(field, val, e) {
   inp.value = val;
   inp.classList.add('has-value');
   document.getElementById('drop-' + field).classList.remove('open');
+
+  // If market/product-type changed, no special action needed (no dependency)
   updatePreview();
 }
 
@@ -424,11 +515,19 @@ function blurDropdown(field) {
 function selectTag(field, val) {
   if (sel[field] === val) delete sel[field];
   else sel[field] = val;
+
+  // Update tag UI
   const container = document.getElementById('tags-' + field);
   if (container) {
     container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[field]));
   }
-  updatePreview();
+
+  // If media-funnel changed, re-filter bidding goals
+  if (field === 'media-funnel') {
+    applyFunnelFilter();
+  } else {
+    updatePreview();
+  }
 }
 
 
@@ -440,15 +539,15 @@ function validateCustom(inp) {
   const r1 = document.getElementById('rule-lower'), r2 = document.getElementById('rule-no-underscore');
   const errEl = document.getElementById('custom-error');
   r1.className = 'rule ' + (v==='' ? '' : lowerOk ? 'pass' : 'fail');
-  r1.textContent = (v===''||lowerOk ? '\u2713' : '\u2717') + ' \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09';
+  r1.textContent = (v===''||lowerOk ? '\u2713' : '\u2717') + ' Lowercase letters, digits, hyphens &amp; spaces only';
   r2.className = 'rule ' + (v==='' ? '' : noUnderscore ? 'pass' : 'fail');
-  r2.textContent = (v===''||noUnderscore ? '\u2713' : '\u2717') + ' \u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf _\uff0c\u7528 - \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed';
+  r2.textContent = (v===''||noUnderscore ? '\u2713' : '\u2717') + ' No underscores _, use - or space instead';
   if (v !== '' && (!lowerOk || !noUnderscore)) {
     inp.classList.add('error'); inp.classList.remove('ok'); customValid = false;
     const msgs=[];
-    if(!lowerOk) msgs.push('\u4ec5\u5141\u8bb8\u82f1\u6587\u5c0f\u5199\u3001\u6570\u5b57\u3001\u8fde\u5b57\u7b26\u548c\u7a7a\u683c');
-    if(!noUnderscore) msgs.push('\u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf _');
-    errEl.textContent=msgs.join('\uff1b'); errEl.classList.add('show');
+    if(!lowerOk) msgs.push('Only lowercase letters, digits, hyphens and spaces allowed');
+    if(!noUnderscore) msgs.push('No underscores _ allowed');
+    errEl.textContent=msgs.join('; '); errEl.classList.add('show');
   } else {
     inp.classList.remove('error');
     if(v!=='') inp.classList.add('ok'); else inp.classList.remove('ok');
@@ -458,10 +557,40 @@ function validateCustom(inp) {
 }
 
 
+// ===== VALIDATION (required fields check) =====
+function validateRequired() {
+  const missing = [];
+  for (const f of FIELDS_ORDER) {
+    if (REQUIRED_FIELDS.has(f) && !sel[f]) {
+      missing.push(FIELD_LABELS[f] || f);
+    }
+  }
+  return missing;
+}
+
+function showValidationWarning(msg) {
+  const el = document.getElementById('validation-warning');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideValidationWarning() {
+  document.getElementById('validation-warning').classList.remove('show');
+}
+
+
 // ===== PREVIEW =====
 function toStr(s){ return s.trim(); }
 
 function buildName() {
+  // Validate required fields first
+  const missing = validateRequired();
+  if (missing.length > 0) {
+    showValidationWarning('\u26A0 Please fill in all required fields: ' + missing.join(', '));
+    return [];
+  }
+  hideValidationWarning();
+
   const parts=[];
   for(const f of FIELDS_ORDER){
     if(f==='custom'){
@@ -477,19 +606,26 @@ function buildName() {
 
 function updatePreview() {
   const parts=buildName(), outEl=document.getElementById('preview-output'), lenEl=document.getElementById('preview-len');
+
+  // If validation failed, show warning instead of partial result
+  if (parts.length === 0 && validateRequired().length > 0) {
+    outEl.innerHTML='<span class="seg-empty">Fill in all required fields above...</span>';
+    lenEl.textContent=''; renderBreakdown([]); return;
+  }
+
   if(parts.length===0){
-    outEl.innerHTML='<span class="seg-empty">\u586b\u5199\u5de6\u4fa7\u5b57\u6bb5\u4ee5\u751f\u6210\u547d\u540d&#8230;</span>';
+    outEl.innerHTML='<span class="seg-empty">Select fields to generate campaign name...</span>';
     lenEl.textContent=''; renderBreakdown([]); return;
   }
   outEl.innerHTML=parts.map((p,i)=>(i>0?'<span class="seg-sep">_</span>':'')+'<span class="'+(p.isCustom?'seg-custom':'seg-part')+'">'+escHtml(p.val)+'</span>').join('');
   const fullName=parts.map(p=>p.val).join('_');
-  lenEl.textContent=fullName.length+' \u5b57\u7b26'; window._currentName=fullName;
+  lenEl.textContent=fullName.length+' chars'; window._currentName=fullName;
   renderBreakdown(parts);
 }
 
 function renderBreakdown(parts){
   const el=document.getElementById('breakdown-list');
-  if(parts.length===0){ el.innerHTML='<div class="empty-hint">\u586b\u5199\u5b57\u6bb5\u540e\u81ea\u52a8\u89e3\u6790&#8230;</div>'; return; }
+  if(parts.length===0){ el.innerHTML='<div class="empty-hint">Fields will appear here after selection...</div>'; return; }
   el.innerHTML=parts.map((p,i)=>'<div class="breakdown-row"><div class="breakdown-num">'+(i+1)+'</div><div class="breakdown-field">'+escHtml(FIELD_LABELS[p.field])+'</div><div class="breakdown-val'+(p.isCustom?' custom-val':'')+'">'+escHtml(p.val)+'</div></div>').join('');
 }
 
@@ -497,30 +633,27 @@ function renderBreakdown(parts){
 // ===== COPY & EXPORT =====
 function copyMain() {
   const n=window._currentName;if(!n)return;doClipboard(n);
-  const b=document.getElementById('copy-main-btn');b.textContent='\u2705 \u5df2\u590d\u5236\uff01';b.classList.add('copied');
-  setTimeout(()=>{b.innerHTML='[OK] Copied';b.classList.remove('copied')},2000);addHistory(n);
+  const b=document.getElementById('copy-main-btn');b.textContent='\u2705 Copied!';b.classList.add('copied');
+  setTimeout(()=>{b.innerHTML='[COPY] Copy Name';b.classList.remove('copied')},2000);addHistory(n);
 }
 function doClipboard(s){ navigator.clipboard.writeText(s).catch(()=>{const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
-function addHistory(n){ copyHistory.unshift({name:n,time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})});renderHistory(); }
+function addHistory(n){ copyHistory.unshift({name:n,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});renderHistory(); }
 function renderHistory(){
   const el=document.getElementById('history-scroller');
-  if(copyHistory.length===0){el.innerHTML='<div class="empty-hh-int">\u6682\u65e0\u8bb0\u5f55&#8230;</div>';return}
+  if(copyHistory.length===0){el.innerHTML='<div class="empty-hint">No records yet...</div>';return}
   el.innerHTML=copyHistory.slice(0,20).map(h=>`<div class="history-row" onclick="doClipboard('${h.name.replace(/'/g,"\\'")}')"><div class="history-name" title="${escHtml(h.name)}">${escHtml(h.name)}</div><div class="history-time">${h.time}</div><div class="history-copy-btn" onclick="event.stopPropagation();doClipboard('${h.name.replace(/'/g,"\\'")}')">COPY</div></div>`).join('');
 }
 function clearHistory(){copyHistory.length=0;renderHistory()}
 function exportTXT(){
-  if(!copyHistory.length){alert('\u6682\u65e0\u5386\u53f2\u8bb0\u5f55');return}
-  dlBlob('\u5e7f\u544a\u7cfb\u5217\u547d\u540b\u5bfc\u51fa\n\u5bfc\u51fa\u65f6\u95f4\uff1a'+new Date().toLocaleString('zh-CN')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map((h,i)=>(i+1)+'. '+h.name).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
+  if(!copyHistory.length){alert('No history records yet.');return}
+  dlBlob('Campaign Name Export\nExported: '+new Date().toLocaleString('en-US')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map((h,i)=>(i+1)+'. '+h.name).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
 }
 function exportCSV(){
-  if(!copyHistory.length){alert('\u6682\u65e0\u5386\u53f2\u8bb0\u5f55');return}
-  dlBlob('\ufeff'+[['\u5e8f\u53f7','\u547d\u540d','\u590d\u5236\u65f6\u95f4'],...copyHistory.map((h,i)=>[i+1,h.name,h.time])].map(r=>r.map(c=>'"'+c+'"').join(',')).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
+  if(!copyHistory.length){alert('No history records yet.');return}
+  dlBlob('\ufeff'+[['No.','Name','Time'],...copyHistory.map((h,i)=>[i+1,h.name,h.time])].map(r=>r.map(c=>'"'+c+'"').join(',')).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
 }
-function downloadTool(){dlBlob('<!DOCTYPE html>\n'+document.documentElement.outerHTML,'ad-campaign-namebuilder.html','text/html;charset=utf-8')}
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
-
-function toggleHelp(){document.getElementById('help-body').classList.toggle('show');document.getElementById('help-toggle').classList.toggle('open')}
 function pickCustom(val){const i=document.getElementById('custom-input');if(i){i.value=val;validateCustom(i)}}
 
 function resetAll() {
@@ -528,11 +661,15 @@ function resetAll() {
   document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(c=>{const f=c.id.replace('tags-','');delete sel[f];c.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'))});
   const ci=document.getElementById('custom-input');if(ci){ci.value='';ci.classList.remove('error','ok')}
   const ce=document.getElementById('custom-error');if(ce)ce.classList.remove('show');
-  const r1=document.getElementById('rule-lower');if(r1){r1.className='rule';r1.textContent='\u25cb \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09'}
-  const r2=document.getElementById('rule-no-underscore');if(r2){r2.className='rule';r2.textContent='\u25cb \u4e0d\u80fd\u5305\u542b\u4e0b\u5217\u7ebf _\uff0c\u7528 - \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed'}
+  const r1=document.getElementById('rule-lower');if(r1){r1.className='rule';r1.textContent='\u25cb Lowercase letters, digits, hyphens &amp; spaces only'}
+  const r2=document.getElementById('rule-no-underscore');if(r2){r2.className='rule';r2.textContent='\u25cb No underscores _, use - or space instead'}
   customValid=true;
-  const hb=document.getElementById('help-body');if(hb)hb.classList.remove('show');
-  const ht=document.getElementById('help-toggle');if(ht)ht.classList.remove('open');
+  hideValidationWarning();
+  // Reset funnel filter
+  applyFunnelFilter();
+  // Keep help expanded (default state)
+  const hb=document.getElementById('help-body');if(hb)hb.classList.remove('collapsed');
+  const ht=document.getElementById('help-toggle');if(ht)ht.classList.add('open');
   updatePreview();
 }
 
