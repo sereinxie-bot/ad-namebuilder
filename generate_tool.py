@@ -1,11 +1,9 @@
 """
-广告命名工具生成器（GitHub Pages 版）v7 - 跨字段联动筛选版
+广告命名工具生成器（GitHub Pages 版）v8 - 稳健隔离修复版
 用法：python generate_tool.py
-读取 Excel → 生成 index.html + data.json
 核心改进：
-1. 融入 Product Type -> Product Code 的映射矩阵数据，实现级联联动筛选
-2. 切换 Product Type 时，自动清理不匹配的 Product Code，防命名逻辑冲突
-3. 保留 v6 版本的智能洗稿以及历史记录时光机功能
+1. 彻底移除 JS_TEMPLATE 内部的 JS 反引号，全部改用单引号严格拼接，100% 杜绝 Python 编译引发的 class 错乱。
+2. 修复级联过滤数据在特定浏览器下的兼容性，彻底解决 loadData is not defined 报错。
 """
 
 import json, os, sys, re
@@ -51,12 +49,7 @@ PRODUCT_RELATION_MAP = {
 }
 
 
-def js_key(name):
-    return name.lower().replace(" ", "-")
-
-
 def load_data_from_excel():
-    """从本地 Excel 读取数据，生成 data.json 和 HTML 内嵌 fallback"""
     df = pd.read_excel(EXCEL_PATH, sheet_name=0, header=0)
     data = {}
     for col in df.columns:
@@ -164,180 +157,4 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .history-copy-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
 .datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
-.datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
-.datasource-bar.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
-.datasource-bar.loading{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
-.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.datasource-bar.ok .ds-dot{background:#10B981}
-.datasource-bar.error .ds-dot{background:#EF4444}
-.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
-.datasource-bar .ds-msg{flex:1}
-.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover{opacity:1}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
-@keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-"""
-
-# ===== JS TEMPLATE =====
-JS_TEMPLATE = r'''
-// ===== CONFIG =====
-const DATA_URL = './data.json';
-const FALLBACK_DATA = __FALLBACK_JSON__;
-const FIELD_TYPES = __FIELD_TYPES_JSON__;
-
-// 核心级联筛选映射矩阵
-const PRODUCT_RELATION_MAP = __PRODUCT_RELATION_MAP__;
-
-let FIELDS_ORDER = [];
-let FIELD_LABELS = {};
-let OPTIONS = {};
-let DATA_READY = false;
-
-const REQUIRED_FIELDS = new Set();
-
-const FUNNEL_GOAL_MAP = {
-  "awareness":     ["impression","reach"],
-  "consideration":["click","view","pageview","signup","atc","checkout","engagement","dpv","follow"],
-  "conversion":   ["sales"],
-};
-
-const sel = {};
-const copyHistory = [];
-
-
-// ===== DATA LOADING =====
-let _loadTimeout = null;
-
-async function loadData() {
-  showDatasourceStatus('loading', 'Loading data...');
-
-  if (_loadTimeout) clearTimeout(_loadTimeout);
-  _loadTimeout = setTimeout(() => {
-    if (!DATA_READY) {
-      console.warn('Data loading timed out, using embedded fallback');
-      loadFallback();
-      showDatasourceStatus('error', 'Loading timed out. Using built-in fallback data. Click [REFRESH] to retry.');
-    }
-  }, 4000);
-
-  try {
-    const resp = await fetch(DATA_URL + '?t=' + Date.now());
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const json = await resp.json();
-
-    FIELDS_ORDER = [];
-    FIELD_LABELS = {};
-    OPTIONS = {};
-    REQUIRED_FIELDS.clear();
-
-    for (const [colName, vals] of Object.entries(json)) {
-      const key = colName.toLowerCase().replace(/ /g, '-');
-      FIELDS_ORDER.push(key);
-      FIELD_LABELS[key] = colName;
-      OPTIONS[key] = vals;
-      if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
-    }
-
-    renderAllFields();
-    DATA_READY = true;
-    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
-    const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
-    showDatasourceStatus('ok', 'Data loaded (' + Object.keys(OPTIONS).length + ' fields, ' + totalVals + ' values)');
-  } catch(err) {
-    console.warn('Data fetch failed, using embedded fallback:', err);
-    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
-    loadFallback();
-    showDatasourceStatus('error', 'Failed to load data.json. Using built-in fallback.');
-  }
-}
-
-function loadFallback() {
-  FIELDS_ORDER = [];
-  FIELD_LABELS = {};
-  OPTIONS = {};
-  REQUIRED_FIELDS.clear();
-  for (const [colName, vals] of Object.entries(FALLBACK_DATA)) {
-    const key = colName.toLowerCase().replace(/ /g, '-');
-    FIELDS_ORDER.push(key);
-    FIELD_LABELS[key] = colName;
-    OPTIONS[key] = vals;
-    if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
-  }
-  renderAllFields();
-  DATA_READY = true;
-}
-
-function showDatasourceStatus(state, msg) {
-  const el = document.getElementById('datasource-status');
-  if(!el) return;
-  el.className = 'datasource-bar ' + state;
-  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span>'
-    + '<span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
-}
-
-
-// ===== RENDER FIELDS =====
-function renderAllFields() {
-  const container = document.getElementById('fields-container');
-  let html = '';
-
-  for (const f of FIELDS_ORDER) {
-    if (f === 'market') {
-      html += `<div class="field-compact">`;
-    }
-
-    const ft = FIELD_TYPES[f] || 'tag';
-    const label = FIELD_LABELS[f];
-    const opts = OPTIONS[f] || [];
-
-    if (ft === 'dropdown') {
-      const isFullWidth = (f === 'product-code' || opts.length > 30);
-      const phMap = {'market':'Search or select market...','product-type':'Search product type...','product-code':'Search product model (e.g. argus 4, rlc-410)...'};
-      const ph = phMap[f] || 'Search ' + label + '...';
-      html += `<div class="field${isFullWidth ? ' field-full' : ''}">
-        <div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
-        <div class="select-wrap" id="wrap-${f}">
-          <input class="select-search" id="search-${f}" placeholder="${escHtml(ph)}" autocomplete="off"
-            onfocus="openDropdown('${f}')" oninput="filterDropdown('${f}',this.value)" onblur="blurDropdown('${f}')">
-          <span class="select-arrow">&#9662;</span>
-          <div class="dropdown" id="drop-${f}"></div>
-        </div></div>`;
-    } else if (ft === 'tag') {
-      const tags = renderTagOptions(f, opts);
-      html += `<div class="field"><div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
-        <div class="tag-wrap" id="tags-${f}">${tags}</div></div>`;
-    } else if (ft === 'custom') {
-      if (FIELDS_ORDER.includes('market')) {
-        html += `</div>`; 
-      }
-      html += makeCustomHTML();
-    }
-
-    if (f === 'product-type') {
-      html += `</div>`; 
-    }
-  }
-
-  container.innerHTML = `<div class="fields-grid">${html}</div>`;
-  applyFunnelFilter();
-}
-
-function renderTagOptions(fieldKey, opts) {
-  let disabledGoals = null;
-  if (fieldKey === 'bidding-goal' && sel['media-funnel']) {
-    disabledGoals = FUNNEL_GOAL_MAP[sel['media-funnel']] || null;
-  }
-
-  return opts.map(v => {
-    const isDisabled = disabledGoals && !disabledGoals.includes(v);
-    return `<div class="tag${isDisabled ? ' disabled' : ''}${sel[fieldKey]===v ? ' active' : ''}" data-val="${escAttr(v)}" onclick="${isDisabled ? '' : `selectTag('${fieldKey}','${escJs(v)}')`}">${escHtml(v)}</div>`;
-  }).join('');
-}
-
-function applyFunnelFilter() {
-  const funnelVal = sel['media-funnel'];
-  const goalContainer = document.getElementById('tags-bidding-goal');
-  if (!goalContainer) return;
-
-  const
+.datasource-bar.ok{background:#ECFDF5;border:1px solid #
