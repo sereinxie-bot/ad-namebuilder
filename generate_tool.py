@@ -1,666 +1,838 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-广告命名工具生成器（GitHub Pages 版）v5 - 修复版
-用法：python generate_tool.py
-读取 Excel → 生成 index.html + data.json
-核心改进：JS 渲染全部改用模板字符串（反引号），彻底消除引号嵌套语法错误
-"""
-
-import json, os, sys, re
-from pathlib import Path
-
-sys.stdout.reconfigure(encoding='utf-8')
-
-try:
-    import pandas as pd
-except ImportError:
-    print("需要安装依赖：pip install pandas openpyxl")
-    exit(1)
-
-# ===== 配置 =====
-EXCEL_PATH = Path(r"D:/serein/工作/媒介建设/ad campaign namebuilder.xlsx")
-OUTPUT_DIR = Path(__file__).parent
-OUTPUT_HTML = OUTPUT_DIR / "index.html"
-OUTPUT_DATA = OUTPUT_DIR / "data.json"
-
-FIELD_TYPES = {
-    "Market":           "dropdown",
-    "Product Type":     "dropdown",
-    "Product Code":     "dropdown",
-    "Media Funnel":     "tag",
-    "Ad Product":       "tag",
-    "Bidding Goal":     "tag",
-    "URL":              "tag",
-    "Custom":           "custom",
-}
-
-PAGE_TITLE = "Ad Campaign 命名生成器 · Campaign Name Builder"
-PAGE_SUBTITLE = "煨保规范快速生成广告系列命名，支持复制 / 导出 · 数据来源：data.json（GitHub 在线维护）"
-
-
-def js_key(name):
-    return name.lower().replace(" ", "-")
-
-
-def load_data_from_excel():
-    """从本地 Excel 读取数据，生成 data.json 和 HTML 内嵌 fallback"""
-    df = pd.read_excel(EXCEL_PATH, sheet_name=0, header=0)
-    data = {}
-    for col in df.columns:
-        vals = df[col].dropna().astype(str).str.strip().tolist()
-        data[str(col)] = vals
-    return data
-
-
-# ===== CSS =====
-CSS = r"""
-:root{--primary:#4F46E5;--primary-light:#EEF2FF;--primary-hover:#4338CA;--success:#10B981;--danger:#EF4444;--danger-light:#FEF2F2;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--bg:#F3F4F6;--card:#FFF;--shadow:0 1px 3px rgba(0,0,0,.08)}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;gap:14px}
-.header-icon{font-size:26px;line-height:1}
-.header-title{font-size:18px;font-weight:700;color:#fff}
-.header-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
-.layout{display:grid;grid-template-columns:1fr 400px;gap:20px;max-width:1200px;margin:24px auto;padding:0 20px 40px;align-items:start}
-@media(max-width:960px){.layout{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;box-shadow:var(--shadow)}
-.card+.card{margin-top:16px}
-.card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
-.card-icon{width:32px;height:32px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.card-title{font-size:15px;font-weight:700}
-.card-desc{font-size:12px;color:var(--muted);margin-top:1px}
-.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:600px){.fields-grid{grid-template-columns:1fr}}
-.field-full{grid-column:1/-1}
-.field{display:flex;flex-direction:column;gap:6px}
-.field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
-.field-label .req{color:var(--danger);font-size:14px;line-height:1}
-.field-label .optional{font-size:10px;font-weight:500;text-transform:none;color:var(--muted);background:#F3F4F6;padding:1px 5px;border-radius:4px}
-.tag-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1.5px solid var(--border);border-radius:10px;min-height:44px;cursor:default;transition:border-color .15s}
-.tag{display:inline-flex;align-items:center;padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--muted);background:var(--bg);user-select:none;white-space:nowrap}
-.tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.tag.active{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:600}
-.select-wrap{position:relative}
-.select-search{width:100%;padding:9px 36px 9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card);transition:border-color .15s,box-shadow .15s;cursor:pointer}
-.select-search::placeholder{color:#9CA3AF;font-size:13px}
-.select-search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
-.select-search.has-value{color:var(--primary);font-weight:600}
-.select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:12px}
-.dropdown{position:absolute;top:calc(100%+4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
-.dropdown.open{display:block}
-.dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text)}
-.dropdown-item:hover{background:var(--primary-light);color:var(--primary)}
-.dropdown-item.selected{background:var(--primary-light);color:var(--primary);font-weight:600}
-.dropdown-item.no-match{color:var(--muted);font-style:italic;pointer-events:none}
-.custom-input-wrap{position:relative}
-.custom-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);transition:border-color .15s,box-shadow .15s}
-.custom-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
-.custom-input.error{border-color:var(--danger);background:var(--danger-light)}
-.custom-input.ok{border-color:var(--success)}
-.custom-error-msg{font-size:11px;color:var(--danger);margin-top:4px;display:none}
-.custom-error-msg.show{display:block}
-.custom-rules{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
-.custom-rules .rule{display:flex;align-items:center;gap:4px}
-.custom-rules .rule.pass{color:var(--success)}
-.custom-rules .rule.fail{color:var(--danger)}
-.custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--muted);transition:background .12s}
-.custom-help-header:hover{background:#E5E7EB}
-.custom-help-toggle{font-size:11px;transition:transform .2s}
-.custom-help-toggle.open{transform:rotate(180deg)}
-.custom-help-body{display:none;padding:12px 14px 14px}
-.custom-help-body.show{display:block}
-.help-group{margin-bottom:12px}
-.help-group:last-child{margin-bottom:0}
-.help-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:7px}
-.help-tags{display:flex;flex-wrap:wrap;gap:6px}
-.help-tag{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--text);background:#fff}
-.help-tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.result-sticky{position:sticky;top:20px}
-.result-dark{background:#18181B;border-radius:12px;padding:20px 20px 16px;margin-bottom:14px}
-.result-dark-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:10px;font-weight:600}
-.result-name-display{font-size:15px;font-weight:700;color:#F4F4F5;word-break:break-all;line-height:1.6;min-height:28px}
-.seg-part{color:#A78BFA}
-.seg-sep{color:#3F3F46}
-.seg-empty{color:#52525B;font-style:italic;font-size:13px;font-weight:400}
-.seg-custom{color:#34D399}
-.result-len{font-size:11px;color:#52525B;margin-top:8px;text-align:right}
-.btn-primary{width:100%;padding:11px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:var(--primary);color:#fff;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-primary:hover{background:var(--primary-hover)}
-.btn-primary.copied{background:var(--success)}
-.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.btn-secondary{padding:9px 10px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
-.btn-secondary:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.btn-download{width:100%;padding:8px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px dashed var(--border);background:transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px}
-.btn-download:hover{border-color:var(--primary);color:var(--primary)}
-.breakdown-list{display:flex;flex-direction:column;gap:7px}
-.breakdown-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg)}
-.breakdown-num{width:20px;height:20px;border-radius:5px;background:var(--primary-light);color:var(--primary);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.breakdown-field{font-size:12px;color:var(--muted);flex:1}
-.breakdown-val{font-size:13px;font-weight:600;color:var(--text)}
-.breakdown-val.custom-val{color:var(--success)}
-.empty-hint{font-size:13px;color:var(--muted);text-align:center;padding:14px 0}
-.history-scroller{max-height:200px;overflow-y:auto}
-.history-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
-.history-row:hover{background:var(--primary-light)}
-.history-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.history-time{font-size:10px;color:var(--muted);flex-shrink:0}
-.history-copy-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
-.history-copy-btn:hover{background:var(--primary-light);border-color:var(--primary)}
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
-.datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
-.datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
-.datasource-bar.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
-.datasource-bar.loading{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
-.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.datasource-bar.ok .ds-dot{background:#10B981}
-.datasource-bar.error .ds-dot{background:#EF4444}
-.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
-.datasource-bar .ds-msg{flex:1}
-.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover{opacity:1}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
-@keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+广告系列命名工具 - 重构版生成脚本 v7
+- 数据源：读取 Excel => 生成 data.json + product-code-map.json + index.html
+- product_code 从 data.json 移除，改为 product-code-map.json 联动过滤
+- Funnel ↔ Goal 联动、紧凑布局、全英文 UI、必填验证
 """
 
+import json, os, re
 
-# ===== JS TEMPLATE（使用模板字符串反引号，避免引号嵌套）=====
-# 注意：整个 JS 块用 Python raw string 存放，不再有复杂的引号转义
-JS_TEMPLATE = r'''
-// ===== CONFIG =====
-const DATA_URL = './data.json';
-const FALLBACK_DATA = __FALLBACK_JSON__;
+# ── 路径配置 ────────────────────────────────────────────────────────────────
+EXCEL_PATH   = r"D:/serein/工作/媒介建设/ad campaign namebuilder.xlsx"
+OUTPUT_DIR   = os.path.dirname(os.path.abspath(__file__))
+DATA_JSON    = os.path.join(OUTPUT_DIR, "data.json")
+MAP_JSON     = os.path.join(OUTPUT_DIR, "product-code-map.json")
+HTML_OUTPUT  = os.path.join(OUTPUT_DIR, "index.html")
 
-const FIELD_TYPES = __FIELD_TYPES_JSON__;
-let FIELDS_ORDER = [];
-let FIELD_LABELS = {};
-let OPTIONS = {};
-let DATA_READY = false;
+# ── Product Type → Product Code 映射 ────────────────────────────────────────
+PRODUCT_CODE_MAP = {
+  "all": ["all"],
+  "poe": ["all", "b1200", "b400", "b500", "b800", "c1", "c2 pro", "cx410", "cx410c", "cx810",
+          "d1200", "d400", "d500", "d800", "e1 outdoor poe", "e1 outdoor se poe", "fe-p",
+          "nvs8-5kb4", "nvs8-5kd4", "duo 2 poe", "duo 2v poe", "duo 3 poe", "duo 3t poe",
+          "duo 3v poe", "duo floodlight poe", "duo poe", "trackmix poe",
+          "rlc-1010a", "rlc-1020a", "rlc-1210a", "rlc-1212a", "rlc-1220a", "rlc-1224a",
+          "rlc-1240a", "rlc-410", "rlc-410s", "rlc-411", "rlc-420", "rlc-422", "rlc-423",
+          "rlc-510a", "rlc-511", "rlc-520", "rlc-520a", "rlc-522", "rlc-540a",
+          "rlc-810a", "rlc-811a", "rlc-812a", "rlc-81ma", "rlc-81pa", "rlc-820a",
+          "rlc-822a", "rlc-823a", "rlc-823a 16x", "rlc-823s1", "rlc-823s2", "rlc-824a",
+          "rlc-830a", "rlc-833a", "rlc-840a", "rlc-842a", "rlc-843a",
+          "rlk16-1200b8", "rlk16-1200d8", "rlk16-410b4d4", "rlk16-410b8",
+          "rlk16-520b4d4", "rlk16-800b8", "rlk16-800d8", "rlk16-800pt8",
+          "rlk16-810b8", "rlk16-812b8", "rlk16-820d8", "rlk16-833d8", "rlk16-843v8",
+          "rlk4-410b4", "rlk8-1200b4", "rlk8-1200d4", "rlk8-1200v4", "rlk8-1210b4",
+          "rlk8-410b2d2", "rlk8-410b4", "rlk8-410b6", "rlk8-420d4", "rlk8-500v4",
+          "rlk8-510b4", "rlk8-520b2d2", "rlk8-520d4", "rlk8-800b2d2", "rlk8-800b4",
+          "rlk8-800b6", "rlk8-800d4", "rlk8-800pt4", "rlk8-800tm4", "rlk8-800v4",
+          "rlk8-810b2d2", "rlk8-810b4", "rlk8-810b6", "rlk8-811b4", "rlk8-812b4",
+          "rlk8-820d4", "rlk8-824d4", "rlk8-833d4", "rlk8-842d4", "rlk8-843v4",
+          "rlk8-cx410b4", "v1200", "v500", "v800", "cx820",
+          "elite xpro poe", "elite pro floodlight poe", "rlk16-811b8", "rp-pct16md", "rp-pct8mz"],
+  "wifi": ["all", "b500w", "b800w", "cx410w", "e1", "e1 outdoor", "e1 outdoor cx",
+           "e1 outdoor pro", "e1 outdoor s", "e1 pro", "e1 zoom", "fe-w",
+           "e1 outdoor pro+hub pro", "duo 2 wifi", "duo floodlight wifi", "duo wifi",
+           "lumus", "trackmix wifi", "rlc-210w", "rlc-410w", "rlc-410ws",
+           "rlc-411ws", "rlc-422w", "rlc-510wa", "rlc-511w", "rlc-511wa",
+           "rlc-523wa", "rlc-542wa", "rlc-810wa", "rlc-811wa", "rlc-823s1w",
+           "rlc-840wa", "rlc-843wa", "rlc-843wa-c", "rlk12-500wb4", "rlk12-800wb4",
+           "rlk12-800wpt4", "rlk12-800wtm2", "rlk12-800wv4", "rlk4-210wb2",
+           "rlk4-210wb4", "rlk4-211wb4", "v800w", "duo 3 wifi", "elite wifi",
+           "elite floodlight wifi", "trackflex floodlight wifi"],
+  "battery wifi": ["all", "argus 3 ultra", "argus 3e", "argus 4", "argus 4 pro",
+                   "argus eco pro", "argus eco ultra", "argus pt lite", "argus pt ultra",
+                   "argus track", "argus 3 ultra+hub", "argus 3e+hub", "argus 4+hub",
+                   "argus 4 pro+hub", "argus eco ultra+hub", "argus pt ultra+hub",
+                   "altas pt", "altas pt ultra", "argus", "argus 2", "argus 2e",
+                   "argus 3", "argus 3 pro", "argus eco", "argus pro", "argus pt",
+                   "duo", "duo 2", "trackmix", "altas",
+                   "home hub mini+argus pt", "altas pt ultra+hub"],
+  "battery 4g": ["all", "keen ranger pt", "duo 2 lte", "duo 4g", "go", "go plus",
+                 "go pt", "go pt plus", "go pt ultra", "go ranger pt", "go ultra",
+                 "trackmix lte", "trackmix lte plus", "trackmix wired lte",
+                 "talon pro", "trackmix lte plus 2"],
+  "doorbell": ["all", "doorbell battery", "doorbell battery+hub", "doorbell poe",
+               "doorbell wifi", "home hub mini+doorbell"],
+  "nvr": ["all", "home hub", "home hub pro", "rln12w", "rln16-410", "rln36", "rln8-410"]
+}
 
-const sel = {};
-let customValid = true;
-const copyHistory = [];
+# ── Funnel → Goal 联动映射 ─────────────────────────────────────────────────
+FUNNEL_GOAL_MAP = {
+    "awareness":      ["impression", "reach"],
+    "consideration":  ["click", "view", "pageview", "signup", "atc", "checkout",
+                       "engagement", "dpv", "follow"],
+    "conversion":     ["sales"]
+}
 
+# ── Excel 读取（可选，找不到就用内置 fallback）────────────────────────────
+def read_excel_data():
+    """读取 Excel 并返回各字段枚举列表，product_code 不再从 Excel 读取"""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(EXCEL_PATH, data_only=True)
+        ws = wb.active
+        print("OK: Excel read success: " + EXCEL_PATH)
+        data = {}
+        for col_letter, key in [
+            ("B", "market"), ("C", "product_type"), ("E", "media_funnel"),
+            ("F", "ad_product"), ("G", "bidding_goal"), ("H", "url"), ("I", "custom_ref")
+        ]:
+            col_idx = ord(col_letter) - ord("A")
+            vals = set()
+            for row in range(2, ws.max_row + 1):
+                v = ws.cell(row=row, column=col_idx + 1).value
+                if v and str(v).strip():
+                    vals.add(str(v).strip())
+            data[key] = sorted(vals)
+        # bidding_goal 去重合并（Excel 里可能只有部分）
+        all_goals = set(data.get("bidding_goal", []))
+        for goals in FUNNEL_GOAL_MAP.values():
+            all_goals.update(goals)
+        data["bidding_goal"] = sorted(all_goals)
+        data["product_code"] = []   # 不再从 Excel 读取
+        return data
+    except Exception as e:
+        print("WARN: Excel read failed (" + str(e) + "), using fallback data")
+        return get_fallback_data()
 
-// ===== DATA LOADING =====
-let _loadTimeout = null;
-
-async function loadData() {
-  showDatasourceStatus('loading', '正在加载数据...');
-
-  if (_loadTimeout) clearTimeout(_loadTimeout);
-  _loadTimeout = setTimeout(() => {
-    if (!DATA_READY) {
-      console.warn('Data loading timed out, using embedded fallback');
-      loadFallback();
-      showDatasourceStatus('error', '加载超时，已使用内置备用数据（点击 [REFRESH] 重试）');
+def get_fallback_data():
+    return {
+        "market": ["us","ca","de","uk","fr","it","es","au","eu other","eu 2b"],
+        "product_type": ["all","poe","doorbell","wifi","battery wifi","battery 4g","nvr"],
+        "product_code": [],
+        "media_funnel": ["awareness","consideration","conversion"],
+        "ad_product": ["search","ytb","discovery","dg","pmax","gdn",
+                       "fb","ig","tw","bing","reddit","programmatic","amg",
+                       "fb-ig","tiktok","linkedin"],
+        "bidding_goal": ["impression","reach","click","view","pageview",
+                         "signup","atc","checkout","sales","engagement","dpv","follow"],
+        "url": ["dtc","amz","tkshop","post"],
+        "custom_ref": ["rm","aon","season","promo","bundle","clearance",
+                       "new arrival","refurbished","pre-order","limited edition",
+                       "collab","holiday","back to school","flash sale",
+                       "free shipping","warranty","app only","influencer",
+                       "retargeting","lookalike"]
     }
-  }, 5000);
 
-  try {
-    const resp = await fetch(DATA_URL + '?t=' + Date.now());
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const json = await resp.json();
+# ── 生成 data.json ──────────────────────────────────────────────────────────
+def generate_data_json(data):
+    """data.json：不含 product_code（由 product-code-map.json 管理）"""
+    out = {k: v for k, v in data.items() if k != "product_code"}
+    with open(DATA_JSON, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+    print("OK: Generated data.json (without product_code)")
 
-    FIELDS_ORDER = [];
-    FIELD_LABELS = {};
-    OPTIONS = {};
+def generate_product_code_map_json():
+    """生成 product-code-map.json"""
+    with open(MAP_JSON, "w", encoding="utf-8") as f:
+        json.dump(PRODUCT_CODE_MAP, f, ensure_ascii=False, indent=2)
+    print("OK: Generated product-code-map.json")
 
-    for (const [colName, vals] of Object.entries(json)) {
-      const key = colName.toLowerCase().replace(/ /g, '-');
-      FIELDS_ORDER.push(key);
-      FIELD_LABELS[key] = colName;
-      OPTIONS[key] = vals;
-    }
-
-    renderAllFields();
-    DATA_READY = true;
-    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
-    const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
-    showDatasourceStatus('ok', '\u6570\u636e\u5df2\u52a0\u8f7d (' + Object.keys(OPTIONS).length + ' \u5b57\u6bb5, ' + totalVals + ' \u679a\u4e3e\u503c)');
-  } catch(err) {
-    console.warn('Data fetch failed, using embedded fallback:', err);
-    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
-    loadFallback();
-    showDatasourceStatus('error', '\u65e0\u6cd5\u52a0\u8f7d data.json\uff0c\u5df2\u4f7f\u7528\u5185\u7f6e\u5907\u7528\u6570\u636e');
-  }
+# ── 生成 index.html ────────────────────────────────────────────────────────
+def get_html_template():
+    return r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Campaign Name Builder</title>
+<style>
+/* ── Reset & Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f2f5; --card: #fff; --primary: #4f6ef7; --primary-hover: #3b5de7;
+  --danger: #e74c3c; --success: #27ae60; --text: #1a1a2e; --text2: #555;
+  --border: #dde1e7; --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,.08);
 }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+.container { max-width: 960px; margin: 0 auto; }
 
-function loadFallback() {
-  FIELDS_ORDER = [];
-  FIELD_LABELS = {};
-  OPTIONS = {};
-  for (const [colName, vals] of Object.entries(FALLBACK_DATA)) {
-    const key = colName.toLowerCase().replace(/ /g, '-');
-    FIELDS_ORDER.push(key);
-    FIELD_LABELS[key] = colName;
-    OPTIONS[key] = vals;
-  }
-  renderAllFields();
-  DATA_READY = true;
+/* ── Header ─────────────────────────────────────────────────────────── */
+.header { background: linear-gradient(135deg, #4f6ef7 0%, #6a82fb 100%);
+  color: #fff; border-radius: var(--radius); padding: 28px 32px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow); }
+.header-icon { font-size: 36px; }
+.header h1 { font-size: 24px; font-weight: 700; }
+.header p  { font-size: 14px; opacity: .85; margin-top: 4px; }
+
+/* ── Card ───────────────────────────────────────────────────────────── */
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+        padding: 24px; margin-bottom: 20px; }
+.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+              padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.card-icon { font-size: 22px; }
+.card-title { font-size: 17px; font-weight: 600; }
+
+/* ── Field compact row (Market + Product Type) ─────────────────────── */
+.field-compact { display: contents; }
+.field-compact > .form-group { margin-bottom: 0; }
+.form-row { display: flex; gap: 16px; margin-bottom: 18px; }
+.form-row .form-group { flex: 1; min-width: 0; }
+
+/* ── Form elements ─────────────────────────────────────────────────── */
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-weight: 600; font-size: 13px;
+                   margin-bottom: 6px; color: var(--text); }
+.form-group label .req { color: var(--danger); margin-left: 2px; }
+.form-hint { font-size: 11px; color: var(--text2); margin-top: 4px; }
+select, input[type="text"] { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: 7px; font-size: 13px; background: #fafbfc; transition: border .2s; }
+select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,110,247,.12); }
+select[multiple] { min-height: 80px; padding: 6px; }
+select[multiple] option { padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+select[multiple] option:checked { background: var(--primary); color: #fff; }
+
+/* ── Tags ───────────────────────────────────────────────────────────── */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+       background: #eef1fb; border: 1px solid #d0d7f0; border-radius: 20px;
+       font-size: 12px; color: var(--primary); cursor: pointer; transition: all .2s; }
+.tag:hover { background: #dce3fa; }
+.tag.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+.tag .remove { margin-left: 2px; font-weight: bold; opacity: .7; }
+.tag .remove:hover { opacity: 1; }
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;
+       border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+       cursor: pointer; transition: all .2s; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-danger  { background: var(--danger); color: #fff; }
+.btn-danger:hover  { background: #c0392b; }
+.btn-outline { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* ── Preview ────────────────────────────────────────────────────────── */
+.preview-box { background: #f8f9fc; border: 1.5px dashed var(--border);
+  border-radius: 8px; padding: 16px; font-size: 14px; word-break: break-all;
+  min-height: 52px; display: flex; align-items: center; gap: 10px; }
+.preview-box .result { font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 15px; font-weight: 600; color: var(--primary); }
+.preview-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* ── Field breakdown ────────────────────────────────────────────────── */
+.breakdown { margin-top: 16px; }
+.breakdown-item { display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.breakdown-item:nth-child(odd) { background: #f8f9fc; }
+.bd-label { color: var(--text2); font-weight: 500; }
+.bd-value { font-weight: 600; color: var(--text); }
+
+/* ── Copy history ───────────────────────────────────────────────────── */
+.history-list { max-height: 200px; overflow-y: auto; }
+.history-item { display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.history-item:last-child { border-bottom: none; }
+.history-text { font-family: monospace; color: var(--primary); cursor: pointer;
+  max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-text:hover { text-decoration: underline; }
+.history-time { font-size: 11px; color: var(--text2); }
+
+/* ── Custom help panel ──────────────────────────────────────────────── */
+.custom-help { margin-top: 8px; border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; }
+.custom-help-header { display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; background: #f8f9fc; cursor: pointer; font-size: 13px;
+  font-weight: 600; user-select: none; }
+.custom-help-header:hover { background: #eef1fb; }
+.custom-help-body { padding: 14px; background: #fff; }
+.custom-help-body.hidden { display: none; }
+.help-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.help-tag { padding: 4px 10px; background: #eef1fb; border-radius: 20px;
+  font-size: 12px; color: var(--primary); cursor: pointer; }
+.help-tag:hover { background: var(--primary); color: #fff; }
+.help-note { font-size: 11px; color: var(--text2); margin-top: 8px; }
+
+/* ── Validation warning ────────────────────────────────────────────── */
+.validation-warning { background: #fff3f0; border: 1.5px solid var(--danger);
+  border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; color: var(--danger);
+  font-size: 13px; display: none; }
+.validation-warning.show { display: flex; align-items: center; gap: 8px; }
+.validation-warning ul { margin: 4px 0 0 18px; }
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .form-row { flex-direction: column; gap: 0; }
+  .preview-actions { flex-wrap: wrap; }
 }
+</style>
+</head>
+<body>
 
-function showDatasourceStatus(state, msg) {
-  const el = document.getElementById('datasource-status');
-  el.className = 'datasource-bar ' + state;
-  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span>'
-    + '<span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
-}
-
-
-// ===== RENDER FIELDS（模板字符串版本，无引号嵌套问题）=====
-function renderAllFields() {
-  const container = document.getElementById('fields-container');
-  let html = '';
-
-  for (const f of FIELDS_ORDER) {
-    const ft = FIELD_TYPES[f] || 'tag';
-    const label = FIELD_LABELS[f];
-    const opts = OPTIONS[f] || [];
-
-    if (ft === 'dropdown') {
-      const isFullWidth = (f === 'product-code' || opts.length > 30);
-      const phMap = {'market':'\u641c\u7d22\u6216\u9009\u62e9\u5e02\u573a...','product-type':'\u641c\u7d22\u4ea7\u54c1\u7c7b\u578b...','product-code':'\u641c\u7d22\u4ea7\u54c1\u578b\u53ef\uff08\u5982 argus 4\u3001rlc-410\uff09...'};
-      const ph = phMap[f] || '\u641c\u7d22' + label + '...';
-      html += `<div class="field${isFullWidth ? ' field-full' : ''}">
-        <div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
-        <div class="select-wrap" id="wrap-${f}">
-          <input class="select-search" id="search-${f}" placeholder="${escHtml(ph)}" autocomplete="off"
-            onfocus="openDropdown('${f}')" oninput="filterDropdown('${f}',this.value)" onblur="blurDropdown('${f}')">
-          <span class="select-arrow">&#9662;</span>
-          <div class="dropdown" id="drop-${f}"></div>
-        </div></div>`;
-    } else if (ft === 'tag') {
-      const tags = opts.map(v =>
-        `<div class="tag" data-val="${escAttr(v)}" onclick="selectTag('${f}','${escJs(v)}')">${escHtml(v)}</div>`
-      ).join('');
-      html += `<div class="field"><div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
-        <div class="tag-wrap" id="tags-${f}">${tags}</div></div>`;
-    } else if (ft === 'custom') {
-      html += makeCustomHTML();
-    }
-  }
-
-  container.innerHTML = `<div class="fields-grid">${html}</div>`;
-}
-
-function makeCustomHTML() {
-  const searchAds = ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'];
-  const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
-  const groups =
-    `<div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">` +
-    searchAds.map(v => `<span class="help-tag" onclick="pickCustom('${v}')">${v}</span>`).join('') +
-    `</div></div>` +
-    `<div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">` +
-    pmaxAds.map(v => `<span class="help-tag" onclick="pickCustom('${v}')">${v}</span>`).join('') +
-    `</div></div>`;
-
-  return `<div class="field field-full">
-    <div class="field-label">Custom<span class="optional">\u53ef\u9009</span></div>
-    <div class="custom-input-wrap">
-      <input type="text" class="custom-input" id="custom-input" placeholder="\u81ea\u5b9a\u4e49\u5185\u5bb9\uff0c\u5982 rm\u3001aon..."
-        oninput="validateCustom(this)" maxlength="50">
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">📋</div>
+    <div>
+      <h1>Ad Campaign Name Builder</h1>
+      <p>Generate standardized ad campaign names across Google, Microsoft & Meta platforms</p>
     </div>
-    <div class="custom-error-msg" id="custom-error"></div>
-    <div class="custom-rules" id="custom-rules-hint">
-      <div class="rule" id="rule-lower">&#9675; \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09</div>
-      <div class="rule" id="rule-no-underscore">&#9675; \u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf <code>_</code>\uff0c\u7528 <code>-</code> \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed</div>
+  </div>
+
+  <!-- Validation Warning -->
+  <div class="validation-warning" id="validationWarning">
+    <span>⚠️</span>
+    <div>
+      <strong>Please fill in all required fields:</strong>
+      <ul id="missingFieldsList"></ul>
     </div>
-    <div class="custom-help">
-      <div class="custom-help-header" onclick="toggleHelp()">
-        &#128161; \u5e38\u7528 Custom \u503c\u53c2\u8003
-        <span class="custom-help-toggle" id="help-toggle">&#9662;</span>
+  </div>
+
+  <!-- Step 1: Select Fields -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📝</div>
+      <div>
+        <div class="card-title">Select Fields</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Fields marked * are required</div>
       </div>
-      <div class="custom-help-body" id="help-body">${groups}</div>
-    </div></div>`;
-}
+    </div>
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
-function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n'); }
+    <!-- Row 1: Market + Product Type (compact side-by-side) -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Market <span class="req">*</span></label>
+        <select id="market" multiple></select>
+        <div class="form-hint">Hold Ctrl/Cmd to select multiple</div>
+      </div>
+      <div class="form-group">
+        <label>Product Type <span class="req">*</span></label>
+        <select id="productType"></select>
+      </div>
+    </div>
 
+    <!-- Row 2: Product Code (dynamically filtered) -->
+    <div class="form-group">
+      <label>Product Code <span class="req">*</span></label>
+      <select id="productCode" multiple></select>
+      <div class="form-hint">Options filtered by Product Type selection</div>
+    </div>
 
-// ===== DROPDOWN ENGINE =====
-function buildDropdown(field) {
-  const opts = OPTIONS[field] || [];
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
-  drop.innerHTML = opts.map(v =>
-    `<div class="dropdown-item${sel[field]===v ? ' selected' : ''}" data-val="${escAttr(v)}"
-      onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}','${escJs(v)}',event)">${escHtml(v)}</div>`
-  ).join('');
-}
+    <!-- Row 3: Media Funnel + Ad Product -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Media Funnel <span class="req">*</span></label>
+        <select id="mediaFunnel"></select>
+      </div>
+      <div class="form-group">
+        <label>Ad Product <span class="req">*</span></label>
+        <select id="adProduct" multiple></select>
+      </div>
+    </div>
 
-function openDropdown(field) {
-  buildDropdown(field);
-  document.getElementById('drop-' + field).classList.add('open');
-  document.getElementById('search-' + field).select();
-}
+    <!-- Row 4: Bidding Goal + URL -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Bidding Goal <span class="req">*</span></label>
+        <select id="biddingGoal" multiple></select>
+        <div class="form-hint">Available options depend on Media Funnel</div>
+      </div>
+      <div class="form-group">
+        <label>URL <span class="req">*</span></label>
+        <select id="url" multiple></select>
+      </div>
+    </div>
 
-function filterDropdown(field, q) {
-  const opts = OPTIONS[field] || [];
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
-  drop.classList.add('open');
-  const filtered = q.trim() === '' ? opts : opts.filter(v => v.toLowerCase().includes(q.toLowerCase()));
-  if (filtered.length === 0) {
-    drop.innerHTML = '<div class="dropdown-item no-match">\u65e0\u5339\u914d\u7ed3\u679c</div>';
-  } else {
-    drop.innerHTML = filtered.map(v =>
-      `<div class="dropdown-item${sel[field]===v ? ' selected' : ''}" data-val="${escAttr(v)}"
-        onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}','${escJs(v)}',event)">${escHtml(v)}</div>`
-    ).join('');
-  }
-}
+    <!-- Row 5: Custom -->
+    <div class="form-group">
+      <label>Custom</label>
+      <input type="text" id="custom" placeholder="e.g. rm, season, promo (lowercase+hyphens only)">
+      <div class="custom-help" id="customHelp">
+        <div class="custom-help-header" onclick="toggleCustomHelp()">
+          <span>💡 Common Custom Values (reference)</span>
+          <span id="customHelpArrow">▼</span>
+        </div>
+        <div class="custom-help-body" id="customHelpBody">
+          <div class="help-tags" id="customHelpTags"></div>
+          <div class="help-note">Click to add; click again to remove. Custom must be lowercase English + numbers + hyphens only, no underscores.</div>
+        </div>
+      </div>
+    </div>
 
-function pickDropdown(field, val, e) {
-  e.preventDefault();
-  sel[field] = val;
-  const inp = document.getElementById('search-' + field);
-  inp.value = val;
-  inp.classList.add('has-value');
-  document.getElementById('drop-' + field).classList.remove('open');
-  updatePreview();
-}
+    <!-- Action Buttons -->
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="generateName()">✨ Generate Name</button>
+      <button class="btn btn-outline" onclick="copyResult()">📋 Copy</button>
+      <button class="btn btn-outline" onclick="copyAll()">📄 Copy All (CSV)</button>
+      <button class="btn btn-danger" onclick="resetAll()">🔁 Reset All Fields</button>
+    </div>
+  </div>
 
-function blurDropdown(field) {
-  setTimeout(() => {
-    const drop = document.getElementById('drop-' + field);
-    if (drop) drop.classList.remove('open');
-    const inp = document.getElementById('search-' + field);
-    if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); }
-    else { inp.value = ''; inp.classList.remove('has-value'); }
-  }, 150);
-}
+  <!-- Step 2: Preview -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">⭐</div>
+      <div>
+        <div class="card-title">Preview</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Generated campaign name</div>
+      </div>
+    </div>
+    <div class="preview-box" id="previewBox">
+      <span style="color:var(--text2);">Fill in required fields and click "Generate Name"</span>
+    </div>
+    <div class="preview-actions" id="previewActions" style="display:none;">
+      <button class="btn btn-sm btn-outline" onclick="copyResult()">📋 Copy</button>
+      <button class="btn btn-sm btn-outline" onclick="copyAll()">📄 Copy All (CSV)</button>
+    </div>
+    <div class="breakdown" id="breakdown" style="display:none;"></div>
+  </div>
 
+  <!-- Step 3: Copy History -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📰</div>
+      <div>
+        <div class="card-title">Copy History</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Recently generated names</div>
+      </div>
+    </div>
+    <div class="history-list" id="historyList">
+      <div style="padding:20px;text-align:center;color:var(--text2);font-size:13px;">
+        No history yet
+      </div>
+    </div>
+  </div>
+</div>
 
-// ===== TAG ENGINE =====
-function selectTag(field, val) {
-  if (sel[field] === val) delete sel[field];
-  else sel[field] = val;
-  const container = document.getElementById('tags-' + field);
-  if (container) {
-    container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[field]));
-  }
-  updatePreview();
-}
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA & STATE
+   ═════════════════════════════════════════════════════════════════════════ */
+let ENUM_DATA = {};
+let PRODUCT_CODE_MAP = {};
+let FUNNEL_GOAL_MAP = {};
+let copyHistory = [];
 
+/* Funnel → Goal mapping (embedded fallback) */
+const DEFAULT_FUNNEL_GOAL_MAP = {
+  "awareness":     ["impression", "reach"],
+  "consideration": ["click","view","pageview","signup","atc","checkout","engagement","dpv","follow"],
+  "conversion":    ["sales"]
+};
 
-// ===== CUSTOM VALIDATION =====
-function validateCustom(inp) {
-  const v = inp.value;
-  const lowerOk = v === '' || /^[a-z0-9 \-+]+$/.test(v);
-  const noUnderscore = !v.includes('_');
-  const r1 = document.getElementById('rule-lower'), r2 = document.getElementById('rule-no-underscore');
-  const errEl = document.getElementById('custom-error');
-  r1.className = 'rule ' + (v==='' ? '' : lowerOk ? 'pass' : 'fail');
-  r1.textContent = (v===''||lowerOk ? '\u2713' : '\u2717') + ' \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09';
-  r2.className = 'rule ' + (v==='' ? '' : noUnderscore ? 'pass' : 'fail');
-  r2.textContent = (v===''||noUnderscore ? '\u2713' : '\u2717') + ' \u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf _\uff0c\u7528 - \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed';
-  if (v !== '' && (!lowerOk || !noUnderscore)) {
-    inp.classList.add('error'); inp.classList.remove('ok'); customValid = false;
-    const msgs=[];
-    if(!lowerOk) msgs.push('\u4ec5\u5141\u8bb8\u82f1\u6587\u5c0f\u5199\u3001\u6570\u5b57\u3001\u8fde\u5b57\u7b26\u548c\u7a7a\u683c');
-    if(!noUnderscore) msgs.push('\u4e0d\u80fd\u5305\u542b\u4e0b\u5212\u7ebf _');
-    errEl.textContent=msgs.join('\uff1b'); errEl.classList.add('show');
-  } else {
-    inp.classList.remove('error');
-    if(v!=='') inp.classList.add('ok'); else inp.classList.remove('ok');
-    customValid=true; errEl.classList.remove('show');
-  }
-  updatePreview();
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   FETCH DATA (data.json + product-code-map.json)
+   ═════════════════════════════════════════════════════════════════════════ */
+async function fetchData() {
+  let dataOk = false, mapOk = false;
 
-
-// ===== PREVIEW =====
-function toStr(s){ return s.trim(); }
-
-function buildName() {
-  const parts=[];
-  for(const f of FIELDS_ORDER){
-    if(f==='custom'){
-      const v=document.getElementById('custom-input');
-      const cv = v ? v.value.trim() : '';
-      if(cv && customValid) parts.push({field:f,val:toStr(cv),isCustom:true});
-    }else{
-      if(sel[f]) parts.push({field:f,val:toStr(sel[f])});
+  /* 1. Fetch data.json */
+  try {
+    const resp = await fetch('./data.json');
+    if (resp.ok) {
+      ENUM_DATA = await resp.json();
+      dataOk = true;
+      console.log('[data.json] loaded from server');
     }
+  } catch(e) { console.warn('[data.json] fetch failed', e); }
+
+  /* 2. Fetch product-code-map.json */
+  try {
+    const resp = await fetch('./product-code-map.json');
+    if (resp.ok) {
+      PRODUCT_CODE_MAP = await resp.json();
+      mapOk = true;
+      console.log('[product-code-map.json] loaded from server');
+    }
+  } catch(e) { console.warn('[product-code-map.json] fetch failed', e); }
+
+  /* 3. Fetch funnel-goal-map (optional) */
+  try {
+    const resp = await fetch('./funnel-goal-map.json');
+    if (resp.ok) {
+      FUNNEL_GOAL_MAP = await resp.json();
+      console.log('[funnel-goal-map.json] loaded');
+    }
+  } catch(e) { /* ignore */ }
+
+  /* Fallbacks if fetch failed */
+  if (!dataOk) {
+    ENUM_DATA = getFallbackData();
+    console.log('[data.json] using embedded fallback');
   }
-  return parts;
+  if (!mapOk) {
+    PRODUCT_CODE_MAP = getFallbackMap();
+    console.log('[product-code-map.json] using embedded fallback');
+  }
+  if (Object.keys(FUNNEL_GOAL_MAP).length === 0) {
+    FUNNEL_GOAL_MAP = DEFAULT_FUNNEL_GOAL_MAP;
+  }
+
+  initUI();
 }
 
-function updatePreview() {
-  const parts=buildName(), outEl=document.getElementById('preview-output'), lenEl=document.getElementById('preview-len');
-  if(parts.length===0){
-    outEl.innerHTML='<span class="seg-empty">\u586b\u5199\u5de6\u4fa7\u5b57\u6bb5\u4ee5\u751f\u6210\u547d\u540d&#8230;</span>';
-    lenEl.textContent=''; renderBreakdown([]); return;
+function getFallbackData() {
+  return {
+    "market": ["us","ca","de","uk","fr","it","es","au","eu other","eu 2b"],
+    "product_type": ["all","poe","doorbell","wifi","battery wifi","battery 4g","nvr"],
+    "media_funnel": ["awareness","consideration","conversion"],
+    "ad_product": ["search","ytb","discovery","dg","pmax","gdn",
+                   "fb","ig","tw","bing","reddit","programmatic","amg",
+                   "fb-ig","tiktok","linkedin"],
+    "bidding_goal": ["impression","reach","click","view","pageview",
+                     "signup","atc","checkout","sales","engagement","dpv","follow"],
+    "url": ["dtc","amz","tkshop","post"],
+    "custom_ref": ["rm","aon","season","promo","bundle","clearance",
+                   "new arrival","refurbished","pre-order","limited edition",
+                   "collab","holiday","back to school","flash sale",
+                   "free shipping","warranty","app only","influencer",
+                   "retargeting","lookalike"]
+  };
+}
+
+function getFallbackMap() {
+  return ##PRODUCT_CODE_MAP_PLACEHOLDER##;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INIT UI
+   ═════════════════════════════════════════════════════════════════════════ */
+function initUI() {
+  /* Populate single-select dropdowns */
+  fillSelect('market',            ENUM_DATA.market,         true);
+  fillSelect('productType',       ENUM_DATA.product_type,   false);
+  fillSelect('mediaFunnel',       ENUM_DATA.media_funnel,  false);
+  fillSelect('adProduct',         ENUM_DATA.ad_product,     true);
+  fillSelect('biddingGoal',       ENUM_DATA.bidding_goal,  true);
+  fillSelect('url',               ENUM_DATA.url,            true);
+
+  /* Product Code: initially populate from map using default productType */
+  updateProductCodeOptions();
+
+  /* Custom reference tags */
+  renderCustomHelpTags();
+
+  /* Listeners */
+  document.getElementById('mediaFunnel').addEventListener('change', onFunnelChange);
+  document.getElementById('productType').addEventListener('change', onProductTypeChange);
+
+  /* Auto-generate on any change */
+  document.querySelectorAll('select, input').forEach(el => {
+    el.addEventListener('change', () => { if (document.getElementById('previewBox').dataset.generated) generateName(); });
+    el.addEventListener('input',  () => { if (document.getElementById('previewBox').dataset.generated) generateName(); });
+  });
+}
+
+function fillSelect(id, items, multiple) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = '';
+  if (!multiple) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '-- Select --';
+    sel.appendChild(ph);
   }
-  outEl.innerHTML=parts.map((p,i)=>(i>0?'<span class="seg-sep">_</span>':'')+'<span class="'+(p.isCustom?'seg-custom':'seg-part')+'">'+escHtml(p.val)+'</span>').join('');
-  const fullName=parts.map(p=>p.val).join('_');
-  lenEl.textContent=fullName.length+' \u5b57\u7b26'; window._currentName=fullName;
+  (items || []).forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = v;
+    sel.appendChild(opt);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRODUCT TYPE → PRODUCT CODE 联动
+   ═════════════════════════════════════════════════════════════════════════ */
+function onProductTypeChange() {
+  updateProductCodeOptions();
+  /* Auto re-generate if already generated */
+  if (document.getElementById('previewBox').dataset.generated) generateName();
+}
+
+function updateProductCodeOptions() {
+  const typeSel = document.getElementById('productType');
+  const codeSel = document.getElementById('productCode');
+  const selectedType = typeSel.value;
+
+  let codes = [];
+  if (selectedType && PRODUCT_CODE_MAP[selectedType]) {
+    codes = PRODUCT_CODE_MAP[selectedType];
+  } else {
+    /* Fallback: show all codes from all types except 'all' */
+    const allCodes = new Set();
+    Object.values(PRODUCT_CODE_MAP).forEach(arr => arr.forEach(c => { if (c !== 'all') allCodes.add(c); }));
+    codes = ['all', ...Array.from(allCodes).sort()];
+  }
+
+  /* Remember previous selection */
+  const prevSelected = Array.from(codeSel.selectedOptions).map(o => o.value);
+  fillSelect('productCode', codes, true);
+
+  /* Restore previous selection if still available */
+  Array.from(codeSel.options).forEach(opt => {
+    if (prevSelected.includes(opt.value)) opt.selected = true;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FUNNEL → GOAL 联动
+   ═════════════════════════════════════════════════════════════════════════ */
+function onFunnelChange() {
+  const funnel = document.getElementById('mediaFunnel').value;
+  const goalSel = document.getElementById('biddingGoal');
+  const allowed = FUNNEL_GOAL_MAP[funnel] || [];
+
+  const prevSelected = Array.from(goalSel.selectedOptions).map(o => o.value);
+  fillSelect('biddingGoal', allowed, true);
+
+  /* Keep valid previously selected goals */
+  Array.from(goalSel.options).forEach(opt => {
+    if (prevSelected.includes(opt.value)) opt.selected = true;
+  });
+
+  if (document.getElementById('previewBox').dataset.generated) generateName();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GENERATE
+   ═════════════════════════════════════════════════════════════════════════ */
+function getSelectedValues(id) {
+  const el = document.getElementById(id);
+  if (el.multiple) {
+    return Array.from(el.selectedOptions).map(o => o.value).filter(v => v);
+  }
+  return el.value ? [el.value] : [];
+}
+
+function validateRequired() {
+  const required = [
+    { id: 'market',       name: 'Market' },
+    { id: 'productType',  name: 'Product Type' },
+    { id: 'productCode',  name: 'Product Code' },
+    { id: 'mediaFunnel',  name: 'Media Funnel' },
+    { id: 'adProduct',    name: 'Ad Product' },
+    { id: 'biddingGoal',  name: 'Bidding Goal' },
+    { id: 'url',          name: 'URL' }
+  ];
+  const missing = [];
+  required.forEach(f => {
+    const vals = getSelectedValues(f.id);
+    if (vals.length === 0) missing.push(f.name);
+  });
+  return missing;
+}
+
+function generateName() {
+  const missing = validateRequired();
+  const warnEl = document.getElementById('validationWarning');
+  const listEl = document.getElementById('missingFieldsList');
+
+  if (missing.length > 0) {
+    warnEl.classList.add('show');
+    listEl.innerHTML = missing.map(m => `<li>${m}</li>`).join('');
+    document.getElementById('previewBox').innerHTML =
+      '<span style="color:var(--text2);">Fill in all required fields to generate a name</span>';
+    document.getElementById('previewBox').dataset.generated = '';
+    document.getElementById('previewActions').style.display = 'none';
+    document.getElementById('breakdown').style.display = 'none';
+    return;
+  }
+  warnEl.classList.remove('show');
+
+  /* Build name */
+  const parts = [
+    ...getSelectedValues('market'),
+    ...getSelectedValues('productType'),
+    ...getSelectedValues('productCode'),
+    ...getSelectedValues('mediaFunnel'),
+    ...getSelectedValues('adProduct'),
+    ...getSelectedValues('biddingGoal'),
+    ...getSelectedValues('url')
+  ];
+
+  const customVal = document.getElementById('custom').value.trim().toLowerCase();
+  if (customVal) {
+    if (!/^[a-z0-9\- ]+$/.test(customVal) || customVal.includes('_')) {
+      alert('Custom field can only contain lowercase English, numbers, hyphens and spaces. No underscores allowed.');
+      return;
+    }
+    parts.push(customVal);
+  }
+
+  const name = parts.join('_');
+  const box = document.getElementById('previewBox');
+  box.innerHTML = `<span class="result">${name}</span>`;
+  box.dataset.generated = '1';
+
+  document.getElementById('previewActions').style.display = 'flex';
   renderBreakdown(parts);
+  addHistory(name);
 }
 
-function renderBreakdown(parts){
-  const el=document.getElementById('breakdown-list');
-  if(parts.length===0){ el.innerHTML='<div class="empty-hint">\u586b\u5199\u5b57\u6bb5\u540e\u81ea\u52a8\u89e3\u6790&#8230;</div>'; return; }
-  el.innerHTML=parts.map((p,i)=>'<div class="breakdown-row"><div class="breakdown-num">'+(i+1)+'</div><div class="breakdown-field">'+escHtml(FIELD_LABELS[p.field])+'</div><div class="breakdown-val'+(p.isCustom?' custom-val':'')+'">'+escHtml(p.val)+'</div></div>').join('');
+/* ═══════════════════════════════════════════════════════════════════════════
+   BREAKDOWN
+   ═════════════════════════════════════════════════════════════════════════ */
+function renderBreakdown(parts) {
+  const el = document.getElementById('breakdown');
+  const labels = [
+    ...getSelectedValues('market').map(() => 'Market'),
+    ...getSelectedValues('productType').map(() => 'Product Type'),
+    ...getSelectedValues('productCode').map(() => 'Product Code'),
+    ...getSelectedValues('mediaFunnel').map(() => 'Media Funnel'),
+    ...getSelectedValues('adProduct').map(() => 'Ad Product'),
+    ...getSelectedValues('biddingGoal').map(() => 'Bidding Goal'),
+    ...getSelectedValues('url').map(() => 'URL')
+  ];
+  const customVal = document.getElementById('custom').value.trim();
+  if (customVal) labels.push('Custom');
+
+  let html = '';
+  parts.forEach((p, i) => {
+    html += `<div class="breakdown-item">
+      <span class="bd-label">${labels[i] || '?'}</span>
+      <span class="bd-value">${p}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
+  el.style.display = 'block';
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   COPY & HISTORY
+   ═════════════════════════════════════════════════════════════════════════ */
+function copyResult() {
+  const text = document.querySelector('.preview-box .result')?.textContent;
+  if (!text) return alert('Nothing to copy. Generate a name first.');
+  navigator.clipboard.writeText(text).then(() => alert('✅ Copied: ' + text));
+}
 
-// ===== COPY & EXPORT =====
-function copyMain() {
-  const n=window._currentName;if(!n)return;doClipboard(n);
-  const b=document.getElementById('copy-main-btn');b.textContent='\u2705 \u5df2\u590d\u5236\uff01';b.classList.add('copied');
-  setTimeout(()=>{b.innerHTML='[OK] Copied';b.classList.remove('copied')},2000);addHistory(n);
+function copyAll() {
+  const text = document.querySelector('.preview-box .result')?.textContent;
+  if (!text) return alert('Nothing to copy.');
+  const line = `${text},`;
+  navigator.clipboard.writeText(line).then(() => alert('✅ Copied (CSV format): ' + line));
 }
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(()=>{const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
-function addHistory(n){ copyHistory.unshift({name:n,time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})});renderHistory(); }
-function renderHistory(){
-  const el=document.getElementById('history-scroller');
-  if(copyHistory.length===0){el.innerHTML='<div class="empty-hh-int">\u6682\u65e0\u8bb0\u5f55&#8230;</div>';return}
-  el.innerHTML=copyHistory.slice(0,20).map(h=>`<div class="history-row" onclick="doClipboard('${h.name.replace(/'/g,"\\'")}')"><div class="history-name" title="${escHtml(h.name)}">${escHtml(h.name)}</div><div class="history-time">${h.time}</div><div class="history-copy-btn" onclick="event.stopPropagation();doClipboard('${h.name.replace(/'/g,"\\'")}')">COPY</div></div>`).join('');
-}
-function clearHistory(){copyHistory.length=0;renderHistory()}
-function exportTXT(){
-  if(!copyHistory.length){alert('\u6682\u65e0\u5386\u53f2\u8bb0\u5f55');return}
-  dlBlob('\u5e7f\u544a\u7cfb\u5217\u547d\u540b\u5bfc\u51fa\n\u5bfc\u51fa\u65f6\u95f4\uff1a'+new Date().toLocaleString('zh-CN')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map((h,i)=>(i+1)+'. '+h.name).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
-}
-function exportCSV(){
-  if(!copyHistory.length){alert('\u6682\u65e0\u5386\u53f2\u8bb0\u5f55');return}
-  dlBlob('\ufeff'+[['\u5e8f\u53f7','\u547d\u540d','\u590d\u5236\u65f6\u95f4'],...copyHistory.map((h,i)=>[i+1,h.name,h.time])].map(r=>r.map(c=>'"'+c+'"').join(',')).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
-}
-function downloadTool(){dlBlob('<!DOCTYPE html>\n'+document.documentElement.outerHTML,'ad-campaign-namebuilder.html','text/html;charset=utf-8')}
-function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
-function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 
-function toggleHelp(){document.getElementById('help-body').classList.toggle('show');document.getElementById('help-toggle').classList.toggle('open')}
-function pickCustom(val){const i=document.getElementById('custom-input');if(i){i.value=val;validateCustom(i)}}
+function addHistory(name) {
+  const now = new Date().toLocaleTimeString();
+  copyHistory.unshift({ name, time: now });
+  if (copyHistory.length > 20) copyHistory.pop();
+  renderHistory();
+}
 
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (copyHistory.length === 0) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px;">No history yet</div>';
+    return;
+  }
+  el.innerHTML = copyHistory.map(h => `
+    <div class="history-item">
+      <span class="history-text" onclick="copyText('${h.name}')" title="Click to copy">${h.name}</span>
+      <span class="history-time">${h.time}</span>
+    </div>`).join('');
+}
+
+function copyText(t) {
+  navigator.clipboard.writeText(t).then(() => alert('✅ Copied: ' + t));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM HELP TAGS
+   ═════════════════════════════════════════════════════════════════════════ */
+function renderCustomHelpTags() {
+  const container = document.getElementById('customHelpTags');
+  (ENUM_DATA.custom_ref || []).forEach(tag => {
+    const el = document.createElement('span');
+    el.className = 'help-tag';
+    el.textContent = tag;
+    el.onclick = () => toggleCustomTag(tag, el);
+    container.appendChild(el);
+  });
+}
+
+function toggleCustomTag(tag, el) {
+  const input = document.getElementById('custom');
+  const current = input.value.trim().toLowerCase();
+  const tags = current ? current.split(' ').filter(Boolean) : [];
+  if (tags.includes(tag)) {
+    el.classList.remove('selected');
+    input.value = tags.filter(t => t !== tag).join(' ');
+  } else {
+    el.classList.add('selected');
+    tags.push(tag);
+    input.value = tags.join(' ');
+  }
+}
+
+function toggleCustomHelp() {
+  const body = document.getElementById('customHelpBody');
+  const arrow = document.getElementById('customHelpArrow');
+  body.classList.toggle('hidden');
+  arrow.textContent = body.classList.contains('hidden') ? '▶' : '▼';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESET
+   ═════════════════════════════════════════════════════════════════════════ */
 function resetAll() {
-  Object.keys(OPTIONS).forEach(f=>{delete sel[f];const i=document.getElementById('search-'+f);if(i){i.value='';i.classList.remove('has-value')}});
-  document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(c=>{const f=c.id.replace('tags-','');delete sel[f];c.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'))});
-  const ci=document.getElementById('custom-input');if(ci){ci.value='';ci.classList.remove('error','ok')}
-  const ce=document.getElementById('custom-error');if(ce)ce.classList.remove('show');
-  const r1=document.getElementById('rule-lower');if(r1){r1.className='rule';r1.textContent='\u25cb \u4ec5\u82f1\u6587\u5c0f\u5199\uff08\u4e0d\u542b\u4e2d\u6587\u53ca\u5927\u5199\u5b57\u6bcd\uff09'}
-  const r2=document.getElementById('rule-no-underscore');if(r2){r2.className='rule';r2.textContent='\u25cb \u4e0d\u80fd\u5305\u542b\u4e0b\u5217\u7ebf _\uff0c\u7528 - \u6216\u7a7a\u683c\u8fde\u63a5\u8bcd\u8bed'}
-  customValid=true;
-  const hb=document.getElementById('help-body');if(hb)hb.classList.remove('show');
-  const ht=document.getElementById('help-toggle');if(ht)ht.classList.remove('open');
-  updatePreview();
+  document.querySelectorAll('select').forEach(s => {
+    if (s.multiple) {
+      Array.from(s.options).forEach(o => o.selected = false);
+    } else {
+      s.selectedIndex = 0;
+    }
+  });
+  document.getElementById('custom').value = '';
+  document.getElementById('previewBox').innerHTML =
+    '<span style="color:var(--text2);">Fill in required fields and click "Generate Name"</span>';
+  document.getElementById('previewBox').dataset.generated = '';
+  document.getElementById('previewActions').style.display = 'none';
+  document.getElementById('breakdown').style.display = 'none';
+  document.getElementById('validationWarning').classList.remove('show');
+  /* Reset custom help tags visual */
+  document.querySelectorAll('.help-tag').forEach(t => t.classList.remove('selected'));
+  /* Reset product code options */
+  updateProductCodeOptions();
 }
 
-document.addEventListener('click',e=>{if(!e.target.closest('.select-wrap'))document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'))});
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOOT
+   ═════════════════════════════════════════════════════════════════════════ */
+fetchData();
+</script>
+</body>
+</html>"""
 
 
-// ===== INIT =====
-loadData();
-'''
-
-
-def generate_html(fallback_data):
-    """Generate index.html that fetches ./data.json at runtime"""
-
-    fallback_json = json.dumps(fallback_data, ensure_ascii=False)
-
-    ft_dict = {}
-    for col_name, ft in FIELD_TYPES.items():
-        ft_dict[js_key(col_name)] = ft
-    ft_json = json.dumps(ft_dict, ensure_ascii=False)
-
-    js = JS_TEMPLATE.replace('__FALLBACK_JSON__', fallback_json)
-    js = js.replace('__FIELD_TYPES_JSON__', ft_json)
-
-    # Strip surrogate pairs that could cause issues in old browsers
-    clean_js = re.sub(r'[\ud800-\udfff]', '[EMOJI]', js)
-
-    html = (
-        "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-        f"  <title>{PAGE_TITLE}</title>\n"
-        f"  <style>{CSS}\n  </style>\n"
-        "</head>\n<body>\n\n"
-        "<div class=\"header\">\n"
-        "  <div class=\"header-icon\">TAG</div>\n"
-        "  <div>\n"
-        f"    <div class=\"header-title\">{PAGE_TITLE}</div>\n"
-        f"    <div class=\"header-sub\">{PAGE_SUBTITLE}</div>\n"
-        "  </div>\n"
-        "</div>\n\n"
-
-        "<div class=\"layout\">\n\n"
-        "  <div>\n"
-        "    <div class=\"card\">\n"
-        "      <div class=\"card-header\">\n"
-        "        <div class=\"card-icon\">&#128203;</div>\n"
-        "        <div>\n"
-        "          <div class=\"card-title\">填写字段信息</div>\n"
-        "          <div class=\"card-desc\">每个字段选择枚举值，或在 Custom 列自定义填写</div>\n"
-        "        </div>\n"
-        "      </div>\n\n"
-
-        '      <div id="datasource-status" class="datasource-bar loading">\n'
-        '        <span class="ds-dot"></span>\n'
-        '        <span class="ds-msg">正在加载数据...</span>\n'
-        '        <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>\n'
-        "      </div>\n\n"
-
-        f"      <div id=\"fields-container\">\n"
-        '        <div style="padding:40px 0;text-align:center">\n'
-        '          <div class="skeleton" style="height:44px;width:100%;margin-bottom:16px"></div>\n'
-        '          <div class="skeleton" style="height:44px;width:48%;display:inline-block;margin-right:2%"></div>\n'
-        '          <div class="skeleton" style="height:44px;width:48%;display:inline-block"></div>\n'
-        '          <div class="skeleton" style="height:44px;width:100%;margin-top:16px"></div>\n'
-        "        </div>\n"
-        "      </div>\n\n"
-
-        "    </div>\n\n"
-
-        '    <div style="display:flex;justify-content:flex-end;margin-top:12px">\n'
-        '      <button class="btn-secondary" onclick="resetAll()" style="padding:8px 18px;border-radius:8px">\n'
-        '        &#x1F504; 重置所有字段\n'
-        "      </button>\n"
-        "    </div>\n"
-        "  </div>\n\n"
-
-        "  <div class=\"result-sticky\">\n"
-        "    <div class=\"card\">\n"
-        "      <div class=\"card-header\">\n"
-        "        <div class=\"card-icon\">&#9733;</div>\n"
-        "        <div>\n"
-        "          <div class=\"card-title\">命名预览</div>\n"
-        '          <div class="card-desc">字段用 <code>_</code> 连接，字段内空格保持原样</div>\n'
-        "        </div>\n"
-        "      </div>\n"
-
-        '      <div class="result-dark">\n'
-        '        <div class="result-dark-label">生成结果</div>\n'
-        '        <div class="result-name-display" id="preview-output">\n'
-        '          <span class="seg-empty">加载中…</span>\n'
-        "        </div>\n"
-        '        <div class="result-len" id="preview-len"></div>\n'
-        "      </div>\n"
-
-        '      <button class="btn-primary" id="copy-main-btn" onclick="copyMain()">\n'
-        '        [COPY] 复制命名\n'
-        "      </button>\n"
-        '      <div class="btn-row">\n'
-        '        <button class="btn-secondary" onclick="exportTXT()">[TXT] 导出 TXT</button>\n'
-        '        <button class="btn-secondary" onclick="exportCSV()">[CSV] 导出 CSV</button>\n'
-        "      </div>\n"
-        '      <button class="btn-download" onclick="downloadTool()">[DL] 下载此工具（离线 / 发给同事）</button>\n'
-        "    </div>\n"
-
-        "    <div class=\"card\" style=\"margin-top:14px\">\n"
-        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">\n'
-        '        <div class="card-icon">&#128269;</div>\n'
-        '        <div class="card-title">字段解析</div>\n'
-        "      </div>\n"
-        '      <div class="breakdown-list" id="breakdown-list">\n'
-        '        <div class="empty-hint">填写字段后自动解析…</div>\n'
-        "      </div>\n"
-        "    </div>\n"
-
-        "    <div class=\"card\" style=\"margin-top:14px\">\n"
-        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">\n'
-        '        <div style="display:flex;align-items:center;gap:10px">\n'
-        '          <div class="card-icon">&#128337;</div>\n'
-        '          <div class="card-title">复制历史</div>\n'
-        "        </div>\n"
-        '        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">清除</span>\n'
-        "      </div>\n"
-        '      <div class="history-scroller" id="history-scroller">\n'
-        '        <div class="empty-hint">暂无记录…</div>\n'
-        "      </div>\n"
-        "    </div>\n"
-        "  </div>\n"
-        "</div>\n\n"
-
-        f"<script>\n{clean_js}\n</script>\n</body>\n</html>"
-    )
-    return html
-
-
-def main():
-    print(f"[READ] Excel: {EXCEL_PATH}")
-    if not EXCEL_PATH.exists():
-        print(f"[ERR] File not found: {EXCEL_PATH}")
-        exit(1)
-
-    data = load_data_from_excel()
-
-    # Write data.json
-    OUTPUT_DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-    print(f"[OK] data.json -> {OUTPUT_DATA}")
-
-    # Generate index.html
-    total = sum(len(v) for v in data.values())
-    print(f"\n   发现 {len(data)} 个字段，共 {total} 个枚举值")
-    icons = {"dropdown": "[DROP]", "tag": "[TAG]", "custom": "[IN]"}
-    for k, v in data.items():
-        ft = FIELD_TYPES.get(k, "tag")
-        print(f"   [{icons.get(ft,'?')}] {k}: {len(v)} 个值")
-
-    print(f"\n[GEN] Generating index.html...")
-    html = generate_html(data)
-    OUTPUT_HTML.write_text(html, encoding='utf-8')
-
-    size_html = OUTPUT_HTML.stat().st_size / 1024
-    size_data = OUTPUT_DATA.stat().st_size / 1024
-    print(f"[OK] index.html -> {OUTPUT_HTML} ({size_html:.0f} KB)")
-    print(f"[OK] data.json  -> {OUTPUT_DATA} ({size_data:.0f} KB)")
-
-    print(f"\n{'='*55}")
-    print(f"  部署到 GitHub Pages 后：")
-    print(f"  ┌─────────────────────────────────────────────┐")
-    print(f"  │  index.html  ← 页面                         │")
-    print(f"  │  data.json   ← 枚举数据                     │")
-    print(f"  ├─────────────────────────────────────────────┤")
-    print(f"  │  维护流程：                                   │")
-    print(f"  │  编辑 data.json → Commit → 刷新页面         │")
-    print(f"  └─────────────────────────────────────────────┘")
-
-
+# ── 主程序 ───────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    main()
+    print("============================")
+    print("  Ad Campaign Name Builder - Generator v7")
+    print("  Product Code Map + Funnel-Goal + Compact")
+    print("============================")
+
+    data = read_excel_data()
+    generate_data_json(data)
+    generate_product_code_map_json()
+
+    html = get_html_template()
+    # Embed product code map as JS fallback
+    map_json_str = json.dumps(PRODUCT_CODE_MAP, ensure_ascii=False, indent=2)
+    html = html.replace("##PRODUCT_CODE_MAP_PLACEHOLDER##", map_json_str)
+
+    with open(HTML_OUTPUT, "w", encoding="utf-8") as f:
+        f.write(html)
+    print("OK: Generated index.html")
+    print("============================")
+    print("Output files:")
+    print("  - " + DATA_JSON)
+    print("  - " + MAP_JSON)
+    print("  - " + HTML_OUTPUT)
+    print("============================")
