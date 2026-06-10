@@ -1,12 +1,11 @@
 """
-广告命名工具生成器（GitHub Pages 版）v9 - 终极安全版
+广告命名工具生成器（GitHub Pages 版）v9.1 - 级联映射稳健版
 用法：python generate_tool.py
 读取 Excel → 生成 index.html + data.json
-核心功能：
-1. 融入 Product Type -> Product Code 的级联映射矩阵，下拉列表自动交集过滤
-2. 切换 Product Type 类别时，智能逆流清理失配的 Product Code，防逻辑冲突
-3. 自定义输入框支持敏捷实时洗稿（大写自动变小写、空格及下划线智能转换连字符）
-4. 复制历史支持一键点击“时光倒流”，将表单秒还原回快照状态
+更新点：
+1. 精准嵌入 product-code-map.json 的矩阵数据，保证生成后的 index.html 完美具备联动筛选功能。
+2. 当选择不同的 Product Type 时，Product Code 的下拉列表会自动呈现对应的过滤子集。
+3. 切换类别导致当前型号不匹配时，下级型号框会自动干净清空，防止出现“脏命名”。
 """
 
 import json, os, sys, re
@@ -40,7 +39,7 @@ FIELD_TYPES = {
 PAGE_TITLE = "Ad Campaign 命名生成器 · Campaign Name Builder"
 PAGE_SUBTITLE = "规范快速生成广告系列命名，支持复制 / 导出 · 数据来源：data.json（GitHub 在线维护）"
 
-# ===== 你的 Product Type -> Product Code 级联映射数据 =====
+# ===== 你的 product-code-map.json 数据结构 =====
 PRODUCT_RELATION_MAP = {
   "all": ["all"],
   "poe": ["all", "b1200", "b400", "b500", "b800", "c1", "c2 pro", "cx410", "cx410c", "cx810", "d1200", "d400", "d500", "d800", "e1 outdoor poe", "e1 outdoor se poe", "fe-p", "nvs8-5kb4", "nvs8-5kd4", "duo 2 poe", "duo 2v poe", "duo 3 poe", "duo 3t poe", "duo 3v poe", "duo floodlight poe", "duo poe", "trackmix poe", "rlc-1010a", "rlc-1020a", "rlc-1210a", "rlc-1212a", "rlc-1220a", "rlc-1224a", "rlc-1240a", "rlc-410", "rlc-410s", "rlc-411", "rlc-420", "rlc-422", "rlc-423", "rlc-510a", "rlc-511", "rlc-520", "rlc-520a", "rlc-522", "rlc-540a", "rlc-810a", "rlc-810wa", "rlc-811a", "rlc-811wa", "rlc-812a", "rlc-81ma", "rlc-81pa", "rlc-820a", "rlc-822a", "rlc-823a", "rlc-823a 16x", "rlc-823s1", "rlc-823s2", "rlc-824a", "rlc-830a", "rlc-833a", "rlc-840a", "rlc-842a", "rlc-843a", "rlk16-1200b8", "rlk16-1200d8", "rlk16-410b4d4", "rlk16-410b8", "rlk16-520b4d4", "rlk16-800b8", "rlk16-800d8", "rlk16-800pt8", "rlk16-810b8", "rlk16-812b8", "rlk16-820d8", "rlk16-833d8", "rlk16-843v8", "rlk4-410b4", "rlk8-1200b4", "rlk8-1200d4", "rlk8-1200v4", "rlk8-1210b4", "rlk8-410b2d2", "rlk8-410b4", "rlk8-410b6", "rlk8-420d4", "rlk8-500v4", "rlk8-510b4", "rlk8-520b2d2", "rlk8-520d4", "rlk8-800b2d2", "rlk8-800b4", "rlk8-800b6", "rlk8-800d4", "rlk8-800pt4", "rlk8-800tm4", "rlk8-800v4", "rlk8-810b2d2", "rlk8-810b4", "rlk8-810b6", "rlk8-811b4", "rlk8-812b4", "rlk8-820d4", "rlk8-824d4", "rlk8-833d4", "rlk8-842d4", "rlk8-843v4", "rlk8-cx410b4", "v1200", "v500", "v800", "cx820", "elite xpro poe", "elite pro floodlight poe", "rlk16-811b8", "rp-pct16md", "rp-pct8mz"],
@@ -57,7 +56,6 @@ def js_key(name):
 
 
 def load_data_from_excel():
-    """从本地 Excel 读取数据，生成 data.json 和 HTML 内嵌 fallback"""
     df = pd.read_excel(EXCEL_PATH, sheet_name=0, header=0)
     data = {}
     for col in df.columns:
@@ -180,7 +178,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 """
 
-# ===== JS TEMPLATE (纯单引号严格隔离拼接版，彻底免去 class 及模板转义报错) =====
+# ===== JS TEMPLATE =====
 JS_TEMPLATE = r'''
 // ===== CONFIG =====
 const DATA_URL = './data.json';
@@ -649,7 +647,6 @@ function copyMain() {
   addHistory(n, stateSnapshot);
 }
 
-// 剪贴板内核切换
 function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
 function addHistory(n, snapshot){ 
@@ -724,7 +721,6 @@ function exportCSV(){
   dlBlob('\ufeff'+[['No.','Name','Time'],...copyHistory.map(function(h,i){return [i+1,h.name,h.time];})].map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
 }
 
-// 核心离线打包文件机制
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 
@@ -758,10 +754,10 @@ def generate_html(fallback_data):
         ft_dict[js_key(col_name)] = ft
     ft_json = json.dumps(ft_dict, ensure_ascii=False)
 
-    # 序列化级联关系映射
+    # 将 Python 字典序列化为原生的严格 JSON 字符串
     relation_json = json.dumps(PRODUCT_RELATION_MAP, ensure_ascii=False)
 
-    # 彻底杜绝 replace() 占位符引发的格式穿透
+    # 采用完全精确的字符字面量安全替换，防转义失效
     js = JS_TEMPLATE.replace('__FALLBACK_JSON__', fallback_json)
     js = js.replace('__FIELD_TYPES_JSON__', ft_json)
     js = js.replace('__PRODUCT_RELATION_MAP__', relation_json)
@@ -885,7 +881,6 @@ def main():
 
     data = load_data_from_excel()
 
-    # 输出纯净数据
     OUTPUT_DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f"[OK] data.json -> {OUTPUT_DATA}")
 
