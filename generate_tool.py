@@ -1,9 +1,10 @@
 """
-广告命名工具生成器（GitHub Pages 版）v8 - 稳健隔离修复版
+广告命名工具生成器（GitHub Pages 版）v8 - 完美收官版
 用法：python generate_tool.py
 核心改进：
-1. 彻底移除 JS_TEMPLATE 内部的 JS 反引号，全部改用单引号严格拼接，100% 杜绝 Python 编译引发的 class 错乱。
-2. 修复级联过滤数据在特定浏览器下的兼容性，彻底解决 loadData is not defined 报错。
+1. 修正了 JS 内部误写的 Python 关键字 'def' 为 'function'，彻底解决 class 语法错误。
+2. 完美融入 Product Type -> Product Code 的映射矩阵级联级联动过滤。
+3. 保留智能托管式洗稿输入与历史记录时光机一键回填。
 """
 
 import json, os, sys, re
@@ -157,4 +158,737 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .history-copy-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
 .datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
-.datasource-bar.ok{background:#ECFDF5;border:1px solid #
+.datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
+.datasource-bar.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
+.datasource-bar.loading{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
+.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.datasource-bar.ok .ds-dot{background:#10B981}
+.datasource-bar.error .ds-dot{background:#EF4444}
+.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
+.datasource-bar .ds-msg{flex:1}
+.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
+.datasource-bar .ds-refresh:hover {opacity:1}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
+@keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+"""
+
+# ===== JS TEMPLATE (已将误写的 def 升级为规范的 function) =====
+JS_TEMPLATE = r'''
+// ===== CONFIG =====
+const DATA_URL = './data.json';
+const FALLBACK_DATA = __FALLBACK_JSON__;
+const FIELD_TYPES = __FIELD_TYPES_JSON__;
+const PRODUCT_RELATION_MAP = __PRODUCT_RELATION_MAP__;
+
+let FIELDS_ORDER = [];
+let FIELD_LABELS = {};
+let OPTIONS = {};
+let DATA_READY = false;
+
+const REQUIRED_FIELDS = new Set();
+
+const FUNNEL_GOAL_MAP = {
+  'awareness':     ['impression','reach'],
+  'consideration': ['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],
+  'conversion':    ['sales']
+};
+
+const sel = {};
+const copyHistory = [];
+
+
+// ===== DATA LOADING =====
+let _loadTimeout = null;
+
+async function loadData() {
+  showDatasourceStatus('loading', 'Loading data...');
+
+  if (_loadTimeout) clearTimeout(_loadTimeout);
+  _loadTimeout = setTimeout(function() {
+    if (!DATA_READY) {
+      console.warn('Data loading timed out, using embedded fallback');
+      loadFallback();
+      showDatasourceStatus('error', 'Loading timed out. Using built-in fallback data. Click [REFRESH] to retry.');
+    }
+  }, 4000);
+
+  try {
+    const resp = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const json = await resp.json();
+
+    FIELDS_ORDER = [];
+    FIELD_LABELS = {};
+    OPTIONS = {};
+    REQUIRED_FIELDS.clear();
+
+    for (const [colName, vals] of Object.entries(json)) {
+      const key = colName.toLowerCase().replace(/ /g, '-');
+      FIELDS_ORDER.push(key);
+      FIELD_LABELS[key] = colName;
+      OPTIONS[key] = vals;
+      if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
+    }
+
+    renderAllFields();
+    DATA_READY = true;
+    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
+    const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
+    showDatasourceStatus('ok', 'Data loaded (' + Object.keys(OPTIONS).length + ' fields, ' + totalVals + ' values)');
+  } catch(err) {
+    console.warn('Data fetch failed, using embedded fallback:', err);
+    if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
+    loadFallback();
+    showDatasourceStatus('error', 'Failed to load data.json. Using built-in fallback.');
+  }
+}
+
+function loadFallback() {
+  FIELDS_ORDER = [];
+  FIELD_LABELS = {};
+  OPTIONS = {};
+  REQUIRED_FIELDS.clear();
+  for (const [colName, vals] of Object.entries(FALLBACK_DATA)) {
+    const key = colName.toLowerCase().replace(/ /g, '-');
+    FIELDS_ORDER.push(key);
+    FIELD_LABELS[key] = colName;
+    OPTIONS[key] = vals;
+    if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
+  }
+  renderAllFields();
+  DATA_READY = true;
+}
+
+function showDatasourceStatus(state, msg) {
+  const el = document.getElementById('datasource-status');
+  if(!el) return;
+  el.className = 'datasource-bar ' + state;
+  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span><span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
+}
+
+
+// ===== RENDER FIELDS =====
+function renderAllFields() {
+  const container = document.getElementById('fields-container');
+  let html = '';
+
+  for (let i = 0; i < FIELDS_ORDER.length; i++) {
+    const f = FIELDS_ORDER[i];
+    if (f === 'market') {
+      html += '<div class="field-compact">';
+    }
+
+    const ft = FIELD_TYPES[f] || 'tag';
+    const label = FIELD_LABELS[f];
+    const opts = OPTIONS[f] || [];
+
+    if (ft === 'dropdown') {
+      const isFullWidth = (f === 'product-code' || opts.length > 30);
+      let ph = 'Search ' + label + '...';
+      if(f === 'market') ph = 'Search or select market...';
+      if(f === 'product-type') ph = 'Search product type...';
+      if(f === 'product-code') ph = 'Search product model (e.g. argus 4, rlc-410)...';
+
+      html += '<div class="field' + (isFullWidth ? ' field-full' : '') + '">';
+      html += '<div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div>';
+      html += '<div class="select-wrap" id="wrap-' + f + '">';
+      html += '<input class="select-search" id="search-' + f + '" placeholder="' + escHtml(ph) + '" autocomplete="off" ';
+      html += 'onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')">';
+      html += '<span class="select-arrow">&#9662;</span>';
+      html += '<div class="dropdown" id="drop-' + f + '"></div>';
+      html += '</div></div>';
+    } else if (ft === 'tag') {
+      const tags = renderTagOptions(f, opts);
+      html += '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div>';
+      html += '<div class="tag-wrap" id="tags-' + f + '">' + tags + '</div></div>';
+    } else if (ft === 'custom') {
+      if (FIELDS_ORDER.includes('market')) {
+        html += '</div>'; 
+      }
+      html += makeCustomHTML();
+    }
+
+    if (f === 'product-type') {
+      html += '</div>'; 
+    }
+  }
+
+  container.innerHTML = '<div class="fields-grid">' + html + '</div>';
+  applyFunnelFilter();
+}
+
+function renderTagOptions(fieldKey, opts) {
+  let disabledGoals = null;
+  if (fieldKey === 'bidding-goal' && sel['media-funnel']) {
+    disabledGoals = FUNNEL_GOAL_MAP[sel['media-funnel']] || null;
+  }
+
+  let html = '';
+  for(let i=0; i<opts.length; i++) {
+    const v = opts[i];
+    const isDisabled = disabledGoals && !disabledGoals.includes(v);
+    const cName = 'tag' + (isDisabled ? ' disabled' : '') + (sel[fieldKey]===v ? ' active' : '');
+    const clickEvt = isDisabled ? '' : 'selectTag(\'' + fieldKey + '\', \'' + escJs(v) + '\')';
+    html += '<div class="' + cName + '" data-val="' + escAttr(v) + '" onclick="' + clickEvt + '">' + escHtml(v) + '</div>';
+  }
+  return html;
+}
+
+function applyFunnelFilter() {
+  const funnelVal = sel['media-funnel'];
+  const goalContainer = document.getElementById('tags-bidding-goal');
+  if (!goalContainer) return;
+
+  const goalOpts = OPTIONS['bidding-goal'] || [];
+  goalContainer.innerHTML = renderTagOptions('bidding-goal', goalOpts);
+
+  if (sel['bidding-goal']) {
+    const allowed = FUNNEL_GOAL_MAP[funnelVal];
+    if (allowed && !allowed.includes(sel['bidding-goal'])) {
+      delete sel['bidding-goal'];
+      updatePreview();
+    } else {
+      goalContainer.querySelectorAll('.tag').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.val === sel['bidding-goal']);
+      });
+    }
+  } else {
+    updatePreview();
+  }
+}
+
+
+// ===== CUSTOM SECTION =====
+function makeCustomHTML() {
+  const searchAds = ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'];
+  const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
+  
+  let sHtml = '';
+  for(let i=0; i<searchAds.length; i++) {
+    sHtml += '<span class="help-tag" onclick="pickCustom(\'' + searchAds[i] + '\')">' + searchAds[i] + '</span>';
+  }
+  let pHtml = '';
+  for(let i=0; i<pmaxAds.length; i++) {
+    pHtml += '<span class="help-tag" onclick="pickCustom(\'' + pmaxAds[i] + '\')">' + pmaxAds[i] + '</span>';
+  }
+
+  let groups = '<div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + sHtml + '</div></div>';
+  groups += '<div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">' + pHtml + '</div></div>';
+
+  let html = '<div class="field field-full">';
+  html += '<div class="field-label">Custom<span class="optional">Optional</span></div>';
+  html += '<div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase, spaces & underscores..." oninput="handleCustomInput(this)" maxlength="50"></div>';
+  html += '<div class="custom-rules" id="custom-rules-hint"><div class="rule">&#9888; Smart Guard Active: Auto-converts to lowercase & hyphens. Cleans illegal tags.</div></div>';
+  html += '<div class="custom-help">';
+  html += '<div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Values Reference<span class="custom-help-toggle open" id="help-toggle">&#9662;</span></div>';
+  html += '<div class="custom-help-body" id="help-body">' + groups + '</div>';
+  html += '</div></div>';
+  return html;
+}
+
+function handleCustomInput(inp) {
+  let v = inp.value;
+  v = v.toLowerCase();
+  v = v.replace(/[_\s]+/g, '-');
+  v = v.replace(/[^a-z0-9\-+]/g, '');
+  inp.value = v;
+  
+  if(v !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
+  updatePreview();
+}
+
+function toggleHelp() {
+  const body = document.getElementById('help-body');
+  const toggle = document.getElementById('help-toggle');
+  if(body.style.display === 'none' || body.classList.contains('collapsed')) {
+    body.style.display = 'block';
+    body.classList.remove('collapsed');
+    toggle.classList.add('open');
+  } else {
+    body.style.display = 'none';
+    body.classList.add('collapsed');
+    toggle.classList.remove('open');
+  }
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
+function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n'); }
+
+
+// ===== DROPDOWN ENGINE =====
+function getFilteredProductCodes() {
+  const allCodes = OPTIONS['product-code'] || [];
+  const currentType = sel['product-type'];
+  if (!currentType) return allCodes;
+  
+  const allowedSubset = PRODUCT_RELATION_MAP[currentType] || [];
+  return allCodes.filter(function(code) {
+    return allowedSubset.includes(code.toLowerCase());
+  });
+}
+
+function buildDropdown(field) {
+  const drop = document.getElementById('drop-' + field);
+  if (!drop) return;
+  
+  const opts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
+  
+  let html = '';
+  for(let i=0; i<opts.length; i++) {
+    const v = opts[i];
+    const isSelected = sel[field]===v ? ' selected' : '';
+    html += '<div class="dropdown-item' + isSelected + '" data-val="' + escAttr(v) + '" ';
+    html += 'onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>';
+  }
+  drop.innerHTML = html;
+}
+
+function openDropdown(field) {
+  buildDropdown(field);
+  document.getElementById('drop-' + field).classList.add('open');
+  document.getElementById('search-' + field).select();
+}
+
+function filterDropdown(field, q) {
+  const drop = document.getElementById('drop-' + field);
+  if (!drop) return;
+  drop.classList.add('open');
+  
+  const baseOpts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
+  const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(function(v) { return v.toLowerCase().includes(q.toLowerCase()); });
+  
+  if (filtered.length === 0) {
+    drop.innerHTML = '<div class="dropdown-item no-match">No matches found</div>';
+  } else {
+    let html = '';
+    for(let i=0; i<filtered.length; i++) {
+      const v = filtered[i];
+      const isSelected = sel[field]===v ? ' selected' : '';
+      html += '<div class="dropdown-item' + isSelected + '" data-val="' + escAttr(v) + '" ';
+      html += 'onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>';
+    }
+    drop.innerHTML = html;
+  }
+}
+
+function pickDropdown(field, val, e) {
+  if(e) e.preventDefault();
+  sel[field] = val;
+  const inp = document.getElementById('search-' + field);
+  if(inp) {
+    inp.value = val;
+    inp.classList.add('has-value');
+  }
+  const drop = document.getElementById('drop-' + field);
+  if(drop) drop.classList.remove('open');
+  
+  if (field === 'product-type') {
+    const allowedSubset = PRODUCT_RELATION_MAP[val] || [];
+    if (sel['product-code'] && !allowedSubset.includes(sel['product-code'].toLowerCase())) {
+      delete sel['product-code'];
+      const codeInp = document.getElementById('search-product-code');
+      if (codeInp) {
+        codeInp.value = '';
+        codeInp.classList.remove('has-value');
+      }
+    }
+  }
+  updatePreview();
+}
+
+function blurDropdown(field) {
+  setTimeout(function() {
+    const drop = document.getElementById('drop-' + field);
+    if (drop) drop.classList.remove('open');
+    const inp = document.getElementById('search-' + field);
+    if(!inp) return;
+    if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); }
+    else { inp.value = ''; inp.classList.remove('has-value'); }
+  }, 150);
+}
+
+
+// ===== TAG ENGINE =====
+function selectTag(field, val) {
+  if (sel[field] === val) delete sel[field];
+  else sel[field] = val;
+
+  const container = document.getElementById('tags-' + field);
+  if (container) {
+    container.querySelectorAll('.tag').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.val === sel[field]);
+    });
+  }
+
+  if (field === 'media-funnel') {
+    applyFunnelFilter();
+  } else {
+    updatePreview();
+  }
+}
+
+
+// ===== VALIDATION =====
+function validateRequired() {
+  const missing = [];
+  FIELDS_ORDER.forEach(function(f) {
+    if (REQUIRED_FIELDS.has(f) && !sel[f]) {
+      missing.push(FIELD_LABELS[f] || f);
+    }
+  });
+  return missing;
+}
+
+function showValidationWarning(msg) {
+  const el = document.getElementById('validation-warning');
+  if(el) { el.textContent = msg; el.classList.add('show'); }
+}
+
+function hideValidationWarning() {
+  const el = document.getElementById('validation-warning');
+  if(el) el.classList.remove('show');
+}
+
+
+// ===== PREVIEW & BREAKDOWN =====
+function toStr(s){ return s.trim(); }
+
+function buildName() {
+  const missing = validateRequired();
+  if (missing.length > 0) {
+    showValidationWarning('Please fill in all required fields: ' + missing.join(', '));
+    return [];
+  }
+  hideValidationWarning();
+
+  const parts = [];
+  for(let i=0; i<FIELDS_ORDER.length; i++) {
+    const f = FIELDS_ORDER[i];
+    if(f === 'custom'){
+      const v = document.getElementById('custom-input');
+      const cv = v ? v.value.trim() : '';
+      if(cv) parts.push({field:f, val:toStr(cv), isCustom:true});
+    } else {
+      if(sel[f]) parts.push({field:f, val:toStr(sel[f])});
+    }
+  }
+  return parts;
+}
+
+function updatePreview() {
+  const parts = buildName();
+  const outEl = document.getElementById('preview-output');
+  const lenEl = document.getElementById('preview-len');
+  if(!outEl) return;
+
+  if (parts.length === 0 && validateRequired().length > 0) {
+    outEl.innerHTML = '<span class="seg-empty">Fill in all required fields above...</span>';
+    if(lenEl) lenEl.textContent = ''; 
+    renderBreakdown([]); 
+    return;
+  }
+
+  if(parts.length === 0){
+    outEl.innerHTML = '<span class="seg-empty">Select fields to generate campaign name...</span>';
+    if(lenEl) lenEl.textContent = ''; 
+    renderBreakdown([]); 
+    return;
+  }
+  
+  let pLinks = '';
+  for(let i=0; i<parts.length; i++) {
+    const p = parts[i];
+    if(i > 0) pLinks += '<span class="seg-sep">_</span>';
+    pLinks += '<span class="' + (p.isCustom ? 'seg-custom' : 'seg-part') + '">' + escHtml(p.val) + '</span>';
+  }
+  outEl.innerHTML = pLinks;
+
+  const fullName = parts.map(function(p) { return p.val; }).join('_');
+  if(lenEl) lenEl.textContent = fullName.length + ' chars'; 
+  window._currentName = fullName;
+  renderBreakdown(parts);
+}
+
+function renderBreakdown(parts){
+  const el = document.getElementById('breakdown-list');
+  if(!el) return;
+  if(parts.length === 0){ el.innerHTML = '<div class="empty-hint">Fields will appear here after selection...</div>'; return; }
+  
+  let bHtml = '';
+  for(let i=0; i<parts.length; i++) {
+    const p = parts[i];
+    bHtml += '<div class="breakdown-row"><div class="breakdown-num">' + (i+1) + '</div>';
+    bHtml += '<div class="breakdown-field">' + escHtml(FIELD_LABELS[p.field] || p.field) + '</div>';
+    bHtml += '<div class="breakdown-val ' + (p.isCustom ? 'custom-val' : '') + '">' + escHtml(p.val) + '</div></div>';
+  }
+  el.innerHTML = bHtml;
+}
+
+
+// ===== SNAPSHOT TIMEMACHINE =====
+function copyMain() {
+  const n = window._currentName; if(!n) return; doClipboard(n);
+  const b = document.getElementById('copy-main-btn'); if(!b) return;
+  b.textContent = '✅ Copied!'; b.classList.add('copied');
+  
+  const stateSnapshot = {
+    sel: JSON.parse(JSON.stringify(sel)),
+    custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : ''
+  };
+
+  setTimeout(function(){ b.innerHTML = '[COPY] Copy Name'; b.classList.remove('copied') }, 2000);
+  addHistory(n, stateSnapshot);
+}
+
+function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
+
+function addHistory(n, snapshot){ 
+  copyHistory.unshift({
+    name: n, 
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
+    snapshot: snapshot
+  }); 
+  renderHistory(); 
+}
+
+function renderHistory(){
+  const el = document.getElementById('history-scroller');
+  if(!el) return;
+  if(copyHistory.length === 0){ el.innerHTML = '<div class="empty-hint">No records yet...</div>'; return; }
+  
+  let hHtml = '';
+  for(let idx=0; idx<copyHistory.length; idx++) {
+    const h = copyHistory[idx];
+    hHtml += '<div class="history-row" onclick="restoreSnapshot(' + idx + ')" title="Click to instantly restore this form state">';
+    hHtml += '<div class="history-name">' + escHtml(h.name) + '</div>';
+    hHtml += '<div class="history-time">' + h.time + '</div>';
+    hHtml += '<div class="history-copy-btn" onclick="event.stopPropagation();doClipboard(\'' + h.name.replace(/'/g,"\\'") + '\')">COPY</div></div>';
+  }
+  el.innerHTML = hHtml;
+}
+
+function restoreSnapshot(idx) {
+  const record = copyHistory[idx];
+  if(!record || !record.snapshot) return;
+
+  Object.keys(sel).forEach(function(k) { delete sel[k]; });
+  Object.assign(sel, record.snapshot.sel);
+
+  FIELDS_ORDER.forEach(function(f) {
+    const ft = FIELD_TYPES[f];
+    if(ft === 'dropdown') {
+      const inp = document.getElementById('search-' + f);
+      if(inp) {
+        if(sel[f]) { inp.value = sel[f]; inp.classList.add('has-value'); }
+        else { inp.value = ''; inp.classList.remove('has-value'); }
+      }
+    } else if(ft === 'tag') {
+      const container = document.getElementById('tags-' + f);
+      if (container) {
+        container.querySelectorAll('.tag').forEach(function(t) {
+          t.classList.toggle('active', t.dataset.val === sel[f]);
+        });
+      }
+    }
+  });
+
+  applyFunnelFilter();
+
+  const ci = document.getElementById('custom-input');
+  if(ci) {
+    ci.value = record.snapshot.custom || '';
+    if(ci.value !== '') ci.classList.add('ok'); else ci.classList.remove('ok');
+  }
+
+  updatePreview();
+}
+
+function clearHistory(){copyHistory.length=0;renderHistory()}
+
+function exportTXT(){
+  if(!copyHistory.length){alert('No history records yet.');return}
+  dlBlob('Campaign Name Export\nExported: '+new Date().toLocaleString('en-US')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map(function(h,i){return (i+1)+'. '+h.name;}).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
+}
+function exportCSV(){
+  if(!copyHistory.length){alert('No history records yet.');return}
+  dlBlob('\ufeff'+[['No.','Name','Time'],...copyHistory.map(function(h,i){return [i+1,h.name,h.time];})].map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
+}
+
+// 这里的 function 已全面修复，替换了之前的 def 关键字
+function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
+function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+
+function pickCustom(val){
+  const i=document.getElementById('custom-input');
+  if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); }
+}
+
+function resetAll() {
+  Object.keys(OPTIONS).forEach(function(f){delete sel[f];const i=document.getElementById('search-'+f);if(i){i.value='';i.classList.remove('has-value')}});
+  document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(function(c){const f=c.id.replace('tags-','');delete sel[f];c.querySelectorAll('.tag').forEach(function(t){t.classList.remove('active')})});
+  const ci=document.getElementById('custom-input');if(ci){ci.value='';ci.classList.remove('error','ok')}
+  hideValidationWarning();
+  applyFunnelFilter();
+  updatePreview();
+}
+
+document.addEventListener('click',function(e){if(!e.target.closest('.select-wrap'))document.querySelectorAll('.dropdown').forEach(function(d){d.classList.remove('open')})});
+
+// ===== INIT =====
+loadData();
+'''
+
+
+def generate_html(fallback_data):
+    """Generate index.html that fetches ./data.json at runtime"""
+    fallback_json = json.dumps(fallback_data, ensure_ascii=False)
+
+    ft_dict = {}
+    for col_name, ft in FIELD_TYPES.items():
+        ft_dict[js_key(col_name)] = ft
+    ft_json = json.dumps(ft_dict, ensure_ascii=False)
+
+    # 序列化级联关系映射
+    relation_json = json.dumps(PRODUCT_RELATION_MAP, ensure_ascii=False)
+
+    # 替换 JS 模板伪标签
+    js = JS_TEMPLATE.replace('__FALLBACK_JSON__', fallback_json)
+    js = js.replace('__FIELD_TYPES_JSON__', ft_json)
+    js = js.replace('__PRODUCT_RELATION_MAP__', relation_json)
+
+    clean_js = re.sub(r'[\ud800-\udfff]', '[EMOJI]', js)
+
+    html = (
+        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
+        "  <meta charset=\"UTF-8\">\n"
+        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+        f"  <title>{PAGE_TITLE}</title>\n"
+        f"  <style>{CSS}\n  </style>\n"
+        "</head>\n<body>\n\n"
+        "<div class=\"header\">\n"
+        "  <div class=\"header-icon\">📋</div>\n"
+        "  <div>\n"
+        f"    <div class=\"header-title\">{PAGE_TITLE}</div>\n"
+        f"    <div class=\"header-sub\">{PAGE_SUBTITLE}</div>\n"
+        "  </div>\n"
+        "</div>\n\n"
+
+        "<div class=\"layout\">\n\n"
+        "  <div>\n"
+        "    <div class=\"card\">\n"
+        "      <div class=\"card-header\">\n"
+        "        <div class=\"card-icon\">📝</div>\n"
+        "        <div>\n"
+        "          <div class=\"card-title\">Select Fields</div>\n"
+        "          <div class=\"card-desc\">Choose enum values for each field, or type in Custom.</div>\n"
+        "        </div>\n"
+        "      </div>\n\n"
+
+        '      <div id="datasource-status" class="datasource-bar loading">\n'
+        '        <span class="ds-dot"></span>\n'
+        '        <span class="ds-msg">Loading data...</span>\n'
+        '        <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>\n'
+        "      </div>\n\n"
+
+        f"      <div id=\"fields-container\">\n"
+        '        <div style="padding:40px 0;text-align:center">\n'
+        '          <div class="skeleton" style="height:40px;width:100%;margin-bottom:16px"></div>\n'
+        '          <div class="skeleton" style="height:40px;width:48%;display:inline-block;margin-right:2%"></div>\n'
+        '          <div class="skeleton" style="height:40px;width:48%;display:inline-block"></div>\n'
+        '          <div class="skeleton" style="height:40px;width:100%;margin-top:16px"></div>\n'
+        "        </div>\n"
+        "      </div>\n\n"
+
+        "      <div id=\"validation-warning\" class=\"validation-warning\"></div>\n"
+        "    </div>\n\n"
+
+        '    <div style="display:flex;justify-content:flex-end;margin-top:12px">\n'
+        '      <button class="btn-secondary" onclick="resetAll()" style="padding:8px 18px;border-radius:8px">\n'
+        '        🔁 Reset All Fields\n'
+        "      </button>\n"
+        "    </div>\n"
+        "  </div>\n\n"
+
+        "  <div class=\"result-sticky\">\n"
+        "    <div class=\"card\">\n"
+        "      <div class=\"card-header\">\n"
+        "        <div class=\"card-icon\">&#9733;</div>\n"
+        "        <div>\n"
+        "          <div class=\"card-title\">命名预览</div>\n"
+        '          <div class="card-desc">字段用 <code>_</code> 连接，字段内空格保持原样</div>\n'
+        "        </div>\n"
+        "      </div>\n"
+
+        '      <div class="result-dark">\n'
+        '        <div class="result-dark-label">生成结果</div>\n'
+        '        <div class="result-name-display" id="preview-output">\n'
+        '          <span class="seg-empty">加载中…</span>\n'
+        "        </div>\n"
+        '        <div class="result-len" id="preview-len"></div>\n'
+        "      </div>\n"
+
+        '      <button class="btn-primary" id="copy-main-btn" onclick="copyMain()">\n'
+        '        [COPY] Copy Name\n'
+        "      </button>\n"
+        '      <div class="btn-row">\n'
+        '        <button class="btn-secondary" onclick="exportTXT()">[TXT] Export TXT</button>\n'
+        '        <button class="btn-secondary" onclick="exportCSV()">[CSV] Export CSV</button>\n'
+        "      </div>\n"
+        '      <button class="btn-download" onclick="downloadTool()">[DL] 下载此工具（离线 / 发给同事）</button>\n'
+        "    </div>\n"
+
+        "    <div class=\"card\" style=\"margin-top:14px\">\n"
+        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">\n'
+        '        <div class="card-icon">&#128269;</div>\n'
+        '        <div class="card-title">Field Breakdown</div>\n'
+        "      </div>\n"
+        '      <div class="breakdown-list" id="breakdown-list">\n'
+        '        <div class="empty-hint">填写字段后自动解析…</div>\n'
+        "      </div>\n"
+        "    </div>\n"
+
+        "    <div class=\"card\" style=\"margin-top:14px\">\n"
+        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">\n'
+        '        <div style="display:flex;align-items:center;gap:10px">\n'
+        '          <div class="card-icon">&#128337;</div>\n'
+        '          <div class="card-title">复制历史</div>\n'
+        "        </div>\n"
+        '        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">Clear</span>\n'
+        "      </div>\n"
+        '      <div class="history-scroller" id="history-scroller">\n'
+        '        <div class="empty-hint">暂无记录…</div>\n'
+        "      </div>\n"
+        "    </div>\n"
+        "  </div>\n"
+        "</div>\n\n"
+
+        f"<script>\n{clean_js}\n</script>\n</body>\n</html>"
+    )
+    return html
+
+
+def main():
+    print(f"[READ] Excel: {EXCEL_PATH}")
+    if not EXCEL_PATH.exists():
+        print(f"[ERR] File not found: {EXCEL_PATH}")
+        exit(1)
+
+    data = load_data_from_excel()
+
+    OUTPUT_DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(f"[OK] data.json -> {OUTPUT_DATA}")
+
+    print(f"\n[GEN] Generating index.html...")
+    html = generate_html(data)
+    OUTPUT_HTML.write_text(html, encoding='utf-8')
+
+    size_html = OUTPUT_HTML.stat().st_size / 1024
+    size_data = OUTPUT_DATA.stat().st_size / 1024
+    print(f"[OK] index.html -> {OUTPUT_HTML} ({size_html:.0f} KB)")
+    print(f"[OK] data.json  -> {OUTPUT_DATA} ({size_data:.0f} KB)")
+
+
+if __name__ == "__main__":
+    main()
