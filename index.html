@@ -23,6 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.fields-grid{grid-template-columns:1fr}}
 .field-full{grid-column:1/-1}
+/* Compact row for Market + Product Type */
 .field-compact{display:contents}
 .field-compact .field{margin-bottom:0}
 .field-compact .field-label{font-size:11px}
@@ -42,18 +43,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .select-search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
 .select-search.has-value{color:var(--primary);font-weight:600}
 .select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:12px}
-.dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
+.dropdown{position:absolute;top:calc(100%+4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
 .dropdown.open{display:block}
 .dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text)}
 .dropdown-item:hover{background:var(--primary-light);color:var(--primary)}
 .dropdown-item.selected{background:var(--primary-light);color:var(--primary);font-weight:600}
-.dropdown-item.no-match{color:var(--muted);font-style:italic;pointer-events:none;padding:12px;text-align:center}
+.dropdown-item.no-match{color:var(--muted);font-style:italic;pointer-events:none}
 .custom-input-wrap{position:relative}
 .custom-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);transition:border-color .15s,box-shadow .15s}
 .custom-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
-.custom-input.ok{border-color:var(--success);background:#F0FDF4}
-.custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
-.custom-rules .rule{display:flex;align-items:center;gap:6px;color:var(--success);font-weight:600}
+.custom-input.error{border-color:var(--danger);background:var(--danger-light)}
+.custom-input.ok{border-color:var(--success)}
+.custom-error-msg{font-size:11px;color:var(--danger);margin-top:4px;display:none}
+.custom-error-msg.show{display:block}
+.custom-rules{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+.custom-rules .rule{display:flex;align-items:center;gap:4px}
+.custom-rules .rule.pass{color:var(--success)}
+.custom-rules .rule.fail{color:var(--danger)}
 .custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--muted);transition:background .12s}
 .custom-help-header:hover{background:#E5E7EB}
@@ -95,11 +101,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .history-scroller{max-height:200px;overflow-y:auto}
 .history-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
 .history-row:hover{background:var(--primary-light)}
-.history-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--primary)}
-.history-row:hover .history-name{text-decoration:underline}
+.history-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .history-time{font-size:10px;color:var(--muted);flex-shrink:0}
-.history-copy-btn{width:50px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
-.history-copy-btn:hover{background:var(--primary);border-color:var(--primary);color:#fff}
+.history-copy-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .1s}
+.history-copy-btn:hover{background:var(--primary-light);border-color:var(--primary)}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:2px}
 .datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
 .datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
@@ -111,14 +116,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
 .datasource-bar .ds-msg{flex:1}
 .datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover {opacity:1}
+.datasource-bar .ds-refresh:hover{opacity:1}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
   </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
   <div class="header-icon">📋</div>
   <div>
@@ -127,8 +134,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- Main Layout -->
 <div class="layout">
 
+  <!-- Left Panel -->
   <div>
     <div class="card">
       <div class="card-header">
@@ -164,6 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 
+  <!-- Right Panel -->
   <div class="result-sticky">
     <div class="card">
       <div class="card-header">
@@ -224,15 +234,18 @@ let FIELD_LABELS = {};
 let OPTIONS = {};
 let DATA_READY = false;
 
+// Required fields (all except Custom)
 const REQUIRED_FIELDS = new Set();
 
+// Funnel -> Goal mapping for cross-filtering
 const FUNNEL_GOAL_MAP = {
-  "awareness":     ["impression","reach"],
+  "awareness":    ["impression","reach"],
   "consideration":["click","view","pageview","signup","atc","checkout","engagement","dpv","follow"],
   "conversion":   ["sales"],
 };
 
 const sel = {};
+let customValid = true;
 const copyHistory = [];
 
 
@@ -249,7 +262,7 @@ async function loadData() {
       loadFallback();
       showDatasourceStatus('error', 'Loading timed out. Using built-in fallback data. Click [REFRESH] to retry.');
     }
-  }, 4000);
+  }, 5000);
 
   try {
     const resp = await fetch(DATA_URL + '?t=' + Date.now());
@@ -300,7 +313,6 @@ function loadFallback() {
 
 function showDatasourceStatus(state, msg) {
   const el = document.getElementById('datasource-status');
-  if(!el) return;
   el.className = 'datasource-bar ' + state;
   el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span>'
     + '<span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
@@ -313,6 +325,7 @@ function renderAllFields() {
   let html = '';
 
   for (const f of FIELDS_ORDER) {
+    // Compact row: Market + Product Type side by side
     if (f === 'market') {
       html += `<div class="field-compact">`;
     }
@@ -338,21 +351,26 @@ function renderAllFields() {
       html += `<div class="field"><div class="field-label"><span class="req">*</span> ${escHtml(label)}</div>
         <div class="tag-wrap" id="tags-${f}">${tags}</div></div>`;
     } else if (ft === 'custom') {
-      if (FIELDS_ORDER.includes('market')) {
-        html += `</div>`; 
+      // Close compact div before custom section
+      if (FIELDS_ORDER.includes('Market')) {
+        html += `</div>`; // close field-compact
       }
       html += makeCustomHTML();
     }
 
+    // Close compact div after Product Type
     if (f === 'product-type') {
-      html += `</div>`; 
+      html += `</div>`; // close field-compact
     }
   }
 
   container.innerHTML = `<div class="fields-grid">${html}</div>`;
+
+  // Apply current funnel filter if already selected
   applyFunnelFilter();
 }
 
+// Render tag options with optional disabled state based on funnel selection
 function renderTagOptions(fieldKey, opts) {
   let disabledGoals = null;
   if (fieldKey === 'bidding-goal' && sel['media-funnel']) {
@@ -361,10 +379,11 @@ function renderTagOptions(fieldKey, opts) {
 
   return opts.map(v => {
     const isDisabled = disabledGoals && !disabledGoals.includes(v);
-    return `<div class="tag${isDisabled ? ' disabled' : ''}${sel[fieldKey]===v ? ' active' : ''}" data-val="${escAttr(v)}" onclick="${isDisabled ? '' : `selectTag('${fieldKey}','${escJs(v)}')`}">${escHtml(v)}</div>`;
+    return `<div class="tag${isDisabled ? ' disabled' : ''}" data-val="${escAttr(v)}" onclick="${isDisabled ? '' : `selectTag('${fieldKey}','${escJs(v)}')`}">${escHtml(v)}</div>`;
   }).join('');
 }
 
+// Apply funnel-based filtering to bidding goals
 function applyFunnelFilter() {
   const funnelVal = sel['media-funnel'];
   const goalContainer = document.getElementById('tags-bidding-goal');
@@ -373,12 +392,15 @@ function applyFunnelFilter() {
   const goalOpts = OPTIONS['bidding-goal'] || [];
   goalContainer.innerHTML = renderTagOptions('bidding-goal', goalOpts);
 
+  // Re-apply active state if current goal is still valid
   if (sel['bidding-goal']) {
     const allowed = FUNNEL_GOAL_MAP[funnelVal];
     if (allowed && !allowed.includes(sel['bidding-goal'])) {
+      // Current goal no longer valid, clear it
       delete sel['bidding-goal'];
       updatePreview();
     } else {
+      // Re-activate the tag
       goalContainer.querySelectorAll('.tag').forEach(t => {
         t.classList.toggle('active', t.dataset.val === sel['bidding-goal']);
       });
@@ -389,45 +411,36 @@ function applyFunnelFilter() {
 }
 
 
-// ===== CUSTOM SECTION (智能纠错式洗稿) =====
+// ===== CUSTOM SECTION =====
 function makeCustomHTML() {
   const searchAds = ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'];
   const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
   const groups =
-    `<div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' +
+    `<div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">` +
     searchAds.map(v => `<span class="help-tag" onclick="pickCustom('${v}')">${v}</span>`).join('') +
-    '</div></div>' +
-    '<div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">' +
+    `</div></div>` +
+    `<div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">` +
     pmaxAds.map(v => `<span class="help-tag" onclick="pickCustom('${v}')">${v}</span>`).join('') +
-    '</div></div>`;
+    `</div></div>`;
 
   return `<div class="field field-full">
     <div class="field-label">Custom<span class="optional">Optional</span></div>
     <div class="custom-input-wrap">
-      <input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase, spaces & underscores..."
-        oninput="handleCustomInput(this)" maxlength="50">
+      <input type="text" class="custom-input" id="custom-input" placeholder="e.g., rm, aon..."
+        oninput="validateCustom(this)" maxlength="50">
     </div>
+    <div class="custom-error-msg" id="custom-error"></div>
     <div class="custom-rules" id="custom-rules-hint">
-      <div class="rule">⚡ Smart Guard Active: Auto-converts to lowercase & hyphens. Cleans illegal tags.</div>
+      <div class="rule" id="rule-lower">&#9675; Lowercase letters, digits, hyphens &amp; spaces only</div>
+      <div class="rule" id="rule-no-underscore">&#9675; No underscores <code>_</code>, use <code>-</code> or space instead</div>
     </div>
     <div class="custom-help">
       <div class="custom-help-header" onclick="toggleHelp()">
-        💡 Common Custom Values Reference
+        &#128161; Common Custom Values Reference
         <span class="custom-help-toggle open" id="help-toggle">&#9662;</span>
       </div>
       <div class="custom-help-body" id="help-body">${groups}</div>
     </div></div>`;
-}
-
-function handleCustomInput(inp) {
-  let v = inp.value;
-  v = v.toLowerCase();
-  v = v.replace(/[_\s]+/g, '-');
-  v = v.replace(/[^a-z0-9\-+]/g, '');
-  inp.value = v;
-  
-  if(v !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
-  updatePreview();
 }
 
 function toggleHelp() {
@@ -449,7 +462,7 @@ function buildDropdown(field) {
   if (!drop) return;
   drop.innerHTML = opts.map(v =>
     `<div class="dropdown-item${sel[field]===v ? ' selected' : ''}" data-val="${escAttr(v)}"
-      onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}', '${escJs(v)}', event)">${escHtml(v)}</div>`
+      onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}','${escJs(v)}',event)">${escHtml(v)}</div>`
   ).join('');
 }
 
@@ -470,21 +483,20 @@ function filterDropdown(field, q) {
   } else {
     drop.innerHTML = filtered.map(v =>
       `<div class="dropdown-item${sel[field]===v ? ' selected' : ''}" data-val="${escAttr(v)}"
-        onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}', '${escJs(v)}', event)">${escHtml(v)}</div>`
+        onmousedown="pickDropdown('${field.replace(/'/g,"\\'")}','${escJs(v)}',event)">${escHtml(v)}</div>`
     ).join('');
   }
 }
 
 function pickDropdown(field, val, e) {
-  if(e) e.preventDefault();
+  e.preventDefault();
   sel[field] = val;
   const inp = document.getElementById('search-' + field);
-  if(inp) {
-    inp.value = val;
-    inp.classList.add('has-value');
-  }
-  const drop = document.getElementById('drop-' + field);
-  if(drop) drop.classList.remove('open');
+  inp.value = val;
+  inp.classList.add('has-value');
+  document.getElementById('drop-' + field).classList.remove('open');
+
+  // If market/product-type changed, no special action needed (no dependency)
   updatePreview();
 }
 
@@ -493,7 +505,6 @@ function blurDropdown(field) {
     const drop = document.getElementById('drop-' + field);
     if (drop) drop.classList.remove('open');
     const inp = document.getElementById('search-' + field);
-    if(!inp) return;
     if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); }
     else { inp.value = ''; inp.classList.remove('has-value'); }
   }, 150);
@@ -505,11 +516,13 @@ function selectTag(field, val) {
   if (sel[field] === val) delete sel[field];
   else sel[field] = val;
 
+  // Update tag UI
   const container = document.getElementById('tags-' + field);
   if (container) {
     container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[field]));
   }
 
+  // If media-funnel changed, re-filter bidding goals
   if (field === 'media-funnel') {
     applyFunnelFilter();
   } else {
@@ -518,7 +531,33 @@ function selectTag(field, val) {
 }
 
 
-// ===== VALIDATION =====
+// ===== CUSTOM VALIDATION =====
+function validateCustom(inp) {
+  const v = inp.value;
+  const lowerOk = v === '' || /^[a-z0-9 \-+]+$/.test(v);
+  const noUnderscore = !v.includes('_');
+  const r1 = document.getElementById('rule-lower'), r2 = document.getElementById('rule-no-underscore');
+  const errEl = document.getElementById('custom-error');
+  r1.className = 'rule ' + (v==='' ? '' : lowerOk ? 'pass' : 'fail');
+  r1.textContent = (v===''||lowerOk ? '\u2713' : '\u2717') + ' Lowercase letters, digits, hyphens &amp; spaces only';
+  r2.className = 'rule ' + (v==='' ? '' : noUnderscore ? 'pass' : 'fail');
+  r2.textContent = (v===''||noUnderscore ? '\u2713' : '\u2717') + ' No underscores _, use - or space instead';
+  if (v !== '' && (!lowerOk || !noUnderscore)) {
+    inp.classList.add('error'); inp.classList.remove('ok'); customValid = false;
+    const msgs=[];
+    if(!lowerOk) msgs.push('Only lowercase letters, digits, hyphens and spaces allowed');
+    if(!noUnderscore) msgs.push('No underscores _ allowed');
+    errEl.textContent=msgs.join('; '); errEl.classList.add('show');
+  } else {
+    inp.classList.remove('error');
+    if(v!=='') inp.classList.add('ok'); else inp.classList.remove('ok');
+    customValid=true; errEl.classList.remove('show');
+  }
+  updatePreview();
+}
+
+
+// ===== VALIDATION (required fields check) =====
 function validateRequired() {
   const missing = [];
   for (const f of FIELDS_ORDER) {
@@ -531,22 +570,23 @@ function validateRequired() {
 
 function showValidationWarning(msg) {
   const el = document.getElementById('validation-warning');
-  if(el) { el.textContent = msg; el.classList.add('show'); }
+  el.textContent = msg;
+  el.classList.add('show');
 }
 
 function hideValidationWarning() {
-  const el = document.getElementById('validation-warning');
-  if(el) el.classList.remove('show');
+  document.getElementById('validation-warning').classList.remove('show');
 }
 
 
-// ===== PREVIEW & TIMEMACHINE =====
+// ===== PREVIEW =====
 function toStr(s){ return s.trim(); }
 
 function buildName() {
+  // Validate required fields first
   const missing = validateRequired();
   if (missing.length > 0) {
-    showValidationWarning('⚠️ Please fill in all required fields: ' + missing.join(', '));
+    showValidationWarning('\u26A0 Please fill in all required fields: ' + missing.join(', '));
     return [];
   }
   hideValidationWarning();
@@ -556,7 +596,7 @@ function buildName() {
     if(f==='custom'){
       const v=document.getElementById('custom-input');
       const cv = v ? v.value.trim() : '';
-      if(cv) parts.push({field:f,val:toStr(cv),isCustom:true});
+      if(cv && customValid) parts.push({field:f,val:toStr(cv),isCustom:true});
     }else{
       if(sel[f]) parts.push({field:f,val:toStr(sel[f])});
     }
@@ -566,115 +606,44 @@ function buildName() {
 
 function updatePreview() {
   const parts=buildName(), outEl=document.getElementById('preview-output'), lenEl=document.getElementById('preview-len');
-  if(!outEl) return;
 
+  // If validation failed, show warning instead of partial result
   if (parts.length === 0 && validateRequired().length > 0) {
     outEl.innerHTML='<span class="seg-empty">Fill in all required fields above...</span>';
-    if(lenEl) lenEl.textContent=''; renderBreakdown([]); return;
+    lenEl.textContent=''; renderBreakdown([]); return;
   }
 
   if(parts.length===0){
     outEl.innerHTML='<span class="seg-empty">Select fields to generate campaign name...</span>';
-    if(lenEl) lenEl.textContent=''; renderBreakdown([]); return;
+    lenEl.textContent=''; renderBreakdown([]); return;
   }
-  
   outEl.innerHTML=parts.map((p,i)=>(i>0?'<span class="seg-sep">_</span>':'')+'<span class="'+(p.isCustom?'seg-custom':'seg-part')+'">'+escHtml(p.val)+'</span>').join('');
   const fullName=parts.map(p=>p.val).join('_');
-  if(lenEl) lenEl.textContent=fullName.length+' chars'; window._currentName=fullName;
+  lenEl.textContent=fullName.length+' chars'; window._currentName=fullName;
   renderBreakdown(parts);
 }
 
 function renderBreakdown(parts){
   const el=document.getElementById('breakdown-list');
-  if(!el) return;
   if(parts.length===0){ el.innerHTML='<div class="empty-hint">Fields will appear here after selection...</div>'; return; }
   el.innerHTML=parts.map((p,i)=>'<div class="breakdown-row"><div class="breakdown-num">'+(i+1)+'</div><div class="breakdown-field">'+escHtml(FIELD_LABELS[p.field])+'</div><div class="breakdown-val'+(p.isCustom?' custom-val':'')+'">'+escHtml(p.val)+'</div></div>').join('');
 }
 
 
-// ===== COPY & SNAPSHOT ENGINE =====
+// ===== COPY & EXPORT =====
 function copyMain() {
   const n=window._currentName;if(!n)return;doClipboard(n);
-  const b=document.getElementById('copy-main-btn');b.textContent='✅ Copied!';b.classList.add('copied');
-  
-  // 核心微调机制：为时光机记录下表单快照
-  const stateSnapshot = {
-    sel: JSON.parse(JSON.stringify(sel)),
-    custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : ''
-  };
-
-  setTimeout(()=>{b.innerHTML='[COPY] Copy Name';b.classList.remove('copied')},2000);
-  addHistory(n, stateSnapshot);
+  const b=document.getElementById('copy-main-btn');b.textContent='\u2705 Copied!';b.classList.add('copied');
+  setTimeout(()=>{b.innerHTML='[COPY] Copy Name';b.classList.remove('copied')},2000);addHistory(n);
 }
-
 function doClipboard(s){ navigator.clipboard.writeText(s).catch(()=>{const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
-
-function addHistory(n, snapshot){ 
-  copyHistory.unshift({
-    name: n, 
-    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-    snapshot: snapshot
-  }); 
-  renderHistory(); 
-}
-
+function addHistory(n){ copyHistory.unshift({name:n,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});renderHistory(); }
 function renderHistory(){
   const el=document.getElementById('history-scroller');
-  if(!el) return;
   if(copyHistory.length===0){el.innerHTML='<div class="empty-hint">No records yet...</div>';return}
-  
-  el.innerHTML=copyHistory.slice(0,20).map((h, idx)=>`
-    <div class="history-row" onclick="restoreSnapshot(${idx})" title="Click to instantly restore this form state">
-      <div class="history-name">${escHtml(h.name)}</div>
-      <div class="history-time">${h.time}</div>
-      <div class="history-copy-btn" onclick="event.stopPropagation();doClipboard('${h.name.replace(/'/g,"\\'")}')">COPY</div>
-    </div>
-  `).join('');
+  el.innerHTML=copyHistory.slice(0,20).map(h=>`<div class="history-row" onclick="doClipboard('${h.name.replace(/'/g,"\\'")}')"><div class="history-name" title="${escHtml(h.name)}">${escHtml(h.name)}</div><div class="history-time">${h.time}</div><div class="history-copy-btn" onclick="event.stopPropagation();doClipboard('${h.name.replace(/'/g,"\\'")}')">COPY</div></div>`).join('');
 }
-
-// 时光机：瞬间将全界面表单恢复至某一历史记录
-function restoreSnapshot(idx) {
-  const record = copyHistory[idx];
-  if(!record || !record.snapshot) return;
-
-  // 1. 清空当前临时选择缓存
-  Object.keys(sel).forEach(k => delete sel[k]);
-  // 2. 将快照赋值回缓存
-  Object.assign(sel, record.snapshot.sel);
-
-  // 3. 逐个同步下拉框 UI
-  FIELDS_ORDER.forEach(f => {
-    const ft = FIELD_TYPES[f];
-    if(ft === 'dropdown') {
-      const inp = document.getElementById('search-' + f);
-      if(inp) {
-        if(sel[f]) { inp.value = sel[f]; inp.classList.add('has-value'); }
-        else { inp.value = ''; inp.classList.remove('has-value'); }
-      }
-    } else if(ft === 'tag') {
-      const container = document.getElementById('tags-' + f);
-      if (container) {
-        container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[f]));
-      }
-    }
-  });
-
-  // 4. 处理跨字段漏斗联动恢复
-  applyFunnelFilter();
-
-  // 5. 恢复 Custom 框
-  const ci = document.getElementById('custom-input');
-  if(ci) {
-    ci.value = record.snapshot.custom || '';
-    if(ci.value !== '') ci.classList.add('ok'); else ci.classList.remove('ok');
-  }
-
-  // 6. 更新全局预览
-  updatePreview();
-}
-
 function clearHistory(){copyHistory.length=0;renderHistory()}
-
 function exportTXT(){
   if(!copyHistory.length){alert('No history records yet.');return}
   dlBlob('Campaign Name Export\nExported: '+new Date().toLocaleString('en-US')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map((h,i)=>(i+1)+'. '+h.name).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
@@ -685,19 +654,20 @@ function exportCSV(){
 }
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
-
-function pickCustom(val){
-  const i=document.getElementById('custom-input');
-  if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); }
-}
+function pickCustom(val){const i=document.getElementById('custom-input');if(i){i.value=val;validateCustom(i)}}
 
 function resetAll() {
   Object.keys(OPTIONS).forEach(f=>{delete sel[f];const i=document.getElementById('search-'+f);if(i){i.value='';i.classList.remove('has-value')}});
   document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(c=>{const f=c.id.replace('tags-','');delete sel[f];c.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'))});
   const ci=document.getElementById('custom-input');if(ci){ci.value='';ci.classList.remove('error','ok')}
+  const ce=document.getElementById('custom-error');if(ce)ce.classList.remove('show');
+  const r1=document.getElementById('rule-lower');if(r1){r1.className='rule';r1.textContent='\u25cb Lowercase letters, digits, hyphens &amp; spaces only'}
+  const r2=document.getElementById('rule-no-underscore');if(r2){r2.className='rule';r2.textContent='\u25cb No underscores _, use - or space instead'}
   customValid=true;
   hideValidationWarning();
+  // Reset funnel filter
   applyFunnelFilter();
+  // Keep help expanded (default state)
   const hb=document.getElementById('help-body');if(hb)hb.classList.remove('collapsed');
   const ht=document.getElementById('help-toggle');if(ht)ht.classList.add('open');
   updatePreview();
