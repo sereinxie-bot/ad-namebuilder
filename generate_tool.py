@@ -1,11 +1,10 @@
 """
-广告命名工具生成器（GitHub Pages 版）v9.1 - 级联映射稳健版
+广告命名工具生成器（GitHub Pages 版）v10.0 - 矩阵解耦版
 用法：python generate_tool.py
 读取 Excel → 生成 index.html + data.json
-更新点：
-1. 精准嵌入 product-code-map.json 的矩阵数据，保证生成后的 index.html 完美具备联动筛选功能。
-2. 当选择不同的 Product Type 时，Product Code 的下拉列表会自动呈现对应的过滤子集。
-3. 切换类别导致当前型号不匹配时，下级型号框会自动干净清空，防止出现“脏命名”。
+核心改进：
+1. HTML 内不再死写任何产品映射矩阵，完全交给外部 product-code-map.json 控制。
+2. 前端 JS 升级为多源异步流（Promise.all），同时加载两份 JSON，数据与逻辑彻底解耦。
 """
 
 import json, os, sys, re
@@ -37,18 +36,7 @@ FIELD_TYPES = {
 }
 
 PAGE_TITLE = "Ad Campaign 命名生成器 · Campaign Name Builder"
-PAGE_SUBTITLE = "规范快速生成广告系列命名，支持复制 / 导出 · 数据来源：data.json（GitHub 在线维护）"
-
-# ===== 你的 product-code-map.json 数据结构 =====
-PRODUCT_RELATION_MAP = {
-  "all": ["all"],
-  "poe": ["all", "b1200", "b400", "b500", "b800", "c1", "c2 pro", "cx410", "cx410c", "cx810", "d1200", "d400", "d500", "d800", "e1 outdoor poe", "e1 outdoor se poe", "fe-p", "nvs8-5kb4", "nvs8-5kd4", "duo 2 poe", "duo 2v poe", "duo 3 poe", "duo 3t poe", "duo 3v poe", "duo floodlight poe", "duo poe", "trackmix poe", "rlc-1010a", "rlc-1020a", "rlc-1210a", "rlc-1212a", "rlc-1220a", "rlc-1224a", "rlc-1240a", "rlc-410", "rlc-410s", "rlc-411", "rlc-420", "rlc-422", "rlc-423", "rlc-510a", "rlc-511", "rlc-520", "rlc-520a", "rlc-522", "rlc-540a", "rlc-810a", "rlc-810wa", "rlc-811a", "rlc-811wa", "rlc-812a", "rlc-81ma", "rlc-81pa", "rlc-820a", "rlc-822a", "rlc-823a", "rlc-823a 16x", "rlc-823s1", "rlc-823s2", "rlc-824a", "rlc-830a", "rlc-833a", "rlc-840a", "rlc-842a", "rlc-843a", "rlk16-1200b8", "rlk16-1200d8", "rlk16-410b4d4", "rlk16-410b8", "rlk16-520b4d4", "rlk16-800b8", "rlk16-800d8", "rlk16-800pt8", "rlk16-810b8", "rlk16-812b8", "rlk16-820d8", "rlk16-833d8", "rlk16-843v8", "rlk4-410b4", "rlk8-1200b4", "rlk8-1200d4", "rlk8-1200v4", "rlk8-1210b4", "rlk8-410b2d2", "rlk8-410b4", "rlk8-410b6", "rlk8-420d4", "rlk8-500v4", "rlk8-510b4", "rlk8-520b2d2", "rlk8-520d4", "rlk8-800b2d2", "rlk8-800b4", "rlk8-800b6", "rlk8-800d4", "rlk8-800pt4", "rlk8-800tm4", "rlk8-800v4", "rlk8-810b2d2", "rlk8-810b4", "rlk8-810b6", "rlk8-811b4", "rlk8-812b4", "rlk8-820d4", "rlk8-824d4", "rlk8-833d4", "rlk8-842d4", "rlk8-843v4", "rlk8-cx410b4", "v1200", "v500", "v800", "cx820", "elite xpro poe", "elite pro floodlight poe", "rlk16-811b8", "rp-pct16md", "rp-pct8mz"],
-  "wifi": ["all", "b500w", "b800w", "cx410w", "e1", "e1 outdoor", "e1 outdoor cx", "e1 outdoor pro", "e1 outdoor s", "e1 pro", "e1 zoom", "fe-w", "e1 outdoor pro+hub pro", "duo 2 wifi", "duo floodlight wifi", "duo wifi", "lumus", "trackmix wifi", "rlc-210w", "rlc-410w", "rlc-410ws", "rlc-411ws", "rlc-422w", "rlc-510wa", "rlc-511w", "rlc-511wa", "rlc-523wa", "rlc-542wa", "rlc-810wa", "rlc-811wa", "rlc-823s1w", "rlc-840wa", "rlc-843wa", "rlc-843wa-c", "rlk12-500wb4", "rlk12-800wb4", "rlk12-800wpt4", "rlk12-800wtm2", "rlk12-800wv4", "rlk4-210wb2", "rlk4-210wb4", "rlk4-211wb4", "v800w", "duo 3 wifi", "elite wifi", "elite floodlight wifi", "trackflex floodlight wifi"],
-  "battery wifi": ["all", "argus 3 ultra", "argus 3e", "argus 4", "argus 4 pro", "argus eco pro", "argus eco ultra", "argus pt lite", "argus pt ultra", "argus track", "argus 3 ultra+hub", "argus 3e+hub", "argus 4+hub", "argus 4 pro+hub", "argus eco ultra+hub", "argus pt ultra+hub", "altas pt", "altas pt ultra", "argus", "argus 2", "argus 2e", "argus 3", "argus 3 pro", "argus eco", "argus pro", "argus pt", "duo", "duo 2", "trackmix", "altas", "home hub mini+argus pt", "altas pt ultra+hub"],
-  "battery 4g": ["all", "keen ranger pt", "duo 2 lte", "duo 4g", "go", "go plus", "go pt", "go pt plus", "go pt ultra", "go ranger pt", "go ultra", "trackmix lte", "trackmix lte plus", "trackmix wired lte", "talon pro", "trackmix lte plus 2"],
-  "doorbell": ["all", "doorbell battery", "doorbell battery+hub", "doorbell poe", "doorbell wifi", "home hub mini+doorbell"],
-  "nvr": ["all", "home hub", "home hub pro", "rln12w", "rln16-410", "rln36", "rln8-410"]
-}
+PAGE_SUBTITLE = "规范快速生成广告系列命名，支持复制 / 导出 · 数据来源：data.json & product-code-map.json（GitHub 在线维护）"
 
 
 def js_key(name):
@@ -178,17 +166,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 """
 
-# ===== JS TEMPLATE =====
+# ===== JS TEMPLATE (使用 Promise.all 多流异步并载，拒绝任何硬编码) =====
 JS_TEMPLATE = r'''
 // ===== CONFIG =====
 const DATA_URL = './data.json';
+const MAP_URL = './product-code-map.json'; // 👈 动态地图源解耦
+
 const FALLBACK_DATA = __FALLBACK_JSON__;
 const FIELD_TYPES = __FIELD_TYPES_JSON__;
-const PRODUCT_RELATION_MAP = __PRODUCT_RELATION_MAP__;
 
 let FIELDS_ORDER = [];
 let FIELD_LABELS = {};
 let OPTIONS = {};
+let PRODUCT_RELATION_MAP = {}; // 👈 由外部外部异步文件接管
 let DATA_READY = false;
 
 const REQUIRED_FIELDS = new Set();
@@ -203,32 +193,40 @@ const sel = {};
 const copyHistory = [];
 
 
-// ===== DATA LOADING =====
+// ===== DATA LOADING (双源并行异步加载) =====
 let _loadTimeout = null;
 
 async function loadData() {
-  showDatasourceStatus('loading', 'Loading data...');
+  showDatasourceStatus('loading', 'Loading layout and relation maps...');
 
   if (_loadTimeout) clearTimeout(_loadTimeout);
   _loadTimeout = setTimeout(function() {
     if (!DATA_READY) {
       console.warn('Data loading timed out, using embedded fallback');
       loadFallback();
-      showDatasourceStatus('error', 'Loading timed out. Using built-in fallback data. Click [REFRESH] to retry.');
+      showDatasourceStatus('error', 'Loading timed out. Click [REFRESH] to retry.');
     }
   }, 4000);
 
   try {
-    const resp = await fetch(DATA_URL + '?t=' + Date.now());
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const json = await resp.json();
+    // 核心大升级：并行发起两项请求，彻底避免死锁
+    const [dataResp, mapResp] = await Promise.all([
+      fetch(DATA_URL + '?t=' + Date.now()),
+      fetch(MAP_URL + '?t=' + Date.now())
+    ]);
+
+    if (!dataResp.ok) throw new Error('Data HTTP ' + dataResp.status);
+    if (!mapResp.ok) throw new Error('Map HTTP ' + mapResp.status);
+
+    const dataJson = await dataResp.json();
+    PRODUCT_RELATION_MAP = await mapResp.json(); // 👈 动态赋权给矩阵
 
     FIELDS_ORDER = [];
     FIELD_LABELS = {};
     OPTIONS = {};
     REQUIRED_FIELDS.clear();
 
-    for (const [colName, vals] of Object.entries(json)) {
+    for (const [colName, vals] of Object.entries(dataJson)) {
       const key = colName.toLowerCase().replace(/ /g, '-');
       FIELDS_ORDER.push(key);
       FIELD_LABELS[key] = colName;
@@ -240,12 +238,12 @@ async function loadData() {
     DATA_READY = true;
     if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     const totalVals = Object.values(OPTIONS).reduce((a,b)=>a+b.length,0);
-    showDatasourceStatus('ok', 'Data loaded (' + Object.keys(OPTIONS).length + ' fields, ' + totalVals + ' values)');
+    showDatasourceStatus('ok', 'All data synced (' + Object.keys(OPTIONS).length + ' fields, ' + totalVals + ' codes)');
   } catch(err) {
     console.warn('Data fetch failed, using embedded fallback:', err);
     if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
     loadFallback();
-    showDatasourceStatus('error', 'Failed to load data.json. Using built-in fallback.');
+    showDatasourceStatus('error', 'Failed to load configuration JSON files. Using built-in local data.');
   }
 }
 
@@ -254,6 +252,8 @@ function loadFallback() {
   FIELD_LABELS = {};
   OPTIONS = {};
   REQUIRED_FIELDS.clear();
+  PRODUCT_RELATION_MAP = {}; 
+  
   for (const [colName, vals] of Object.entries(FALLBACK_DATA)) {
     const key = colName.toLowerCase().replace(/ /g, '-');
     FIELDS_ORDER.push(key);
@@ -417,482 +417,4 @@ function toggleHelp() {
   }
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
-function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n'); }
-
-
-// ===== DROPDOWN ENGINE (联动交叉拦截) =====
-function getFilteredProductCodes() {
-  const allCodes = OPTIONS['product-code'] || [];
-  const currentType = sel['product-type'];
-  if (!currentType) return allCodes;
-  
-  const allowedSubset = PRODUCT_RELATION_MAP[currentType] || [];
-  return allCodes.filter(function(code) {
-    return allowedSubset.includes(code.toLowerCase());
-  });
-}
-
-function buildDropdown(field) {
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
-  
-  const opts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
-  
-  let html = '';
-  for(let i=0; i<opts.length; i++) {
-    const v = opts[i];
-    const isSelected = sel[field]===v ? ' selected' : '';
-    html += '<div class="dropdown-item' + isSelected + '" data-val="' + escAttr(v) + '" ';
-    html += 'onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>';
-  }
-  drop.innerHTML = html;
-}
-
-function openDropdown(field) {
-  buildDropdown(field);
-  document.getElementById('drop-' + field).classList.add('open');
-  document.getElementById('search-' + field).select();
-}
-
-function filterDropdown(field, q) {
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
-  drop.classList.add('open');
-  
-  const baseOpts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
-  const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(function(v) { return v.toLowerCase().includes(q.toLowerCase()); });
-  
-  if (filtered.length === 0) {
-    drop.innerHTML = '<div class="dropdown-item no-match">No matches found</div>';
-  } else {
-    let html = '';
-    for(let i=0; i<filtered.length; i++) {
-      const v = filtered[i];
-      const isSelected = sel[field]===v ? ' selected' : '';
-      html += '<div class="dropdown-item' + isSelected + '" data-val="' + escAttr(v) + '" ';
-      html += 'onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>';
-    }
-    drop.innerHTML = html;
-  }
-}
-
-function pickDropdown(field, val, e) {
-  if(e) e.preventDefault();
-  sel[field] = val;
-  const inp = document.getElementById('search-' + field);
-  if(inp) {
-    inp.value = val;
-    inp.classList.add('has-value');
-  }
-  const drop = document.getElementById('drop-' + field);
-  if(drop) drop.classList.remove('open');
-  
-  if (field === 'product-type') {
-    const allowedSubset = PRODUCT_RELATION_MAP[val] || [];
-    if (sel['product-code'] && !allowedSubset.includes(sel['product-code'].toLowerCase())) {
-      delete sel['product-code'];
-      const codeInp = document.getElementById('search-product-code');
-      if (codeInp) {
-        codeInp.value = '';
-        codeInp.classList.remove('has-value');
-      }
-    }
-  }
-  updatePreview();
-}
-
-function blurDropdown(field) {
-  setTimeout(function() {
-    const drop = document.getElementById('drop-' + field);
-    if (drop) drop.classList.remove('open');
-    const inp = document.getElementById('search-' + field);
-    if(!inp) return;
-    if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); }
-    else { inp.value = ''; inp.classList.remove('has-value'); }
-  }, 150);
-}
-
-
-// ===== TAG ENGINE =====
-function selectTag(field, val) {
-  if (sel[field] === val) delete sel[field];
-  else sel[field] = val;
-
-  const container = document.getElementById('tags-' + field);
-  if (container) {
-    container.querySelectorAll('.tag').forEach(function(t) {
-      t.classList.toggle('active', t.dataset.val === sel[field]);
-    });
-  }
-
-  if (field === 'media-funnel') {
-    applyFunnelFilter();
-  } else {
-    updatePreview();
-  }
-}
-
-
-// ===== VALIDATION =====
-function validateRequired() {
-  const missing = [];
-  FIELDS_ORDER.forEach(function(f) {
-    if (REQUIRED_FIELDS.has(f) && !sel[f]) {
-      missing.push(FIELD_LABELS[f] || f);
-    }
-  });
-  return missing;
-}
-
-function showValidationWarning(msg) {
-  const el = document.getElementById('validation-warning');
-  if(el) { el.textContent = msg; el.classList.add('show'); }
-}
-
-function hideValidationWarning() {
-  const el = document.getElementById('validation-warning');
-  if(el) el.classList.remove('show');
-}
-
-
-// ===== PREVIEW & BREAKDOWN =====
-function toStr(s){ return s.trim(); }
-
-function buildName() {
-  const missing = validateRequired();
-  if (missing.length > 0) {
-    showValidationWarning('Please fill in all required fields: ' + missing.join(', '));
-    return [];
-  }
-  hideValidationWarning();
-
-  const parts = [];
-  for(let i=0; i<FIELDS_ORDER.length; i++) {
-    const f = FIELDS_ORDER[i];
-    if(f === 'custom'){
-      const v = document.getElementById('custom-input');
-      const cv = v ? v.value.trim() : '';
-      if(cv) parts.push({field:f, val:toStr(cv), isCustom:true});
-    } else {
-      if(sel[f]) parts.push({field:f, val:toStr(sel[f])});
-    }
-  }
-  return parts;
-}
-
-function updatePreview() {
-  const parts = buildName();
-  const outEl = document.getElementById('preview-output');
-  const lenEl = document.getElementById('preview-len');
-  if(!outEl) return;
-
-  if (parts.length === 0 && validateRequired().length > 0) {
-    outEl.innerHTML = '<span class="seg-empty">Fill in all required fields above...</span>';
-    if(lenEl) lenEl.textContent = ''; 
-    renderBreakdown([]); 
-    return;
-  }
-
-  if(parts.length === 0){
-    outEl.innerHTML = '<span class="seg-empty">Select fields to generate campaign name...</span>';
-    if(lenEl) lenEl.textContent = ''; 
-    renderBreakdown([]); 
-    return;
-  }
-  
-  let pLinks = '';
-  for(let i=0; i<parts.length; i++) {
-    const p = parts[i];
-    if(i > 0) pLinks += '<span class="seg-sep">_</span>';
-    pLinks += '<span class="' + (p.isCustom ? 'seg-custom' : 'seg-part') + '">' + escHtml(p.val) + '</span>';
-  }
-  outEl.innerHTML = pLinks;
-
-  const fullName = parts.map(function(p) { return p.val; }).join('_');
-  if(lenEl) lenEl.textContent = fullName.length + ' chars'; 
-  window._currentName = fullName;
-  renderBreakdown(parts);
-}
-
-function renderBreakdown(parts){
-  const el = document.getElementById('breakdown-list');
-  if(!el) return;
-  if(parts.length === 0){ el.innerHTML = '<div class="empty-hint">Fields will appear here after selection...</div>'; return; }
-  
-  let bHtml = '';
-  for(let i=0; i<parts.length; i++) {
-    const p = parts[i];
-    bHtml += '<div class="breakdown-row"><div class="breakdown-num">' + (i+1) + '</div>';
-    bHtml += '<div class="breakdown-field">' + escHtml(FIELD_LABELS[p.field] || p.field) + '</div>';
-    bHtml += '<div class="breakdown-val ' + (p.isCustom ? 'custom-val' : '') + '">' + escHtml(p.val) + '</div></div>';
-  }
-  el.innerHTML = bHtml;
-}
-
-
-// ===== SNAPSHOT TIMEMACHINE =====
-function copyMain() {
-  const n = window._currentName; if(!n) return; doClipboard(n);
-  const b = document.getElementById('copy-main-btn'); if(!b) return;
-  b.textContent = '✅ Copied!'; b.classList.add('copied');
-  
-  const stateSnapshot = {
-    sel: JSON.parse(JSON.stringify(sel)),
-    custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : ''
-  };
-
-  setTimeout(function(){ b.innerHTML = '[COPY] Copy Name'; b.classList.remove('copied') }, 2000);
-  addHistory(n, stateSnapshot);
-}
-
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
-
-function addHistory(n, snapshot){ 
-  copyHistory.unshift({
-    name: n, 
-    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-    snapshot: snapshot
-  }); 
-  renderHistory(); 
-}
-
-function renderHistory(){
-  const el = document.getElementById('history-scroller');
-  if(!el) return;
-  if(copyHistory.length === 0){ el.innerHTML = '<div class="empty-hint">No records yet...</div>'; return; }
-  
-  let hHtml = '';
-  for(let idx=0; idx<copyHistory.length; idx++) {
-    const h = copyHistory[idx];
-    hHtml += '<div class="history-row" onclick="restoreSnapshot(' + idx + ')" title="Click to instantly restore this form state">';
-    hHtml += '<div class="history-name">' + escHtml(h.name) + '</div>';
-    hHtml += '<div class="history-time">' + h.time + '</div>';
-    hHtml += '<div class="history-copy-btn" onclick="event.stopPropagation();doClipboard(\'' + h.name.replace(/'/g,"\\'") + '\')">COPY</div></div>';
-  }
-  el.innerHTML = hHtml;
-}
-
-function restoreSnapshot(idx) {
-  const record = copyHistory[idx];
-  if(!record || !record.snapshot) return;
-
-  Object.keys(sel).forEach(function(k) { delete sel[k]; });
-  Object.assign(sel, record.snapshot.sel);
-
-  FIELDS_ORDER.forEach(function(f) {
-    const ft = FIELD_TYPES[f];
-    if(ft === 'dropdown') {
-      const inp = document.getElementById('search-' + f);
-      if(inp) {
-        if(sel[f]) { inp.value = sel[f]; inp.classList.add('has-value'); }
-        else { inp.value = ''; inp.classList.remove('has-value'); }
-      }
-    } else if(ft === 'tag') {
-      const container = document.getElementById('tags-' + f);
-      if (container) {
-        container.querySelectorAll('.tag').forEach(function(t) {
-          t.classList.toggle('active', t.dataset.val === sel[f]);
-        });
-      }
-    }
-  });
-
-  applyFunnelFilter();
-
-  const ci = document.getElementById('custom-input');
-  if(ci) {
-    ci.value = record.snapshot.custom || '';
-    if(ci.value !== '') ci.classList.add('ok'); else ci.classList.remove('ok');
-  }
-
-  updatePreview();
-}
-
-function clearHistory(){copyHistory.length=0;renderHistory()}
-
-function exportTXT(){
-  if(!copyHistory.length){alert('No history records yet.');return}
-  dlBlob('Campaign Name Export\nExported: '+new Date().toLocaleString('en-US')+'\n'+String.fromCharCode(8210).repeat(60)+'\n\n'+copyHistory.map(function(h,i){return (i+1)+'. '+h.name;}).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8');
-}
-function exportCSV(){
-  if(!copyHistory.length){alert('No history records yet.');return}
-  dlBlob('\ufeff'+[['No.','Name','Time'],...copyHistory.map(function(h,i){return [i+1,h.name,h.time];})].map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8');
-}
-
-function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
-function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
-
-function pickCustom(val){
-  const i=document.getElementById('custom-input');
-  if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); }
-}
-
-function resetAll() {
-  Object.keys(OPTIONS).forEach(function(f){delete sel[f];const i=document.getElementById('search-'+f);if(i){i.value='';i.classList.remove('has-value')}});
-  document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(function(c){const f=c.id.replace('tags-','');delete sel[f];c.querySelectorAll('.tag').forEach(function(t){t.classList.remove('active')})});
-  const ci=document.getElementById('custom-input');if(ci){ci.value='';ci.classList.remove('error','ok')}
-  hideValidationWarning();
-  applyFunnelFilter();
-  updatePreview();
-}
-
-document.addEventListener('click',function(e){if(!e.target.closest('.select-wrap'))document.querySelectorAll('.dropdown').forEach(function(d){d.classList.remove('open')})});
-
-// ===== INIT =====
-loadData();
-'''
-
-
-def generate_html(fallback_data):
-    """Generate index.html that fetches ./data.json at runtime"""
-    fallback_json = json.dumps(fallback_data, ensure_ascii=False)
-
-    ft_dict = {}
-    for col_name, ft in FIELD_TYPES.items():
-        ft_dict[js_key(col_name)] = ft
-    ft_json = json.dumps(ft_dict, ensure_ascii=False)
-
-    # 将 Python 字典序列化为原生的严格 JSON 字符串
-    relation_json = json.dumps(PRODUCT_RELATION_MAP, ensure_ascii=False)
-
-    # 采用完全精确的字符字面量安全替换，防转义失效
-    js = JS_TEMPLATE.replace('__FALLBACK_JSON__', fallback_json)
-    js = js.replace('__FIELD_TYPES_JSON__', ft_json)
-    js = js.replace('__PRODUCT_RELATION_MAP__', relation_json)
-
-    clean_js = re.sub(r'[\ud800-\udfff]', '[EMOJI]', js)
-
-    html = (
-        "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
-        "  <meta charset=\"UTF-8\">\n"
-        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-        f"  <title>{PAGE_TITLE}</title>\n"
-        f"  <style>{CSS}\n  </style>\n"
-        "</head>\n<body>\n\n"
-        "<div class=\"header\">\n"
-        "  <div class=\"header-icon\">📋</div>\n"
-        "  <div>\n"
-        f"    <div class=\"header-title\">{PAGE_TITLE}</div>\n"
-        f"    <div class=\"header-sub\">{PAGE_SUBTITLE}</div>\n"
-        "  </div>\n"
-        "</div>\n\n"
-
-        "<div class=\"layout\">\n\n"
-        "  <div>\n"
-        "    <div class=\"card\">\n"
-        "      <div class=\"card-header\">\n"
-        "        <div class=\"card-icon\">📝</div>\n"
-        "        <div>\n"
-        "          <div class=\"card-title\">Select Fields</div>\n"
-        "          <div class=\"card-desc\">Choose enum values for each field, or type in Custom.</div>\n"
-        "        </div>\n"
-        "      </div>\n\n"
-
-        '      <div id="datasource-status" class="datasource-bar loading">\n'
-        '        <span class="ds-dot"></span>\n'
-        '        <span class="ds-msg">Loading data...</span>\n'
-        '        <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>\n'
-        "      </div>\n\n"
-
-        f"      <div id=\"fields-container\">\n"
-        '        <div style="padding:40px 0;text-align:center">\n'
-        '          <div class="skeleton" style="height:40px;width:100%;margin-bottom:16px"></div>\n'
-        '          <div class="skeleton" style="height:40px;width:48%;display:inline-block;margin-right:2%"></div>\n'
-        '          <div class="skeleton" style="height:40px;width:48%;display:inline-block"></div>\n'
-        '          <div class="skeleton" style="height:40px;width:100%;margin-top:16px"></div>\n'
-        "        </div>\n"
-        "      </div>\n\n"
-
-        "      <div id=\"validation-warning\" class=\"validation-warning\"></div>\n"
-        "    </div>\n\n"
-
-        '    <div style="display:flex;justify-content:flex-end;margin-top:12px">\n'
-        '      <button class="btn-secondary" onclick="resetAll()" style="padding:8px 18px;border-radius:8px">\n'
-        '        🔁 Reset All Fields\n'
-        "      </button>\n"
-        "    </div>\n"
-        "  </div>\n\n"
-
-        "  <div class=\"result-sticky\">\n"
-        "    <div class=\"card\">\n"
-        "      <div class=\"card-header\">\n"
-        "        <div class=\"card-icon\">&#9733;</div>\n"
-        "        <div>\n"
-        "          <div class=\"card-title\">命名预览</div>\n"
-        '          <div class="card-desc">字段用 <code>_</code> 连接，字段内空格保持原样</div>\n'
-        "        </div>\n"
-        "      </div>\n"
-
-        '      <div class="result-dark">\n'
-        '        <div class="result-dark-label">生成结果</div>\n'
-        '        <div class="result-name-display" id="preview-output">\n'
-        '          <span class="seg-empty">加载中…</span>\n'
-        "        </div>\n"
-        '        <div class="result-len" id="preview-len"></div>\n'
-        "      </div>\n"
-
-        '      <button class="btn-primary" id="copy-main-btn" onclick="copyMain()">\n'
-        '        [COPY] Copy Name\n'
-        "      </button>\n"
-        '      <div class="btn-row">\n'
-        '        <button class="btn-secondary" onclick="exportTXT()">[TXT] Export TXT</button>\n'
-        '        <button class="btn-secondary" onclick="exportCSV()">[CSV] Export CSV</button>\n'
-        "      </div>\n"
-        '      <button class="btn-download" onclick="downloadTool()">[DL] 下载此工具（离线 / 发给同事）</button>\n'
-        "    </div>\n"
-
-        "    <div class=\"card\" style=\"margin-top:14px\">\n"
-        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">\n'
-        '        <div class="card-icon">&#128269;</div>\n'
-        '        <div class="card-title">Field Breakdown</div>\n'
-        "      </div>\n"
-        '      <div class="breakdown-list" id="breakdown-list">\n'
-        '        <div class="empty-hint">填写字段后自动解析…</div>\n'
-        "      </div>\n"
-        "    </div>\n"
-
-        "    <div class=\"card\" style=\"margin-top:14px\">\n"
-        '      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">\n'
-        '        <div style="display:flex;align-items:center;gap:10px">\n'
-        '          <div class="card-icon">&#128337;</div>\n'
-        '          <div class="card-title">复制历史</div>\n'
-        "        </div>\n"
-        '        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">Clear</span>\n'
-        "      </div>\n"
-        '      <div class="history-scroller" id="history-scroller">\n'
-        '        <div class="empty-hint">暂无记录…</div>\n'
-        "      </div>\n"
-        "    </div>\n"
-        "  </div>\n"
-        "</div>\n\n"
-
-        f"<script>\n{clean_js}\n</script>\n</body>\n</html>"
-    )
-    return html
-
-
-def main():
-    print(f"[READ] Excel: {EXCEL_PATH}")
-    if not EXCEL_PATH.exists():
-        print(f"[ERR] File not found: {EXCEL_PATH}")
-        exit(1)
-
-    data = load_data_from_excel()
-
-    OUTPUT_DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
-    print(f"[OK] data.json -> {OUTPUT_DATA}")
-
-    print(f"\n[GEN] Generating index.html...")
-    html = generate_html(data)
-    OUTPUT_HTML.write_text(html, encoding='utf-8')
-
-    size_html = OUTPUT_HTML.stat().st_size / 1024
-    size_data = OUTPUT_DATA.stat().st_size / 1024
-    print(f"[OK] index.html -> {OUTPUT_HTML} ({size_html:.0f} KB)")
-    print(f"[OK] data.json  -> {OUTPUT_DATA} ({size_data:.0f} KB)")
-
-
-if __name__ == "__main__":
-    main()
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
