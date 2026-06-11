@@ -57,8 +57,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .custom-help-header:hover{background:#E5E7EB}
 .custom-help-toggle{font-size:11px;transition:transform .2s}
 .custom-help-toggle.open{transform:rotate(180deg)}
-.custom-help-body{display:none;padding:12px 14px 14px}
-.custom-help-body.show{display:block}
+/* 💡 默认直接展示展开面板样式 */
+.custom-help-body{display:block;padding:12px 14px 14px}
+.custom-help-body.collapsed{display:none}
 .help-group{margin-bottom:12px}
 .help-group:last-child{margin-bottom:0}
 .help-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:7px}
@@ -211,6 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
+const STORAGE_KEY = 'campaign_builder_history'; // 💡 本地缓存秘钥
 
 const FIELD_TYPES = {"market": "dropdown", "product-type": "dropdown", "product-code": "dropdown", "media-funnel": "tag", "ad-product": "tag", "bidding-goal": "tag", "url": "tag", "custom": "custom"};
 let FIELDS_ORDER = [];
@@ -228,11 +230,24 @@ const FUNNEL_GOAL_MAP = {
 };
 
 const sel = {};
-const copyHistory = [];
+let copyHistory = []; // 💡 数组支持动态加载
 let _loadTimeout = null;
+
+// 💡 页面初始化：首要读取浏览器缓存的老数据
+function initHistoryFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      copyHistory = JSON.parse(raw);
+    }
+  } catch(e) {
+    console.warn('LocalStorage reads failed', e);
+  }
+}
 
 async function loadData() {
   showDatasourceStatus('loading', 'Loading configurations...');
+  initHistoryFromStorage(); // 💡 提前回填历史
   try {
     const [dataResp, mapResp] = await Promise.all([
       fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
@@ -265,6 +280,7 @@ async function loadData() {
     }
 
     renderAllFields();
+    renderHistory(); // 💡 初始化历史 UI
     DATA_READY = true;
     showDatasourceStatus('ok', 'Data fully synced.');
   } catch(err) {
@@ -338,7 +354,8 @@ function makeCustomHTML() {
   const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
   let sHtml = searchAds.map(function(v) { return '<span class="help-tag" onclick="pickCustom(\'' + v + '\')">' + v + '</span>'; }).join('');
   let pHtml = pmaxAds.map(function(v) { return '<span class="help-tag" onclick="pickCustom(\'' + v + '\')">' + v + '</span>'; }).join('');
-  return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-rules"><div class="rule">⚡ Smart Guard Active: Auto-converts to lowercase & hyphens.</div></div><div class="custom-help"><div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Values Reference<span class="custom-help-toggle open" id="help-toggle">&#9662;</span></div><div class="custom-help-body" id="help-body" style="display:none;"><div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + sHtml + '</div></div><div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">' + pHtml + '</div></div></div></div></div>';
+  // 💡 剥离了 body 面板上的 style="display:none;" 从而实现默认永久高能平铺展开
+  return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-rules"><div class="rule">⚡ Smart Guard Active: Auto-converts to lowercase & hyphens.</div></div><div class="custom-help"><div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Values Reference<span class="custom-help-toggle open" id="help-toggle">&#9662;</span></div><div class="custom-help-body" id="help-body"><div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + sHtml + '</div></div><div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">' + pHtml + '</div></div></div></div></div>';
 }
 
 function handleCustomInput(inp) {
@@ -358,19 +375,22 @@ function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/
 
 function getFilteredProductCodes() {
   const currentType = sel['product-type'];
+  
+  // 💡 核心改动：当选择 all 分类时，优雅合并、去重、排序所有矩阵数据，并严格保留占位符 all
   if (!currentType || currentType === 'all') {
-    let allMergedCodes = [];
+    let allMergedCodes = ['all']; // 确保开局带有一个独立的 all
     for (const [typeKey, codesArray] of Object.entries(PRODUCT_RELATION_MAP)) {
       if (Array.isArray(codesArray)) {
         allMergedCodes = allMergedCodes.concat(codesArray);
       }
     }
-    const uniqueCodes = [...new Set(allMergedCodes)].filter(function(c) { return c !== 'all'; });
-    return uniqueCodes.sort();
+    // 重新排序（并让 "all" 恒定留在数组第一位）
+    const uniqueCodes = [...new Set(allMergedCodes)].filter(function(c) { return c !== 'all'; }).sort();
+    return ['all'].concat(uniqueCodes);
   }
   
-  const rawSubset = PRODUCT_RELATION_MAP[currentType] || [];
-  return rawSubset.filter(function(c) { return c !== 'all'; });
+  // 💡 选择具体分类（如 poe, wifi）时，直接返回该分类下的真实子集（100%保留你配置的 all 占位符）
+  return PRODUCT_RELATION_MAP[currentType] || [];
 }
 
 function buildDropdown(field) {
@@ -481,12 +501,18 @@ function copyMain() {
   b.textContent = '✅ Copied!'; b.classList.add('copied');
   const stateSnapshot = { sel: JSON.parse(JSON.stringify(sel)), custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : '' };
   setTimeout(function(){ b.innerHTML = '[COPY] Copy Name'; b.classList.remove('copied') }, 2000);
-  addHistory(n, stateSnapshot);
+  
+  // 💡 将新生成的快照追加并安全推送进持久化 localStorage
+  copyHistory.unshift({ name: n, time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}), snapshot: snapshot = stateSnapshot }); 
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(copyHistory));
+  } catch(e) {}
+  renderHistory();
 }
 
 function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
-function addHistory(n, snapshot){ copyHistory.unshift({ name: n, time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}), snapshot: snapshot }); renderHistory(); }
+function addHistory(n, snapshot){} // 已废弃，合并至 copyMain 内部避免异步冲突
 
 function renderHistory(){
   const el = document.getElementById('history-scroller'); if(!el) return;
@@ -510,7 +536,14 @@ function restoreSnapshot(idx) {
   updatePreview();
 }
 
-function clearHistory(){copyHistory.length=0;renderHistory()}
+function clearHistory(){
+  copyHistory.length=0;
+  try {
+    localStorage.removeItem(STORAGE_KEY); // 💡 一键彻底抹去本地缓存
+  } catch(e){}
+  renderHistory();
+}
+
 function exportTXT(){ if(!copyHistory.length)return; dlBlob('Campaign Name Export\n' + copyHistory.map(function(h,i){return (i+1)+'. '+h.name;}).join('\n'),'campaign-names-'+fmt()+'.txt','text/plain;charset=utf-8'); }
 function exportCSV(){ if(!copyHistory.length)return; dlBlob('\ufeff'+[['No.','Name','Time'],...copyHistory.map(function(h,i){return [i+1,h.name,h.time];})].map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n'),'campaign-names-'+fmt()+'.csv','text/csv;charset=utf-8'); }
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
