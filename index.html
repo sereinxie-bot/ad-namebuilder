@@ -20,13 +20,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .card-icon{width:32px;height:32px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .card-title{font-size:15px;font-weight:700}
 .card-desc{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* 全局统一字段字段网格布局 */
 .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.fields-grid{grid-template-columns:1fr}}
 .field-full{grid-column:1/-1}
+
+/* 完美解决 Market + Product Type 并排展示与字号等大 */
 .field-compact{display:contents}
-.field-compact .field{margin-bottom:0}
-.field-compact .field-label{font-size:11px}
-.field-compact .select-search{padding:7px 32px 7px 10px;font-size:13px}
+.field-compact .field{grid-column:span 1}
+@media(max-width:600px){.field-compact .field{grid-column:1/-1}}
+
 .field{display:flex;flex-direction:column;gap:6px}
 .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
@@ -37,20 +41,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .tag.active{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:600}
 .tag.disabled{opacity:.35;pointer-events:none;cursor:not-allowed}
 .select-wrap{position:relative}
-.select-search{width:100%;padding:9px 36px 9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card);transition:border-color .15s,box-shadow .15s;cursor:pointer}
-.select-search::placeholder{color:#9CA3AF;font-size:13px}
-.select-search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+
+/* 彻底统一所有 Input 和 Search 框的边距与高度 */
+.select-search, .custom-input{width:100%;padding:9px 36px 9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card);transition:border-color .15s,box-shadow .15s;cursor:pointer}
+.custom-input{padding-right:12px;cursor:text}
+.select-search::placeholder, .custom-input::placeholder{color:#9CA3AF;font-size:13px}
+.select-search:focus, .custom-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
 .select-search.has-value{color:var(--primary);font-weight:600}
 .select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:12px}
-.dropdown{position:absolute;top:calc(100%+4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
+
+.dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
 .dropdown.open{display:block}
 .dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text)}
 .dropdown-item:hover{background:var(--primary-light);color:var(--primary)}
 .dropdown-item.selected{background:var(--primary-light);color:var(--primary);font-weight:600}
 .dropdown-item.no-match{color:var(--muted);font-style:italic;pointer-events:none;padding:12px;text-align:center}
 .custom-input-wrap{position:relative}
-.custom-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);transition:border-color .15s,box-shadow .15s}
-.custom-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
 .custom-input.ok{border-color:var(--success);background:#F0FDF4}
 .custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
 .custom-rules .rule{display:flex;align-items:center;gap:6px;color:var(--success);font-weight:600}
@@ -111,7 +117,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
 .datasource-bar .ds-msg{flex:1}
 .datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover{opacity:1}
+.datasource-bar .ds-refresh:hover {opacity:1}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -236,9 +242,10 @@ const copyHistory = [];
 async function loadData() {
   showDatasourceStatus('loading', 'Loading configurations...');
   try {
+    // 强制加入 cache: "no-store"，击碎一切浏览器和边缘服务器的强缓存
     const [dataResp, mapResp] = await Promise.all([
-      fetch(DATA_URL + '?t=' + Date.now()),
-      fetch(MAP_URL + '?t=' + Date.now())
+      fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
+      fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" })
     ]);
 
     if (!dataResp.ok || !mapResp.ok) throw new Error('HTTP Error');
@@ -252,6 +259,7 @@ async function loadData() {
     REQUIRED_FIELDS.clear();
 
     for (const [colName, vals] of Object.entries(dataJson)) {
+      if(colName === 'Relation-Map') continue;
       const key = colName.toLowerCase().replace(/ /g, '-');
       FIELDS_ORDER.push(key);
       FIELD_LABELS[key] = colName;
@@ -368,7 +376,6 @@ function buildDropdown(field) {
 
 function openDropdown(field) { buildDropdown(field); document.getElementById('drop-' + field).classList.add('open'); document.getElementById('search-' + field).select(); }
 
-// 过滤搜索框
 function filterDropdown(field, q) {
   const drop = document.getElementById('drop-' + field);
   if (!drop) return;
@@ -437,6 +444,7 @@ function buildName() {
   return parts;
 }
 
+// 刷新预览
 function updatePreview() {
   const parts = buildName(), outEl = document.getElementById('preview-output'), lenEl = document.getElementById('preview-len');
   if(!outEl) return;
