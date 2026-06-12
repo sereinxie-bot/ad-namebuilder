@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ad Structure Name Builder</title>
+  <title>Ad Structure Universal Hub</title>
   <style>
 :root{--primary:#4F46E5;--primary-light:#EEF2FF;--primary-hover:#4338CA;--success:#10B981;--danger:#EF4444;--danger-light:#FEF2F2;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--bg:#F3F4F6;--card:#FFF;--shadow:0 1px 3px rgba(0,0,0,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -37,7 +37,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
 .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
-.field-label .optional{font-size:10px;font-weight:500;text-transform:none;color:var(--muted);background:#F3F4F6;padding:1px 5px;border-radius:4px}
 
 .prefix-holder {background:#F9FAFB;border:1.5px dashed var(--border);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:14px;word-break:break-all;line-height:1.4}
 .prefix-label {font-size:10px;text-transform:uppercase;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:.05em}
@@ -56,17 +55,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:12px}
 .dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
 .dropdown.open{display:block}
-.dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text)}
-.dropdown-item:hover{background:var(--primary-light);color:var(--primary)}
-.dropdown-item.selected{background:var(--primary-light);color:var(--primary);font-weight:600}
-.dropdown-item.no-match{color:var(--muted);font-style:italic;pointer-events:none;padding:12px;text-align:center}
-.custom-input-wrap{position:relative}
+.dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text);border-bottom:1px dashed var(--bg)}
+.dropdown-item-title{font-weight:700;color:var(--text);margin-bottom:2px}
+.dropdown-item-note{font-size:11px;color:var(--muted);font-style:italic}
+.dropdown-item:hover{background:var(--primary-light)}
+.dropdown-item:hover .dropdown-item-title{color:var(--primary)}
+.dropdown-item.selected{background:var(--primary-light)}
+.dropdown-item.selected .dropdown-item-title{color:var(--primary)}
 .custom-input.ok{border-color:var(--success);background:#F0FDF4}
-.custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
 .custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--muted);transition:background .12s}
-.custom-help-header:hover{background:#E5E7EB}
 .custom-help-body{display:block;padding:12px 14px 14px}
+.help-group{margin-bottom:12px}
+.help-group:last-child{margin-bottom:0}
+.help-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:7px}
+.help-tags{display:flex;flex-wrap:wrap;gap:6px}
+.help-tag{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--text);background:#fff}
+.help-tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 .result-sticky{position:sticky;top:20px}
 .result-dark{background:#18181B;border-radius:12px;padding:16px;margin-bottom:12px}
 .result-dark-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:6px;font-weight:600}
@@ -83,7 +88,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .btn-secondary:hover {border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
 .validation-warning{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:#991B1B;display:none}
 .validation-warning.show{display:block;font-weight:500}
-.history-scroller{max-height:300px;overflow-y:auto}
+.history-scroller{max-height:350px;overflow-y:auto}
 .history-row{display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
 .history-row:hover{background:var(--primary-light)}
 .history-type-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;text-transform:uppercase;margin-bottom:2px}
@@ -131,7 +136,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <div class="card-icon">🚀</div>
           <div>
             <div class="card-title">Ad Campaign Configurations</div>
-            <div class="card-desc">Enum values pulled from dynamic map configuration files.</div>
+            <div class="card-desc">Campaign structural segments are isolated within this workspace.</div>
           </div>
         </div>
 
@@ -141,7 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>
         </div>
 
-        <div id="fields-container">
+        <div id="fields-container-campaign">
           <div style="padding:40px 0;text-align:center">
             <div class="skeleton" style="height:40px;width:100%;margin-bottom:16px"></div>
             <div class="skeleton" style="height:40px;width:48%;display:inline-block;margin-right:2%"></div>
@@ -150,7 +155,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         </div>
         
         <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('campaign')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Campaign</button>
+          <button class="btn-primary" onclick="storeLayer('campaign')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad Campaign</button>
         </div>
       </div>
     </div>
@@ -161,7 +166,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <div class="card-icon">📦</div>
           <div>
             <div class="card-title">Ad Group Configurations</div>
-            <div class="card-desc">Inject targeting parameters down into the node tree.</div>
+            <div class="card-desc">Targeting nodes pulled automatically from extended data blocks.</div>
           </div>
         </div>
 
@@ -170,16 +175,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <span id="heritage-prefix-g">(Please select required fields in Ad Campaign tab first)</span>
         </div>
         
-        <div class="fields-grid">
-          <div class="field">
-            <div class="field-label"><span class="req">*</span> Audience / Targeting</div>
-            <input type="text" class="select-search" id="ag-audience" placeholder="e.g. interest-security, lookalike-1pct" oninput="updateAllPreviews()" value="all">
-          </div>
-          <div class="field">
-            <div class="field-label"><span class="req">*</span> Match Type</div>
-            <input type="text" class="select-search" id="ag-match" placeholder="e.g. exact, phrase, broad, n-a" oninput="updateAllPreviews()" value="all">
-          </div>
-        </div>
+        <div id="fields-container-adgroup"></div>
         
         <div class="tab-footer-row">
           <button class="btn-primary" onclick="storeLayer('adgroup')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad Group</button>
@@ -193,7 +189,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <div class="card-icon">🖼️</div>
           <div>
             <div class="card-title">Ad Configurations</div>
-            <div class="card-desc">Append final tracking sizes and concepts.</div>
+            <div class="card-desc">Creative mapping fields built independently.</div>
           </div>
         </div>
 
@@ -202,16 +198,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           <span id="heritage-prefix-a">(Please select required fields in Ad Campaign tab first)</span>
         </div>
         
-        <div class="fields-grid">
-          <div class="field">
-            <div class="field-label"><span class="req">*</span> Creative Concept</div>
-            <input type="text" class="select-search" id="ad-concept" placeholder="e.g. feature-map, promotion-bf" oninput="updateAllPreviews()" value="all">
-          </div>
-          <div class="field">
-            <div class="field-label"><span class="req">*</span> Format / Size</div>
-            <input type="text" class="select-search" id="ad-format" placeholder="e.g. video-15s, image-1200x628" oninput="updateAllPreviews()" value="all">
-          </div>
-        </div>
+        <div id="fields-container-ad"></div>
         
         <div class="tab-footer-row">
           <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad</button>
@@ -280,20 +267,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
-const STORAGE_KEY = 'universal_tab_structure_history_v3';
+const STORAGE_KEY = 'universal_tab_structure_history_v5';
 
-const FIELD_TYPES = {"market": "dropdown", "product-type": "dropdown", "product-code": "dropdown", "media-funnel": "tag", "ad-product": "tag", "bidding-goal": "tag", "url": "tag", "custom": "custom"};
+// ⚙️ WhiteLists definitions mapping structural layers
+const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
+const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
+const AD_WHITELIST = ['creative-concept', 'format---size'];
+
+const FIELD_TYPES = {
+  "market": "dropdown", "product-type": "dropdown", "product-code": "dropdown",
+  "media-funnel": "tag", "ad-product": "tag", "bidding-goal": "tag", "url": "tag", "custom": "custom",
+  "audience-category": "dropdown", "audience-tag": "dropdown", "data-source": "dropdown", 
+  "data-source-detail": "dropdown", "data-window": "dropdown", "ag-custom": "custom",
+  "creative-concept": "dropdown", "format---size": "dropdown"
+};
+
 let FIELDS_ORDER = [];
-let FIELD_LABELS = {};
+let FIELD_LABELS = {
+  "audience-category": "Audience Category", "audience-tag": "Audience Tag",
+  "data-source": "Data Source", "data-source-detail": "Data Source Detail",
+  "data-window": "Data Window", "ag-custom": "Custom"
+};
 let OPTIONS = {};
 let PRODUCT_RELATION_MAP = {}; 
 let DATA_READY = false;
-
-const REQUIRED_FIELDS = new Set();
-const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
-
 const sel = {};
 let copyHistory = [];
+
+const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
 
 function switchTab(layer) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -309,6 +310,10 @@ function initHistoryFromStorage() {
   } catch(e) { console.warn('Cache mapping fault', e); }
 }
 
+function cleanKey(str) {
+  return str.toLowerCase().replace(/ \/ /g, '-').replace(/ /g, '-');
+}
+
 async function loadData() {
   showDatasourceStatus('loading', 'Loading components...');
   initHistoryFromStorage();
@@ -317,23 +322,46 @@ async function loadData() {
       fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
       fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" })
     ]);
-    if (!dataResp.ok || !mapResp.ok) throw new Error('HTTP Error');
+    if (!dataResp.ok || !mapResp.ok) throw new Error('HTTP network error');
 
     const dataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
 
-    FIELDS_ORDER = [];
-    FIELD_LABELS = {};
     OPTIONS = {};
-    REQUIRED_FIELDS.clear();
+    
+    // Parse Campaign Block
+    if(dataJson["Ad-Campaign"]) {
+      for(const [col, vals] of Object.entries(dataJson["Ad-Campaign"])) {
+        const k = cleanKey(col);
+        FIELD_LABELS[k] = col;
+        OPTIONS[k] = (k === 'product-code') ? [] : vals;
+      }
+    }
+    
+    // Parse Ad Group Block
+    if(dataJson["Ad-Group"]) {
+      for(const [col, vals] of Object.entries(dataJson["Ad-Group"])) {
+        const k = cleanKey(col);
+        if(k === 'audience-tag-map' || k === 'data-source-map') {
+          OPTIONS[k] = vals; // 存储路由映射字典
+        } else if(k === 'custom') {
+          // Field 6 Custom block mapping
+          FIELD_LABELS['ag-custom'] = "Custom";
+          OPTIONS['ag-custom'] = vals;
+        } else {
+          FIELD_LABELS[k] = col;
+          OPTIONS[k] = vals;
+        }
+      }
+    }
 
-    for (const [colName, vals] of Object.entries(dataJson)) {
-      if(colName === 'Relation-Map') continue;
-      const key = colName.toLowerCase().replace(/ /g, '-');
-      FIELDS_ORDER.push(key);
-      FIELD_LABELS[key] = colName;
-      if (key === 'product-code') { OPTIONS[key] = []; } else { OPTIONS[key] = vals; }
-      if (colName !== 'Custom') REQUIRED_FIELDS.add(key);
+    // Parse Ad Block
+    if(dataJson["Ad"]) {
+      for(const [col, vals] of Object.entries(dataJson["Ad"])) {
+        const k = cleanKey(col);
+        FIELD_LABELS[k] = col;
+        OPTIONS[k] = vals;
+      }
     }
 
     renderAllFields();
@@ -345,34 +373,40 @@ async function loadData() {
   }
 }
 
-function showDatasourceStatus(state, msg) {
-  const el = document.getElementById('datasource-status');
-  if(!el) return;
-  el.className = 'datasource-bar ' + state;
-  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span><span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
+function renderFieldHTML(f) {
+  const ft = FIELD_TYPES[f] || 'dropdown';
+  const label = FIELD_LABELS[f] || f;
+
+  if (ft === 'dropdown') {
+    const isFullWidth = (f === 'product-code' || f === 'audience-tag' || f === 'data-source-detail' || f === 'creative-concept');
+    return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
+  } else if (ft === 'tag') {
+    const opts = OPTIONS[f] || [];
+    return '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
+  } else if (f === 'custom') {
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Reference</div><div class="custom-help-body" id="help-body" style="display:none;"><div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','brand','product','generic'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
+  } else if (f === 'ag-custom') {
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Language / Country / Split Test variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Applied for testing segments or locale identifiers. Omitted if empty.</div></div></div>';
+  }
+  return '';
 }
 
 function renderAllFields() {
-  const container = document.getElementById('fields-container');
-  let html = '';
-  for (let i = 0; i < FIELDS_ORDER.length; i++) {
-    const f = FIELDS_ORDER[i];
-    if (f === 'market') html += '<div class="field-compact">';
-    const ft = FIELD_TYPES[f] || 'tag';
-    const label = FIELD_LABELS[f];
-    const opts = OPTIONS[f] || [];
+  let cHtml = '<div class="fields-grid">';
+  for (const f of CAMPAIGN_WHITELIST) { if (f === 'market') cHtml += '<div class="field-compact">'; cHtml += renderFieldHTML(f); if (f === 'product-type') cHtml += '</div>'; }
+  cHtml += '</div>';
+  document.getElementById('fields-container-campaign').innerHTML = cHtml;
 
-    if (ft === 'dropdown') {
-      html += '<div class="field ' + (f === 'product-code' ? 'field-full' : '') + '"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
-    } else if (ft === 'tag') {
-      html += '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
-    } else if (ft === 'custom') {
-      if (FIELDS_ORDER.includes('market')) html += '</div>';
-      html += makeCustomHTML();
-    }
-    if (f === 'product-type') html += '</div>';
-  }
-  container.innerHTML = '<div class="fields-grid">' + html + '</div>';
+  let gHtml = '<div class="fields-grid">';
+  for (const f of ADGROUP_WHITELIST) { gHtml += renderFieldHTML(f); }
+  gHtml += '</div>';
+  document.getElementById('fields-container-adgroup').innerHTML = gHtml;
+
+  let aHtml = '<div class="fields-grid">';
+  for (const f of AD_WHITELIST) { aHtml += renderFieldHTML(f); }
+  aHtml += '</div>';
+  document.getElementById('fields-container-ad').innerHTML = aHtml;
+
   updateAllPreviews();
 }
 
@@ -388,46 +422,77 @@ function renderTagOptions(fieldKey, opts) {
   return html;
 }
 
-function makeCustomHTML() {
-  const searchAds = ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'];
-  const pmaxAds = ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'];
-  let sHtml = searchAds.map(v => '<span class="help-tag" onclick="pickCustom(\'' + v + '\')">' + v + '</span>').join('');
-  let pHtml = pmaxAds.map(v => '<span class="help-tag" onclick="pickCustom(\'' + v + '\')">' + v + '</span>').join('');
-  return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Values Reference</div><div class="custom-help-body" id="help-body" style="display:none;"><div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + sHtml + '</div></div><div class="help-group"><div class="help-group-title">Pmax Ad</div><div class="help-tags">' + pHtml + '</div></div></div></div></div>';
-}
-
 function handleCustomInput(inp) {
   inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
   if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
   updateAllPreviews();
 }
 
-function toggleHelp() {
-  const body = document.getElementById('help-body');
-  body.style.display = (body.style.display === 'none') ? 'block' : 'none';
+function handleAgCustomInput(inp) {
+  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
+  if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
+  updateAllPreviews();
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
-function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n'); }
+function toggleHelp() { const b = document.getElementById('help-body'); b.style.display = (b.style.display === 'none') ? 'block' : 'none'; }
+function escHtml(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+function escAttr(s) { return s ? s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;") : ''; }
+function escJs(s) { return s ? s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n') : ''; }
 
-function getFilteredProductCodes() {
-  const currentType = sel['product-type'];
-  if (!currentType || currentType === 'all') {
-    let allMergedCodes = ['all'];
-    for (const [typeKey, codesArray] of Object.entries(PRODUCT_RELATION_MAP)) {
-      if (Array.isArray(codesArray)) allMergedCodes = allMergedCodes.concat(codesArray);
+// ⚙️ Cascading Core Logic: Dynamic dataset switcher based on parent node selections
+function getFieldRuntimeOptions(field) {
+  if (field === 'product-code') {
+    const currentType = sel['product-type'];
+    if (!currentType || currentType === 'all') {
+      let allMergedCodes = ['all'];
+      for (const [typeKey, codesArray] of Object.entries(PRODUCT_RELATION_MAP)) {
+        if (Array.isArray(codesArray)) allMergedCodes = allMergedCodes.concat(codesArray);
+      }
+      return ['all'].concat([...new Set(allMergedCodes)].filter(c => c !== 'all').sort());
     }
-    return ['all'].concat([...new Set(allMergedCodes)].filter(c => c !== 'all').sort());
+    return PRODUCT_RELATION_MAP[currentType] || [];
   }
-  return PRODUCT_RELATION_MAP[currentType] || [];
+
+  // 💡 Field 2: Audience Tag Route mapping
+  if (field === 'audience-tag') {
+    const cat = sel['audience-category'];
+    if(!cat) return [];
+    const map = OPTIONS['audience-tag-map'] || {};
+    return map[cat] || [];
+  }
+
+  // 💡 Field 3: Data Source Condition Branch
+  if (field === 'data-source') {
+    const cat = sel['audience-category'];
+    if(!cat) return [];
+    const map = OPTIONS['data-source-map'] || {};
+    
+    // Check if Prospecting categories
+    if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(cat)) {
+      return map["拉新客人群适用机制 (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || [];
+    } else {
+      return map["重定向人群适用机制 (rm, lal)"] || [];
+    }
+  }
+
+  return OPTIONS[field] || [];
 }
 
 function buildDropdown(field) {
   const drop = document.getElementById('drop-' + field);
   if (!drop) return;
-  const opts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
-  drop.innerHTML = opts.map(v => '<div class="dropdown-item' + (sel[field]===v ? ' selected' : '') + '" data-val="' + escAttr(v) + '" onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>').join('');
+  const opts = getFieldRuntimeOptions(field);
+  
+  let html = '';
+  for(let i=0; i<opts.length; i++) {
+    const o = opts[i];
+    if(typeof o === 'object') {
+      html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + ' (' + escHtml(o.label) + ')</div><div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div></div>';
+    } else {
+      html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
+    }
+  }
+  drop.innerHTML = html;
 }
 
 function openDropdown(field) { buildDropdown(field); document.getElementById('drop-' + field).classList.add('open'); document.getElementById('search-' + field).select(); }
@@ -436,26 +501,67 @@ function filterDropdown(field, q) {
   const drop = document.getElementById('drop-' + field);
   if (!drop) return;
   drop.classList.add('open');
-  const baseOpts = (field === 'product-code') ? getFilteredProductCodes() : (OPTIONS[field] || []);
-  const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(v => v.toLowerCase().includes(q.toLowerCase()));
-  drop.innerHTML = filtered.map(v => '<div class="dropdown-item' + (sel[field]===v ? ' selected' : '') + '" data-val="' + escAttr(v) + '" onmousedown="pickDropdown(\'' + field.replace(/'/g,"\\'") + '\', \'' + escJs(v) + '\', event)">' + escHtml(v) + '</div>').join('');
+  const baseOpts = getFieldRuntimeOptions(field);
+  const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(o => {
+    const targetStr = (typeof o === 'object') ? (o.value + ' ' + o.label + ' ' + o.note) : o;
+    return targetStr.toLowerCase().includes(q.toLowerCase());
+  });
+  
+  let html = '';
+  for(let i=0; i<filtered.length; i++) {
+    const o = filtered[i];
+    if(typeof o === 'object') {
+      html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + ' (' + escHtml(o.label) + ')</div><div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div></div>';
+    } else {
+      html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
+    }
+  }
+  drop.innerHTML = html || '<div class="dropdown-item no-match">No results found</div>';
 }
 
+// 🚀 核心联动重构算法：拉新自动流式填充 n
 function pickDropdown(field, val, e) {
   if(e) e.preventDefault();
   sel[field] = val;
   const inp = document.getElementById('search-' + field);
   if(inp) { inp.value = val; inp.classList.add('has-value'); }
   if(document.getElementById('drop-' + field)) document.getElementById('drop-' + field).classList.remove('open');
+  
   if (field === 'product-type' && val !== 'all') {
-     const allowedSubset = PRODUCT_RELATION_MAP[val] || [];
-     if (sel['product-code'] && !allowedSubset.includes(sel['product-code'])) {
-       delete sel['product-code'];
-       const codeInp = document.getElementById('search-product-code');
-       if (codeInp) { codeInp.value = ''; codeInp.classList.remove('has-value'); }
+     const allowed = PRODUCT_RELATION_MAP[val] || [];
+     if (sel['product-code'] && !allowed.includes(sel['product-code'])) { resetInputNode('product-code'); }
+  }
+
+  // 💡 核心算法：当第一子受众类目发生裂变切换时
+  if (field === 'audience-category') {
+     resetInputNode('audience-tag');
+     
+     // 判定是否属于拉新（Prospecting）类目
+     if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(val)) {
+       // 自动化管道流填充填充核心
+       forceFillInputNode('data-source', 'n');
+       forceFillInputNode('data-source-detail', 'n');
+       forceFillInputNode('data-window', 'n');
+     } else {
+       // 如果切回重定向，释放锁定清空子集，让用户重新选择真实链路
+       resetInputNode('data-source');
+       resetInputNode('data-source-detail');
+       resetInputNode('data-window');
      }
   }
   updateAllPreviews();
+}
+
+function forceFillInputNode(f, val) {
+  sel[f] = val;
+  const i = document.getElementById('search-' + f);
+  if(i) { i.value = val; i.classList.add('has-value'); }
+}
+
+function resetInputNode(f) {
+  delete sel[f];
+  const i = document.getElementById('search-' + f);
+  if(i) { i.value = ''; i.classList.remove('has-value'); }
 }
 
 function blurDropdown(field) {
@@ -481,41 +587,50 @@ function selectTag(field, val) {
 
 function validateLayer(layer) {
   const missing = [];
-  FIELDS_ORDER.forEach(f => { if (f !== 'custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
+  CAMPAIGN_WHITELIST.forEach(f => { if (f !== 'custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
   if (missing.length > 0) return { ok: false, msg: 'Missing Ad Campaign fields: ' + missing.join(', ') };
   
   if (layer === 'adgroup' || layer === 'ad') {
-    if(!document.getElementById('ag-audience').value.trim()) missing.push('Audience');
-    if(!document.getElementById('ag-match').value.trim()) missing.push('Match Type');
+    ADGROUP_WHITELIST.forEach(f => { if (f !== 'ag-custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
   }
   if (layer === 'ad') {
-    if(!document.getElementById('ad-concept').value.trim()) missing.push('Creative Concept');
-    if(!document.getElementById('ad-format').value.trim()) missing.push('Format/Size');
+    if(!sel['creative-concept']) missing.push('Creative Concept');
+    if(!sel['format---size']) missing.push('Format / Size');
   }
-  if (missing.length > 0) return { ok: false, msg: 'Missing elements: ' + missing.join(', ') };
+  if (missing.length > 0) return { ok: false, msg: 'Missing configuration fields: ' + missing.join(', ') };
   return { ok: true };
 }
 
+// 🎛️ 三层高阶动态拼接组装流水线 (Custom 智能裁剪省略算法)
 function compileNames() {
   const campaignParts = [];
-  for (const f of FIELDS_ORDER) {
+  for (const f of CAMPAIGN_WHITELIST) {
     if (f === 'custom') {
       const cv = document.getElementById('custom-input') ? document.getElementById('custom-input').value.trim() : '';
       if (cv) campaignParts.push(cv);
-    } else if (sel[f]) {
-      campaignParts.push(sel[f].trim());
-    }
+    } else if (sel[f]) { campaignParts.push(sel[f].trim()); }
   }
   const cName = campaignParts.join('_');
   if (!cName) return { campaign: '', adgroup: '', ad: '' };
 
-  const agAudience = (document.getElementById('ag-audience').value.trim() || 'all').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  const agMatch = (document.getElementById('ag-match').value.trim() || 'all').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  const gName = cName + '_' + agAudience + '_' + agMatch;
+  // 组装 Ad Group 层级
+  const agParts = [cName];
+  if(sel['audience-category']) agParts.push(sel['audience-category'].trim());
+  if(sel['audience-tag']) agParts.push(sel['audience-tag'].trim());
+  if(sel['data-source']) agParts.push(sel['data-source'].trim());
+  if(sel['data-source-detail']) agParts.push(sel['data-source-detail'].trim());
+  if(sel['data-window']) agParts.push(sel['data-window'].trim());
+  
+  // Custom 智能断言裁剪：有则加入，无则彻底在字符串流中省略
+  const agCustomVal = document.getElementById('ag-custom') ? document.getElementById('ag-custom').value.trim() : '';
+  if(agCustomVal) agParts.push(agCustomVal);
+  const gName = agParts.join('_');
 
-  const adConcept = (document.getElementById('ad-concept').value.trim() || 'all').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  const adFormat = (document.getElementById('ad-format').value.trim() || 'all').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  const aName = gName + '_' + adConcept + '_' + adFormat;
+  // 组装 Ad 层级
+  const adParts = [gName];
+  if(sel['creative-concept']) adParts.push(sel['creative-concept'].trim());
+  if(sel['format---size']) adParts.push(sel['format---size'].trim());
+  const aName = adParts.join('_');
 
   return { campaign: cName, adgroup: gName, ad: aName };
 }
@@ -529,7 +644,7 @@ function updateAllPreviews() {
   const hA = document.getElementById('heritage-prefix-a');
   if(names.campaign) {
     hG.textContent = names.campaign;
-    hA.textContent = names.adgroup;
+    hA.textContent = names.adgroup ? names.adgroup : names.campaign + '_[Awaiting Ad Group Fields]';
   } else {
     hG.textContent = '(Please select required fields in Ad Campaign tab first)';
     hA.textContent = '(Please select required fields in Ad Campaign tab first)';
@@ -540,15 +655,14 @@ function updateAllPreviews() {
   else { cEl.innerHTML = '<span class="seg-empty">Awaiting Ad Campaign fields...</span>'; }
 
   const gEl = document.getElementById('preview-adgroup');
-  if (names.campaign) { gEl.innerHTML = escHtml(names.adgroup) + '<div class="result-len">' + names.adgroup.length + ' chars</div>'; }
-  else { gEl.innerHTML = '<span class="seg-empty">Awaiting Ad Campaign fields...</span>'; }
+  if (names.adgroup) { gEl.innerHTML = escHtml(names.adgroup) + '<div class="result-len">' + names.adgroup.length + ' chars</div>'; }
+  else { gEl.innerHTML = '<span class="seg-empty">Awaiting Ad Group setup...</span>'; }
 
   const aEl = document.getElementById('preview-ad');
-  if (names.campaign) { aEl.innerHTML = escHtml(names.ad) + '<div class="result-len">' + names.ad.length + ' chars</div>'; }
-  else { aEl.innerHTML = '<span class="seg-empty">Awaiting Ad Campaign fields...</span>'; }
+  if (names.ad) { aEl.innerHTML = escHtml(names.ad) + '<div class="result-len">' + names.ad.length + ' chars</div>'; }
+  else { aEl.innerHTML = '<span class="seg-empty">Awaiting Ad setup...</span>'; }
 }
 
-// 📋 单纯执行剪贴板复制逻辑，不触碰数据库历史
 function copyText(layer) {
   const names = compileNames();
   if(!names[layer]) return;
@@ -561,7 +675,6 @@ function copyText(layer) {
   setTimeout(() => { btn.innerHTML = originalTxt; }, 1200);
 }
 
-// 💾 控制存储记忆按键：记录自己并强力递归绑定其所有上层记忆网格
 function storeLayer(layer) {
   const check = validateLayer(layer);
   if (!check.ok) {
@@ -571,8 +684,6 @@ function storeLayer(layer) {
   }
   
   const names = compileNames();
-  
-  // 核心清洗提取三层分流隔离出的精确字段实体，供导出独立三列使用
   const campaignValue = names.campaign;
   const adgroupValue = layer === 'campaign' ? '' : names.adgroup;
   const adValue = (layer === 'campaign' || layer === 'adgroup') ? '' : names.ad;
@@ -580,15 +691,12 @@ function storeLayer(layer) {
   const snapshot = {
     sel: JSON.parse(JSON.stringify(sel)),
     custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : '',
-    agAudience: document.getElementById('ag-audience').value,
-    agMatch: document.getElementById('ag-match').value,
-    adConcept: document.getElementById('ad-concept').value,
-    adFormat: document.getElementById('ad-format').value
+    agCustom: document.getElementById('ag-custom') ? document.getElementById('ag-custom').value : ''
   };
 
   copyHistory.unshift({
     type: layer,
-    name: names[layer], // 用于右侧日志栏主要呈现
+    name: names[layer],
     cCol: campaignValue,
     gCol: adgroupValue,
     aCol: adValue,
@@ -614,7 +722,6 @@ function renderHistory(){
     html += '<div><span class="history-type-badge ' + badgeClass + '">' + label + '</span></div>';
     html += '<div class="history-name">' + escHtml(h.name) + '</div>';
     
-    // 呈现结构流面包屑
     html += '<div class="history-subnames-box">';
     html += '<div>🔹 C: ' + escHtml(h.cCol) + '</div>';
     if(h.gCol) html += '<div>🔹 G: ' + escHtml(h.gCol) + '</div>';
@@ -634,26 +741,21 @@ function restoreUniversalSnapshot(idx) {
   Object.keys(sel).forEach(k => delete sel[k]);
   Object.assign(sel, snap.sel);
 
-  FIELDS_ORDER.forEach(f => {
+  // 恢复所有的字段节点表现值
+  const allFields = CAMPAIGN_WHITELIST.concat(ADGROUP_WHITELIST).concat(AD_WHITELIST);
+  allFields.forEach(f => {
     const ft = FIELD_TYPES[f];
-    if(ft === 'dropdown') {
-      const inp = document.getElementById('search-' + f);
-      if(inp) { inp.value = sel[f] || ''; if(sel[f]) inp.classList.add('has-value'); else inp.classList.remove('has-value'); }
+    const inp = document.getElementById('search-' + f);
+    if(ft === 'dropdown' && inp) {
+      inp.value = sel[f] || ''; if(sel[f]) inp.classList.add('has-value'); else inp.classList.remove('has-value');
+    } else if(ft === 'tag') {
+      const container = document.getElementById('tags-' + f);
+      if(container) { container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[f])); }
     }
   });
 
   if(document.getElementById('custom-input')) document.getElementById('custom-input').value = snap.custom || '';
-  if(document.getElementById('ag-audience')) document.getElementById('ag-audience').value = snap.agAudience || 'all';
-  if(document.getElementById('ag-match')) document.getElementById('ag-match').value = snap.agMatch || 'all';
-  if(document.getElementById('ad-concept')) document.getElementById('ad-concept').value = snap.adConcept || 'all';
-  if(document.getElementById('ad-format')) document.getElementById('ad-format').value = snap.adFormat || 'all';
-
-  const funnelContainer = document.getElementById('tags-media-funnel');
-  if(funnelContainer) { funnelContainer.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel['media-funnel'])); }
-  const productContainer = document.getElementById('tags-ad-product');
-  if(productContainer) { productContainer.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel['ad-product'])); }
-  const urlContainer = document.getElementById('tags-url');
-  if(urlContainer) { urlContainer.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel['url'])); }
+  if(document.getElementById('ag-custom')) document.getElementById('ag-custom').value = snap.agCustom || '';
 
   const goalContainer = document.getElementById('tags-bidding-goal');
   if(goalContainer) {
@@ -667,20 +769,15 @@ function restoreUniversalSnapshot(idx) {
 
 function clearHistory(){ copyHistory.length=0; try { localStorage.removeItem(STORAGE_KEY); } catch(e){} renderHistory(); }
 
-// 💡 TXT 输出结构流：分栏对齐三列
 function exportTXT(){
   if(!copyHistory.length) return;
-  let divider = '-'.repeat(100) + '\n';
+  let divider = '-'.repeat(120) + '\n';
   let txt = 'Universal Layer Ad Structure Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider;
   txt += 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(55) + ' | ' + 'Ad\n' + divider;
-  
-  copyHistory.forEach(h => {
-    txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(55) + ' | ' + (h.aCol || '-') + '\n';
-  });
+  copyHistory.forEach(h => { txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(55) + ' | ' + (h.aCol || '-') + '\n'; });
   dlBlob(txt, 'ad-structure-matrix-' + fmt() + '.txt', 'text/plain;charset=utf-8');
 }
 
-// 💡 CSV 输出结构流：标准的独立三列结构
 function exportCSV(){
   if(!copyHistory.length) return;
   const headers = ['Log Time', 'Stored Type', 'Ad Campaign', 'Ad Group', 'Ad'];
@@ -693,13 +790,15 @@ function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).
 function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
 
 function resetAll() {
-  Object.keys(OPTIONS).forEach(f => { delete sel[f]; const i=document.getElementById('search-'+f); if(i){i.value='';i.classList.remove('has-value')} });
-  document.querySelectorAll('.tag-wrap[id^="tags-"]').forEach(c => { const f=c.id.replace('tags-',''); delete sel[f]; c.querySelectorAll('.tag').forEach(t => t.classList.remove('active')) });
+  Object.keys(FIELD_TYPES).forEach(f => {
+    delete sel[f];
+    const i = document.getElementById('search-' + f);
+    if(i){ i.value = ''; i.classList.remove('has-value'); }
+    const c = document.getElementById('tags-' + f);
+    if(c){ c.querySelectorAll('.tag').forEach(t => t.classList.remove('active')); }
+  });
   if(document.getElementById('custom-input')) { document.getElementById('custom-input').value = ''; document.getElementById('custom-input').classList.remove('ok'); }
-  document.getElementById('ag-audience').value = 'all';
-  document.getElementById('ag-match').value = 'all';
-  document.getElementById('ad-concept').value = 'all';
-  document.getElementById('ad-format').value = 'all';
+  if(document.getElementById('ag-custom')) { document.getElementById('ag-custom').value = ''; document.getElementById('ag-custom').classList.remove('ok'); }
   if(document.getElementById('validation-warning')) document.getElementById('validation-warning').classList.remove('show');
   const goalContainer = document.getElementById('tags-bidding-goal');
   if(goalContainer) goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
