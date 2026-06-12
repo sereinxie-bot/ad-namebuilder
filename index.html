@@ -63,6 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .dropdown-item.selected{background:var(--primary-light)}
 .dropdown-item.selected .dropdown-item-title{color:var(--primary)}
 .custom-input.ok{border-color:var(--success);background:#F0FDF4}
+.custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
 .custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--muted);transition:background .12s}
 .custom-help-body{display:block;padding:12px 14px 14px}
@@ -118,18 +119,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
   <div class="header-icon">📋</div>
   <div>
     <div class="header-title">Ad Structure Universal Tab-Builder</div>
-    <div class="header-sub">Product Data Source: product-code-map.json · Updated: 2026/06/11</div>
+    <div class="header-sub">Product Data Source: product-code-map.json · Updated: 2026/06/12</div>
   </div>
 </div>
 
 <div class="layout">
   <div>
+    <!-- TAB BUTTON HEADERS -->
     <div class="tab-container">
       <button class="tab-btn active" id="tab-c" onclick="switchTab('campaign')">🚀 Ad Campaign</button>
       <button class="tab-btn" id="tab-g" onclick="switchTab('adgroup')">📦 Ad Group</button>
       <button class="tab-btn" id="tab-a" onclick="switchTab('ad')">🖼️ Ad</button>
     </div>
 
+    <!-- PANEL 1: AD CAMPAIGN LAYER -->
     <div class="tab-panel active" id="panel-campaign">
       <div class="card">
         <div class="card-header">
@@ -160,6 +163,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
+    <!-- PANEL 2: AD GROUP LAYER -->
     <div class="tab-panel" id="panel-adgroup">
       <div class="card">
         <div class="card-header">
@@ -183,6 +187,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
+    <!-- PANEL 3: AD LAYER -->
     <div class="tab-panel" id="panel-ad">
       <div class="card">
         <div class="card-header">
@@ -211,6 +216,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
     </div>
   </div>
 
+  <!-- FIXED RIGHT LIVE PREVIEW PANEL -->
   <div class="result-sticky">
     <div class="card">
       <div class="card-header">
@@ -249,6 +255,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
+    <!-- HISTORICAL LOGS -->
     <div class="card" style="margin-top:14px">
       <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:10px">
@@ -267,9 +274,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
-const STORAGE_KEY = 'universal_tab_structure_history_v5';
+const STORAGE_KEY = 'universal_tab_structure_history_v6';
 
-// ⚙️ WhiteLists definitions mapping structural layers
 const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
 const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
 const AD_WHITELIST = ['creative-concept', 'format---size'];
@@ -282,7 +288,6 @@ const FIELD_TYPES = {
   "creative-concept": "dropdown", "format---size": "dropdown"
 };
 
-let FIELDS_ORDER = [];
 let FIELD_LABELS = {
   "audience-category": "Audience Category", "audience-tag": "Audience Tag",
   "data-source": "Data Source", "data-source-detail": "Data Source Detail",
@@ -307,7 +312,7 @@ function initHistoryFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw) { copyHistory = JSON.parse(raw); }
-  } catch(e) { console.warn('Cache mapping fault', e); }
+  } catch(e) { console.warn('History storage cache skipped', e); }
 }
 
 function cleanKey(str) {
@@ -315,52 +320,37 @@ function cleanKey(str) {
 }
 
 async function loadData() {
-  showDatasourceStatus('loading', 'Loading components...');
+  showDatasourceStatus('loading', 'Resolving configuration layers...');
   initHistoryFromStorage();
   try {
     const [dataResp, mapResp] = await Promise.all([
       fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
       fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" })
     ]);
-    if (!dataResp.ok || !mapResp.ok) throw new Error('HTTP network error');
+    if (!dataResp.ok || !mapResp.ok) throw new Error('Network file lookup error');
 
     const dataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
 
     OPTIONS = {};
     
-    // Parse Campaign Block
+    // 💡 修复解析引擎核心：完美解包三层嵌套的大字典数据源，阻断卡死
     if(dataJson["Ad-Campaign"]) {
       for(const [col, vals] of Object.entries(dataJson["Ad-Campaign"])) {
-        const k = cleanKey(col);
-        FIELD_LABELS[k] = col;
-        OPTIONS[k] = (k === 'product-code') ? [] : vals;
+        const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = (k === 'product-code') ? [] : vals;
       }
     }
-    
-    // Parse Ad Group Block
     if(dataJson["Ad-Group"]) {
       for(const [col, vals] of Object.entries(dataJson["Ad-Group"])) {
         const k = cleanKey(col);
-        if(k === 'audience-tag-map' || k === 'data-source-map') {
-          OPTIONS[k] = vals; // 存储路由映射字典
-        } else if(k === 'custom') {
-          // Field 6 Custom block mapping
-          FIELD_LABELS['ag-custom'] = "Custom";
-          OPTIONS['ag-custom'] = vals;
-        } else {
-          FIELD_LABELS[k] = col;
-          OPTIONS[k] = vals;
-        }
+        if(k === 'audience-tag-map' || k === 'data-source-map') { OPTIONS[k] = vals; }
+        else if(k === 'custom') { FIELD_LABELS['ag-custom'] = "Custom"; OPTIONS['ag-custom'] = vals; }
+        else { FIELD_LABELS[k] = col; OPTIONS[k] = vals; }
       }
     }
-
-    // Parse Ad Block
     if(dataJson["Ad"]) {
       for(const [col, vals] of Object.entries(dataJson["Ad"])) {
-        const k = cleanKey(col);
-        FIELD_LABELS[k] = col;
-        OPTIONS[k] = vals;
+        const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = vals;
       }
     }
 
@@ -369,8 +359,15 @@ async function loadData() {
     DATA_READY = true;
     showDatasourceStatus('ok', 'Data synchronized.');
   } catch(err) {
-    showDatasourceStatus('error', 'Sync failed.');
+    console.error(err);
+    showDatasourceStatus('error', 'Sync structural breakdown.');
   }
+}
+
+function showDatasourceStatus(state, msg) {
+  const el = document.getElementById('datasource-status'); if(!el) return;
+  el.className = 'datasource-bar ' + state;
+  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span><span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
 }
 
 function renderFieldHTML(f) {
@@ -384,7 +381,8 @@ function renderFieldHTML(f) {
     const opts = OPTIONS[f] || [];
     return '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
   } else if (f === 'custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header" onclick="toggleHelp()">💡 Common Custom Reference</div><div class="custom-help-body" id="help-body" style="display:none;"><div class="help-group"><div class="help-group-title">Search Ad</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','brand','product','generic'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
+    // 💡 修复体验细节：Campaign 层的 Custom 推荐默认改为直接平铺不隐藏 (display:block)
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Common Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
   } else if (f === 'ag-custom') {
     return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Language / Country / Split Test variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Applied for testing segments or locale identifiers. Omitted if empty.</div></div></div>';
   }
@@ -415,8 +413,7 @@ function renderTagOptions(fieldKey, opts) {
   if (fieldKey === 'bidding-goal' && sel['media-funnel']) disabledGoals = FUNNEL_GOAL_MAP[sel['media-funnel']];
   let html = '';
   for(let i=0; i<opts.length; i++) {
-    const v = opts[i];
-    const isDisabled = disabledGoals && !disabledGoals.includes(v);
+    const v = opts[i]; const isDisabled = disabledGoals && !disabledGoals.includes(v);
     html += '<div class="tag' + (isDisabled ? ' disabled' : '') + (sel[fieldKey]===v ? ' active' : '') + '" data-val="' + escAttr(v) + '" onclick="' + (isDisabled ? '' : 'selectTag(\'' + fieldKey + '\', \'' + escJs(v) + '\')') + '">' + escHtml(v) + '</div>';
   }
   return html;
@@ -434,12 +431,10 @@ function handleAgCustomInput(inp) {
   updateAllPreviews();
 }
 
-function toggleHelp() { const b = document.getElementById('help-body'); b.style.display = (b.style.display === 'none') ? 'block' : 'none'; }
 function escHtml(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 function escAttr(s) { return s ? s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;") : ''; }
 function escJs(s) { return s ? s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n') : ''; }
 
-// ⚙️ Cascading Core Logic: Dynamic dataset switcher based on parent node selections
 function getFieldRuntimeOptions(field) {
   if (field === 'product-code') {
     const currentType = sel['product-type'];
@@ -453,21 +448,24 @@ function getFieldRuntimeOptions(field) {
     return PRODUCT_RELATION_MAP[currentType] || [];
   }
 
-  // 💡 Field 2: Audience Tag Route mapping
+  // 💡 级联轻量化提取：如果前置类目选中，下拉框显示精准路由推荐，不选则显示全部，确保“物理独立可选”
   if (field === 'audience-tag') {
     const cat = sel['audience-category'];
-    if(!cat) return [];
-    const map = OPTIONS['audience-tag-map'] || {};
-    return map[cat] || [];
+    if(!cat) {
+      let merged = []; const map = OPTIONS['audience-tag-map'] || {};
+      Object.values(map).forEach(arr => { merged = merged.concat(arr); });
+      return [...new Map(merged.map(item => [item.value, item])).values()];
+    }
+    return (OPTIONS['audience-tag-map'] || {})[cat] || [];
   }
 
-  // 💡 Field 3: Data Source Condition Branch
   if (field === 'data-source') {
     const cat = sel['audience-category'];
-    if(!cat) return [];
     const map = OPTIONS['data-source-map'] || {};
-    
-    // Check if Prospecting categories
+    if(!cat) {
+      let merged = []; Object.values(map).forEach(arr => { merged = merged.concat(arr); });
+      return [...new Map(merged.map(item => [item.value, item])).values()];
+    }
     if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(cat)) {
       return map["拉新客人群适用机制 (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || [];
     } else {
@@ -479,10 +477,8 @@ function getFieldRuntimeOptions(field) {
 }
 
 function buildDropdown(field) {
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
+  const drop = document.getElementById('drop-' + field); if (!drop) return;
   const opts = getFieldRuntimeOptions(field);
-  
   let html = '';
   for(let i=0; i<opts.length; i++) {
     const o = opts[i];
@@ -498,8 +494,7 @@ function buildDropdown(field) {
 function openDropdown(field) { buildDropdown(field); document.getElementById('drop-' + field).classList.add('open'); document.getElementById('search-' + field).select(); }
 
 function filterDropdown(field, q) {
-  const drop = document.getElementById('drop-' + field);
-  if (!drop) return;
+  const drop = document.getElementById('drop-' + field); if (!drop) return;
   drop.classList.add('open');
   const baseOpts = getFieldRuntimeOptions(field);
   const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(o => {
@@ -519,7 +514,7 @@ function filterDropdown(field, q) {
   drop.innerHTML = html || '<div class="dropdown-item no-match">No results found</div>';
 }
 
-// 🚀 核心联动重构算法：拉新自动流式填充 n
+// 💡 修复点：彻底移除强覆盖，所有层级现在完全独立选择，仅在切换类目时进行“首发安全值推荐”，不锁死
 function pickDropdown(field, val, e) {
   if(e) e.preventDefault();
   sel[field] = val;
@@ -532,43 +527,34 @@ function pickDropdown(field, val, e) {
      if (sel['product-code'] && !allowed.includes(sel['product-code'])) { resetInputNode('product-code'); }
   }
 
-  // 💡 核心算法：当第一子受众类目发生裂变切换时
   if (field === 'audience-category') {
-     resetInputNode('audience-tag');
+     // 仅在手动切大类时做安全值刷新初始化，并不剥夺右侧独立修改的权利
+     const tags = (OPTIONS['audience-tag-map'] || {})[val] || [];
+     if(tags.length > 0) { forceFillInputNode('audience-tag', tags[0].value); } else { resetInputNode('audience-tag'); }
      
-     // 判定是否属于拉新（Prospecting）类目
      if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(val)) {
-       // 自动化管道流填充填充核心
        forceFillInputNode('data-source', 'n');
        forceFillInputNode('data-source-detail', 'n');
        forceFillInputNode('data-window', 'n');
      } else {
-       // 如果切回重定向，释放锁定清空子集，让用户重新选择真实链路
-       resetInputNode('data-source');
-       resetInputNode('data-source-detail');
-       resetInputNode('data-window');
+       resetInputNode('data-source'); resetInputNode('data-source-detail'); resetInputNode('data-window');
      }
   }
   updateAllPreviews();
 }
 
 function forceFillInputNode(f, val) {
-  sel[f] = val;
-  const i = document.getElementById('search-' + f);
-  if(i) { i.value = val; i.classList.add('has-value'); }
+  sel[f] = val; const i = document.getElementById('search-' + f); if(i) { i.value = val; i.classList.add('has-value'); }
 }
 
 function resetInputNode(f) {
-  delete sel[f];
-  const i = document.getElementById('search-' + f);
-  if(i) { i.value = ''; i.classList.remove('has-value'); }
+  delete sel[f]; const i = document.getElementById('search-' + f); if(i) { i.value = ''; i.classList.remove('has-value'); }
 }
 
 function blurDropdown(field) {
   setTimeout(function() {
     if(document.getElementById('drop-' + field)) document.getElementById('drop-' + field).classList.remove('open');
-    const inp = document.getElementById('search-' + field);
-    if(!inp) return;
+    const inp = document.getElementById('search-' + field); if(!inp) return;
     if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); } else { inp.value = ''; inp.classList.remove('has-value'); }
   }, 150);
 }
@@ -597,11 +583,10 @@ function validateLayer(layer) {
     if(!sel['creative-concept']) missing.push('Creative Concept');
     if(!sel['format---size']) missing.push('Format / Size');
   }
-  if (missing.length > 0) return { ok: false, msg: 'Missing configuration fields: ' + missing.join(', ') };
+  if (missing.length > 0) return { ok: false, msg: 'Missing fields: ' + missing.join(', ') };
   return { ok: true };
 }
 
-// 🎛️ 三层高阶动态拼接组装流水线 (Custom 智能裁剪省略算法)
 function compileNames() {
   const campaignParts = [];
   for (const f of CAMPAIGN_WHITELIST) {
@@ -613,7 +598,6 @@ function compileNames() {
   const cName = campaignParts.join('_');
   if (!cName) return { campaign: '', adgroup: '', ad: '' };
 
-  // 组装 Ad Group 层级
   const agParts = [cName];
   if(sel['audience-category']) agParts.push(sel['audience-category'].trim());
   if(sel['audience-tag']) agParts.push(sel['audience-tag'].trim());
@@ -621,12 +605,10 @@ function compileNames() {
   if(sel['data-source-detail']) agParts.push(sel['data-source-detail'].trim());
   if(sel['data-window']) agParts.push(sel['data-window'].trim());
   
-  // Custom 智能断言裁剪：有则加入，无则彻底在字符串流中省略
   const agCustomVal = document.getElementById('ag-custom') ? document.getElementById('ag-custom').value.trim() : '';
   if(agCustomVal) agParts.push(agCustomVal);
   const gName = agParts.join('_');
 
-  // 组装 Ad 层级
   const adParts = [gName];
   if(sel['creative-concept']) adParts.push(sel['creative-concept'].trim());
   if(sel['format---size']) adParts.push(sel['format---size'].trim());
@@ -637,11 +619,9 @@ function compileNames() {
 
 function updateAllPreviews() {
   const names = compileNames();
-  const warEl = document.getElementById('validation-warning');
-  if(warEl) warEl.classList.remove('show');
+  const warEl = document.getElementById('validation-warning'); if(warEl) warEl.classList.remove('show');
 
-  const hG = document.getElementById('heritage-prefix-g');
-  const hA = document.getElementById('heritage-prefix-a');
+  const hG = document.getElementById('heritage-prefix-g'); const hA = document.getElementById('heritage-prefix-a');
   if(names.campaign) {
     hG.textContent = names.campaign;
     hA.textContent = names.adgroup ? names.adgroup : names.campaign + '_[Awaiting Ad Group Fields]';
@@ -664,30 +644,19 @@ function updateAllPreviews() {
 }
 
 function copyText(layer) {
-  const names = compileNames();
-  if(!names[layer]) return;
-  doClipboard(names[layer]);
-  
+  const names = compileNames(); if(!names[layer]) return; doClipboard(names[layer]);
   let btnId = layer === 'campaign' ? 'btn-copy-c' : (layer === 'adgroup' ? 'btn-copy-g' : 'btn-copy-a');
   let originalTxt = layer === 'campaign' ? '📋 Copy Ad Campaign' : (layer === 'adgroup' ? '📋 Copy Ad Group' : '📋 Copy Ad Name');
-  const btn = document.getElementById(btnId);
-  btn.textContent = '✅ Copied!';
+  const btn = document.getElementById(btnId); btn.textContent = '✅ Copied!';
   setTimeout(() => { btn.innerHTML = originalTxt; }, 1200);
 }
 
 function storeLayer(layer) {
   const check = validateLayer(layer);
   if (!check.ok) {
-    const warEl = document.getElementById('validation-warning');
-    if(warEl) { warEl.textContent = check.msg; warEl.classList.add('show'); }
-    return;
+    const warEl = document.getElementById('validation-warning'); if(warEl) { warEl.textContent = check.msg; warEl.classList.add('show'); } return;
   }
-  
   const names = compileNames();
-  const campaignValue = names.campaign;
-  const adgroupValue = layer === 'campaign' ? '' : names.adgroup;
-  const adValue = (layer === 'campaign' || layer === 'adgroup') ? '' : names.ad;
-
   const snapshot = {
     sel: JSON.parse(JSON.stringify(sel)),
     custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : '',
@@ -695,15 +664,9 @@ function storeLayer(layer) {
   };
 
   copyHistory.unshift({
-    type: layer,
-    name: names[layer],
-    cCol: campaignValue,
-    gCol: adgroupValue,
-    aCol: adValue,
-    time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}),
-    snapshot: snapshot
+    type: layer, name: names[layer], cCol: names.campaign, gCol: layer === 'campaign' ? '' : names.adgroup, aCol: (layer==='campaign'||layer==='adgroup') ? '' : names.ad,
+    time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}), snapshot: snapshot
   });
-
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(copyHistory)); } catch(e){}
   renderHistory();
 }
@@ -711,41 +674,24 @@ function storeLayer(layer) {
 function renderHistory(){
   const el = document.getElementById('history-scroller'); if(!el) return;
   if(copyHistory.length === 0){ el.innerHTML = '<div class="empty-hint">No database storage records...</div>'; return; }
-  
   let html = '';
   for(let i=0; i<copyHistory.length; i++) {
-    const h = copyHistory[i];
-    let badgeClass = h.type === 'campaign' ? 'badge-c' : (h.type === 'adgroup' ? 'badge-g' : 'badge-a');
-    let label = h.type === 'campaign' ? 'CAMP' : (h.type === 'adgroup' ? 'GRP' : 'AD');
-    
-    html += '<div class="history-row" onclick="restoreUniversalSnapshot(' + i + ')" title="Instant rollback form state">';
-    html += '<div><span class="history-type-badge ' + badgeClass + '">' + label + '</span></div>';
-    html += '<div class="history-name">' + escHtml(h.name) + '</div>';
-    
-    html += '<div class="history-subnames-box">';
-    html += '<div>🔹 C: ' + escHtml(h.cCol) + '</div>';
+    const h = copyHistory[i]; let badgeClass = h.type === 'campaign' ? 'badge-c' : (h.type === 'adgroup' ? 'badge-g' : 'badge-a');
+    html += '<div class="history-row" onclick="restoreUniversalSnapshot(' + i + ')" title="Instant rollback form state"><div><span class="history-type-badge ' + badgeClass + '">' + h.type.toUpperCase() + '</span></div><div class="history-name">' + escHtml(h.name) + '</div><div class="history-subnames-box"><div>🔹 C: ' + escHtml(h.cCol) + '</div>';
     if(h.gCol) html += '<div>🔹 G: ' + escHtml(h.gCol) + '</div>';
     if(h.aCol) html += '<div>🔹 A: ' + escHtml(h.aCol) + '</div>';
-    html += '</div>';
-    
-    html += '<div class="history-meta"><span>🕒 ' + h.time + '</span><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></div>';
-    html += '</div>';
+    html += '</div><div class="history-meta"><span>🕒 ' + h.time + '</span><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></div></div>';
   }
   el.innerHTML = html;
 }
 
 function restoreUniversalSnapshot(idx) {
-  const r = copyHistory[idx]; if(!r || !r.snapshot) return;
-  const snap = r.snapshot;
+  const r = copyHistory[idx]; if(!r || !r.snapshot) return; const snap = r.snapshot;
+  Object.keys(sel).forEach(k => delete sel[k]); Object.assign(sel, snap.sel);
 
-  Object.keys(sel).forEach(k => delete sel[k]);
-  Object.assign(sel, snap.sel);
-
-  // 恢复所有的字段节点表现值
   const allFields = CAMPAIGN_WHITELIST.concat(ADGROUP_WHITELIST).concat(AD_WHITELIST);
   allFields.forEach(f => {
-    const ft = FIELD_TYPES[f];
-    const inp = document.getElementById('search-' + f);
+    const ft = FIELD_TYPES[f]; const inp = document.getElementById('search-' + f);
     if(ft === 'dropdown' && inp) {
       inp.value = sel[f] || ''; if(sel[f]) inp.classList.add('has-value'); else inp.classList.remove('has-value');
     } else if(ft === 'tag') {
@@ -762,46 +708,34 @@ function restoreUniversalSnapshot(idx) {
     goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
     goalContainer.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel['bidding-goal']));
   }
-
-  switchTab(r.type);
-  updateAllPreviews();
+  switchTab(r.type); updateAllPreviews();
 }
 
 function clearHistory(){ copyHistory.length=0; try { localStorage.removeItem(STORAGE_KEY); } catch(e){} renderHistory(); }
-
 function exportTXT(){
-  if(!copyHistory.length) return;
-  let divider = '-'.repeat(120) + '\n';
-  let txt = 'Universal Layer Ad Structure Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider;
-  txt += 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(55) + ' | ' + 'Ad\n' + divider;
+  if(!copyHistory.length) return; let divider = '-'.repeat(120) + '\n';
+  let txt = 'Universal Layer Ad Structure Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider + 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(55) + ' | ' + 'Ad\n' + divider;
   copyHistory.forEach(h => { txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(55) + ' | ' + (h.aCol || '-') + '\n'; });
   dlBlob(txt, 'ad-structure-matrix-' + fmt() + '.txt', 'text/plain;charset=utf-8');
 }
-
 function exportCSV(){
   if(!copyHistory.length) return;
-  const headers = ['Log Time', 'Stored Type', 'Ad Campaign', 'Ad Group', 'Ad'];
-  const rows = copyHistory.map(h => [h.time, h.type.toUpperCase(), h.cCol || '', h.gCol || '', h.aCol || '']);
-  dlBlob('\ufeff' + [headers, ...rows].map(r => r.map(c => '"' + c + '"').join(',')).join('\n'), 'ad-structure-matrix-' + fmt() + '.csv', 'text/csv;charset=utf-8');
+  dlBlob('\ufeff' + [['Log Time', 'Stored Type', 'Ad Campaign', 'Ad Group', 'Ad'], ...copyHistory.map(h => [h.time, h.type.toUpperCase(), h.cCol || '', h.gCol || '', h.aCol || ''])].map(r => r.map(c => '"' + c + '"').join(',')).join('\n'), 'ad-structure-matrix-' + fmt() + '.csv', 'text/csv;charset=utf-8');
 }
-
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
+function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
 function resetAll() {
   Object.keys(FIELD_TYPES).forEach(f => {
-    delete sel[f];
-    const i = document.getElementById('search-' + f);
-    if(i){ i.value = ''; i.classList.remove('has-value'); }
-    const c = document.getElementById('tags-' + f);
-    if(c){ c.querySelectorAll('.tag').forEach(t => t.classList.remove('active')); }
+    delete sel[f]; const i = document.getElementById('search-' + f); if(i){ i.value = ''; i.classList.remove('has-value'); }
+    const c = document.getElementById('tags-' + f); if(c){ c.querySelectorAll('.tag').forEach(t => t.classList.remove('active')); }
   });
   if(document.getElementById('custom-input')) { document.getElementById('custom-input').value = ''; document.getElementById('custom-input').classList.remove('ok'); }
   if(document.getElementById('ag-custom')) { document.getElementById('ag-custom').value = ''; document.getElementById('ag-custom').classList.remove('ok'); }
   if(document.getElementById('validation-warning')) document.getElementById('validation-warning').classList.remove('show');
-  const goalContainer = document.getElementById('tags-bidding-goal');
-  if(goalContainer) goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
+  const goalContainer = document.getElementById('tags-bidding-goal'); if(goalContainer) goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
   updateAllPreviews();
 }
 
