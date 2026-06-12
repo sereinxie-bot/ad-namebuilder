@@ -38,9 +38,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
 
-.prefix-holder {background:#F9FAFB;border:1.5px dashed var(--border);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:14px;word-break:break-all;line-height:1.4}
-.prefix-label {font-size:10px;text-transform:uppercase;font-weight:700;color:var(--primary);margin-bottom:4px;letter-spacing:.05em}
-
 .tag-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1.5px solid var(--border);border-radius:10px;min-height:44px;cursor:default;transition:border-color .15s}
 .tag{display:inline-flex;align-items:center;padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--muted);background:var(--bg);user-select:none;white-space:nowrap}
 .tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
@@ -65,7 +62,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .custom-input.ok{border-color:var(--success);background:#F0FDF4}
 .custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
 .custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--muted);transition:background .12s}
+.custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;font-size:12px;font-weight:600;color:var(--muted)}
 .custom-help-body{display:block;padding:12px 14px 14px}
 .help-group{margin-bottom:12px}
 .help-group:last-child{margin-bottom:0}
@@ -119,27 +116,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
   <div class="header-icon">📋</div>
   <div>
     <div class="header-title">Ad Structure Universal Tab-Builder</div>
-    <div class="header-sub">Product Data Source: product-code-map.json · Updated: 2026/06/12</div>
+    <div class="header-sub">Product Data Source: product-code-map.json · Clean Level Naming Engine</div>
   </div>
 </div>
 
 <div class="layout">
   <div>
-    <!-- TAB BUTTON HEADERS -->
     <div class="tab-container">
       <button class="tab-btn active" id="tab-c" onclick="switchTab('campaign')">🚀 Ad Campaign</button>
       <button class="tab-btn" id="tab-g" onclick="switchTab('adgroup')">📦 Ad Group</button>
       <button class="tab-btn" id="tab-a" onclick="switchTab('ad')">🖼️ Ad</button>
     </div>
 
-    <!-- PANEL 1: AD CAMPAIGN LAYER -->
     <div class="tab-panel active" id="panel-campaign">
       <div class="card">
         <div class="card-header">
           <div class="card-icon">🚀</div>
           <div>
             <div class="card-title">Ad Campaign Configurations</div>
-            <div class="card-desc">Campaign structural segments are isolated within this workspace.</div>
+            <div class="card-desc">Independent workspace. Generates ONLY campaign string segments.</div>
           </div>
         </div>
 
@@ -158,55 +153,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         </div>
         
         <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('campaign')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad Campaign</button>
+          <button class="btn-primary" onclick="storeLayer('campaign')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Campaign</button>
         </div>
       </div>
     </div>
 
-    <!-- PANEL 2: AD GROUP LAYER -->
     <div class="tab-panel" id="panel-adgroup">
       <div class="card">
         <div class="card-header">
           <div class="card-icon">📦</div>
           <div>
             <div class="card-title">Ad Group Configurations</div>
-            <div class="card-desc">Targeting nodes pulled automatically from extended data blocks.</div>
+            <div class="card-desc">Generates standalone Ad Group names (Audience to Time Window). No campaign prefix.</div>
           </div>
-        </div>
-
-        <div class="prefix-holder">
-          <div class="prefix-label">Parent Ad Campaign Prefix Inherited:</div>
-          <span id="heritage-prefix-g">(Please select required fields in Ad Campaign tab first)</span>
         </div>
         
         <div id="fields-container-adgroup"></div>
         
         <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('adgroup')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad Group</button>
+          <button class="btn-primary" onclick="storeLayer('adgroup')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Group</button>
         </div>
       </div>
     </div>
 
-    <!-- PANEL 3: AD LAYER -->
     <div class="tab-panel" id="panel-ad">
       <div class="card">
         <div class="card-header">
           <div class="card-icon">🖼️</div>
           <div>
             <div class="card-title">Ad Configurations</div>
-            <div class="card-desc">Creative mapping fields built independently.</div>
+            <div class="card-desc">Generates standalone Ad names (Creative to Format). No parent prefixes.</div>
           </div>
-        </div>
-
-        <div class="prefix-holder">
-          <div class="prefix-label">Parent Ad Group Prefix Inherited:</div>
-          <span id="heritage-prefix-a">(Please select required fields in Ad Campaign tab first)</span>
         </div>
         
         <div id="fields-container-ad"></div>
         
         <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save & Store Ad</button>
+          <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
         </div>
       </div>
     </div>
@@ -216,14 +199,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
     </div>
   </div>
 
-  <!-- FIXED RIGHT LIVE PREVIEW PANEL -->
   <div class="result-sticky">
     <div class="card">
       <div class="card-header">
         <div class="card-icon">⭐</div>
         <div>
           <div class="card-title">Live Preview Panel</div>
-          <div class="card-desc">Copy data fluidly. Saving memory is controlled by Save buttons inside tabs.</div>
+          <div class="card-desc">Isolated levels. Form items are decoupled, generating clean code segments.</div>
         </div>
       </div>
       
@@ -255,7 +237,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
-    <!-- HISTORICAL LOGS -->
     <div class="card" style="margin-top:14px">
       <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:10px">
@@ -274,7 +255,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
-const STORAGE_KEY = 'universal_tab_structure_history_v6';
+const STORAGE_KEY = 'universal_tab_structure_history_v7';
 
 const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
 const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
@@ -334,7 +315,6 @@ async function loadData() {
 
     OPTIONS = {};
     
-    // 💡 修复解析引擎核心：完美解包三层嵌套的大字典数据源，阻断卡死
     if(dataJson["Ad-Campaign"]) {
       for(const [col, vals] of Object.entries(dataJson["Ad-Campaign"])) {
         const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = (k === 'product-code') ? [] : vals;
@@ -381,10 +361,10 @@ function renderFieldHTML(f) {
     const opts = OPTIONS[f] || [];
     return '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
   } else if (f === 'custom') {
-    // 💡 修复体验细节：Campaign 层的 Custom 推荐默认改为直接平铺不隐藏 (display:block)
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Common Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
+    // 💡 修复细节2：Campaign Custom 推荐升级，拆分 Search Ad 和 Pmax Ad 两个完整的阵列
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Auto-Fill Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div><div class="help-group" style="margin-top:10px;"><div class="help-group-title">Pmax Ad Tags</div><div class="help-tags">' + ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
   } else if (f === 'ag-custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Language / Country / Split Test variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Applied for testing segments or locale identifiers. Omitted if empty.</div></div></div>';
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Omitted if empty.</div></div></div>';
   }
   return '';
 }
@@ -448,7 +428,7 @@ function getFieldRuntimeOptions(field) {
     return PRODUCT_RELATION_MAP[currentType] || [];
   }
 
-  // 💡 级联轻量化提取：如果前置类目选中，下拉框显示精准路由推荐，不选则显示全部，确保“物理独立可选”
+  // 💡 完整保留人群强制条件绑定规则
   if (field === 'audience-tag') {
     const cat = sel['audience-category'];
     if(!cat) {
@@ -514,7 +494,6 @@ function filterDropdown(field, q) {
   drop.innerHTML = html || '<div class="dropdown-item no-match">No results found</div>';
 }
 
-// 💡 修复点：彻底移除强覆盖，所有层级现在完全独立选择，仅在切换类目时进行“首发安全值推荐”，不锁死
 function pickDropdown(field, val, e) {
   if(e) e.preventDefault();
   sel[field] = val;
@@ -527,8 +506,8 @@ function pickDropdown(field, val, e) {
      if (sel['product-code'] && !allowed.includes(sel['product-code'])) { resetInputNode('product-code'); }
   }
 
+  // 💡 人群机制强制条件触发：保留
   if (field === 'audience-category') {
-     // 仅在手动切大类时做安全值刷新初始化，并不剥夺右侧独立修改的权利
      const tags = (OPTIONS['audience-tag-map'] || {})[val] || [];
      if(tags.length > 0) { forceFillInputNode('audience-tag', tags[0].value); } else { resetInputNode('audience-tag'); }
      
@@ -573,21 +552,25 @@ function selectTag(field, val) {
 
 function validateLayer(layer) {
   const missing = [];
-  CAMPAIGN_WHITELIST.forEach(f => { if (f !== 'custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
-  if (missing.length > 0) return { ok: false, msg: 'Missing Ad Campaign fields: ' + missing.join(', ') };
-  
-  if (layer === 'adgroup' || layer === 'ad') {
+  if (layer === 'campaign') {
+    CAMPAIGN_WHITELIST.forEach(f => { if (f !== 'custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
+    if (missing.length > 0) return { ok: false, msg: 'Missing Campaign fields: ' + missing.join(', ') };
+  }
+  if (layer === 'adgroup') {
     ADGROUP_WHITELIST.forEach(f => { if (f !== 'ag-custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
+    if (missing.length > 0) return { ok: false, msg: 'Missing Ad Group fields: ' + missing.join(', ') };
   }
   if (layer === 'ad') {
     if(!sel['creative-concept']) missing.push('Creative Concept');
     if(!sel['format---size']) missing.push('Format / Size');
+    if (missing.length > 0) return { ok: false, msg: 'Missing Ad fields: ' + missing.join(', ') };
   }
-  if (missing.length > 0) return { ok: false, msg: 'Missing fields: ' + missing.join(', ') };
   return { ok: true };
 }
 
+// 💡 核心大修正3：彻底砍断级联包含！各层命名完全独立，仅按该层字段规则组装字符串
 function compileNames() {
+  // 1. Campaign Name：仅拼 Campaign 自身字段
   const campaignParts = [];
   for (const f of CAMPAIGN_WHITELIST) {
     if (f === 'custom') {
@@ -596,20 +579,20 @@ function compileNames() {
     } else if (sel[f]) { campaignParts.push(sel[f].trim()); }
   }
   const cName = campaignParts.join('_');
-  if (!cName) return { campaign: '', adgroup: '', ad: '' };
 
-  const agParts = [cName];
+  // 2. Ad Group Name：不再携带 cName！直接从 Audience Category 拼到 Custom
+  const agParts = [];
   if(sel['audience-category']) agParts.push(sel['audience-category'].trim());
   if(sel['audience-tag']) agParts.push(sel['audience-tag'].trim());
   if(sel['data-source']) agParts.push(sel['data-source'].trim());
   if(sel['data-source-detail']) agParts.push(sel['data-source-detail'].trim());
   if(sel['data-window']) agParts.push(sel['data-window'].trim());
-  
   const agCustomVal = document.getElementById('ag-custom') ? document.getElementById('ag-custom').value.trim() : '';
   if(agCustomVal) agParts.push(agCustomVal);
   const gName = agParts.join('_');
 
-  const adParts = [gName];
+  // 3. Ad Name：跨度只拼 Creative Concept + Size，没有父级累加
+  const adParts = [];
   if(sel['creative-concept']) adParts.push(sel['creative-concept'].trim());
   if(sel['format---size']) adParts.push(sel['format---size'].trim());
   const aName = adParts.join('_');
@@ -621,26 +604,17 @@ function updateAllPreviews() {
   const names = compileNames();
   const warEl = document.getElementById('validation-warning'); if(warEl) warEl.classList.remove('show');
 
-  const hG = document.getElementById('heritage-prefix-g'); const hA = document.getElementById('heritage-prefix-a');
-  if(names.campaign) {
-    hG.textContent = names.campaign;
-    hA.textContent = names.adgroup ? names.adgroup : names.campaign + '_[Awaiting Ad Group Fields]';
-  } else {
-    hG.textContent = '(Please select required fields in Ad Campaign tab first)';
-    hA.textContent = '(Please select required fields in Ad Campaign tab first)';
-  }
-
   const cEl = document.getElementById('preview-campaign');
   if (names.campaign) { cEl.innerHTML = escHtml(names.campaign) + '<div class="result-len">' + names.campaign.length + ' chars</div>'; }
   else { cEl.innerHTML = '<span class="seg-empty">Awaiting Ad Campaign fields...</span>'; }
 
   const gEl = document.getElementById('preview-adgroup');
   if (names.adgroup) { gEl.innerHTML = escHtml(names.adgroup) + '<div class="result-len">' + names.adgroup.length + ' chars</div>'; }
-  else { gEl.innerHTML = '<span class="seg-empty">Awaiting Ad Group setup...</span>'; }
+  else { gEl.innerHTML = '<span class="seg-empty">Awaiting Ad Group fields...</span>'; }
 
   const aEl = document.getElementById('preview-ad');
   if (names.ad) { aEl.innerHTML = escHtml(names.ad) + '<div class="result-len">' + names.ad.length + ' chars</div>'; }
-  else { aEl.innerHTML = '<span class="seg-empty">Awaiting Ad setup...</span>'; }
+  else { aEl.innerHTML = '<span class="seg-empty">Awaiting Ad fields...</span>'; }
 }
 
 function copyText(layer) {
@@ -664,7 +638,7 @@ function storeLayer(layer) {
   };
 
   copyHistory.unshift({
-    type: layer, name: names[layer], cCol: names.campaign, gCol: layer === 'campaign' ? '' : names.adgroup, aCol: (layer==='campaign'||layer==='adgroup') ? '' : names.ad,
+    type: layer, name: names[layer], cCol: names.campaign, gCol: names.adgroup, aCol: names.ad,
     time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}), snapshot: snapshot
   });
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(copyHistory)); } catch(e){}
@@ -677,9 +651,10 @@ function renderHistory(){
   let html = '';
   for(let i=0; i<copyHistory.length; i++) {
     const h = copyHistory[i]; let badgeClass = h.type === 'campaign' ? 'badge-c' : (h.type === 'adgroup' ? 'badge-g' : 'badge-a');
-    html += '<div class="history-row" onclick="restoreUniversalSnapshot(' + i + ')" title="Instant rollback form state"><div><span class="history-type-badge ' + badgeClass + '">' + h.type.toUpperCase() + '</span></div><div class="history-name">' + escHtml(h.name) + '</div><div class="history-subnames-box"><div>🔹 C: ' + escHtml(h.cCol) + '</div>';
-    if(h.gCol) html += '<div>🔹 G: ' + escHtml(h.gCol) + '</div>';
-    if(h.aCol) html += '<div>🔹 A: ' + escHtml(h.aCol) + '</div>';
+    html += '<div class="history-row" onclick="restoreUniversalSnapshot(' + i + ')" title="Instant rollback form state"><div><span class="history-type-badge ' + badgeClass + '">' + h.type.toUpperCase() + '</span></div><div class="history-name">' + escHtml(h.name) + '</div><div class="history-subnames-box">';
+    if(h.cCol) html += '<div>🚀 C: ' + escHtml(h.cCol) + '</div>';
+    if(h.gCol) html += '<div>📦 G: ' + escHtml(h.gCol) + '</div>';
+    if(h.aCol) html += '<div>🖼️ A: ' + escHtml(h.aCol) + '</div>';
     html += '</div><div class="history-meta"><span>🕒 ' + h.time + '</span><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></div></div>';
   }
   el.innerHTML = html;
@@ -714,8 +689,8 @@ function restoreUniversalSnapshot(idx) {
 function clearHistory(){ copyHistory.length=0; try { localStorage.removeItem(STORAGE_KEY); } catch(e){} renderHistory(); }
 function exportTXT(){
   if(!copyHistory.length) return; let divider = '-'.repeat(120) + '\n';
-  let txt = 'Universal Layer Ad Structure Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider + 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(55) + ' | ' + 'Ad\n' + divider;
-  copyHistory.forEach(h => { txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(55) + ' | ' + (h.aCol || '-') + '\n'; });
+  let txt = 'Universal Clean Segment Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider + 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(45) + ' | ' + 'Ad\n' + divider;
+  copyHistory.forEach(h => { txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(45) + ' | ' + (h.aCol || '-') + '\n'; });
   dlBlob(txt, 'ad-structure-matrix-' + fmt() + '.txt', 'text/plain;charset=utf-8');
 }
 function exportCSV(){
