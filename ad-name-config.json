@@ -1,0 +1,300 @@
+{
+  "Landing Page Collections": [
+    {
+      "value": "deal page",
+      "note": "Promotional landing catalog featuring discounted prices, seasonal holiday sales, and special bundles for security cameras."
+    },
+    {
+      "value": "web home page",
+      "note": "The primary root storefront homepage showcasing flagship security camera models and new technology launches."
+    },
+    {
+      "value": "store home page",
+      "note": "The main catalog landing page for the marketplace storefront filtering active security camera inventory."
+    },
+    {
+      "value": "store poe page",
+      "note": "Collection page dedicated to Power over Ethernet (PoE) wired security cameras and local recording network infrastructures."
+    },
+    {
+      "value": "store doorbell page",
+      "note": "Collection page concentrating on smart video doorbells, front-door entry security, and chime hardware accessories."
+    },
+    {
+      "value": "store battery wifi page",
+      "note": "Collection page tracking standalone wire-free rechargeable battery security cameras powered via residential Wi-Fi."
+    },
+    {
+      "value": "store battery 4g page",
+      "note": "Collection page filtering off-grid wire-free cellular LTE battery security cameras built for remote or rural locations."
+    },
+    {
+      "value": "store wifi page",
+      "note": "Collection page mapping continuous plug-in powered security cameras connecting via Wi-Fi networks."
+    },
+    {
+      "value": "store system page",
+      "note": "Collection page focusing on multi-camera security system kits bundled with local storage NVR servers."
+    },
+    {
+      "value": "store dual lens page",
+      "note": "Collection page centered on dual-lens wide-angle stitch technology security cameras for panoramic coverage."
+    },
+    {
+      "value": "store home hub page",
+      "note": "Collection page highlighting next-generation smart automation base hubs coordinating multiple security cameras."
+    },
+    {
+      "value": "store floodlight page",
+      "note": "Collection page targeting ultra-bright motion-activated protective lighting security cameras for active night defense."
+    },
+    {
+      "value": "reseller page",
+      "note": "B2B intake lead portals for wholesale operations, distribution partners, or certified security custom installers."
+    },
+    {
+      "value": "ptz wifi page",
+      "note": "Collection page tracking motorized pan-tilt-zoom smart tracking Wi-Fi cameras with auto-patrol features."
+    },
+    {
+      "value": "vp series page",
+      "note": "Exclusive showcase landing page for high-performance Value-Plus series security cameras targeting premium configurations."
+    },
+    {
+      "value": "prof series page",
+      "note": "Dedicated landing catalog mapping professional-grade heavy DIY security cameras for commercial and enterprise setups."
+    },
+    {
+      "value": "event page",
+      "note": "Custom localized campaign hubs for massive brand milestones, collaborative product rollouts, or new security camera launches."
+    },
+    {
+      "value": "16mp page",
+      "note": "E-commerce category section capturing next-level ultra-HD 16-megapixel panoramic sensor security cameras."
+    },
+    {
+      "value": "floodlight page",
+      "note": "Standalone hardware landing page focusing exclusively on outdoor motion-triggered floodlight surveillance cameras."
+    },
+    {
+      "value": "hub mini series page",
+      "note": "Collection page targeting compact local network sync hosts designed to manage smaller residential security camera nodes."
+    },
+    {
+      "value": "omvi series page",
+      "note": "Exclusive tech showcase filtering the Omvi smart security ecosystem with advanced cloud AI software integrations."
+    },
+    {
+      "value": "anniversary page",
+      "note": "High-conversion clearance event page celebrating the annual brand anniversary milestone with major site-wide camera deals."
+    }
+  ],
+  "Creative Type": [
+    {
+      "value": "vid",
+      "note": "Standard video ad creative covering product features, unboxing, security camera installations, or real defense footage clips."
+    },
+    {
+      "value": "pic",
+      "note": "Static single-image creative used for showcasing security camera industrial design or hardware crisp details."
+    },
+    {
+      "value": "carousel pic",
+      "note": "Multi-card image carousel displaying a series of different security cameras or sequential lifestyle setups."
+    },
+    {
+      "value": "carousel vid",
+      "note": "Multi-card video carousel ad displaying sequential hardware operations, tracking tech, or multi-scenario camera feature breakdowns."
+    },
+    {
+      "value": "text",
+      "note": "Pure text copy variations reserved primarily for intent-driven search engine ad extensions or textual forum segments."
+    },
+    {
+      "value": "gif",
+      "note": "Short animated looping graphic highlighting quick key app interactions or security camera motion sensor triggers."
+    },
+    {
+      "value": "adaptive",
+      "note": "Criteo adaptive ad format that intelligently modifies layout, imagery, and copywriting variations to fit different app placement sizes."
+    },
+    {
+      "value": "feed",
+      "note": "Criteo dynamic ad format utilizing automated catalog feeds to dynamically retarget viewers based on viewed security camera SKUs."
+    }
+  ],
+  "Creative Source": [
+    {
+      "value": "bgc",
+      "note": "Brand Generated Content: Official high-production studio assets, product renders, and slick marketing videos showcasing security camera industrial design."
+    },
+    {
+      "value": "ugc",
+      "note": "User Generated Content: Highly authentic, native-style creator videos demonstrating security camera unboxing, home installation, or real-life backyard capture footage."
+    },
+    {
+      "value": "kol",
+      "note": "Key Opinion Leader: Professional influencer collaborations and tech reviewer content lending authority and deep technical walkthroughs for the security camera."
+    }
+  ],
+  "Creative Source Type": [
+    {
+      "value": "unlisted",
+      "note": "Non-public BGC video on official YouTube channel, pic/gif, or native video on other platforms."
+    },
+    {
+      "value": "public",
+      "note": "Public BGC video published on the official YouTube brand channel."
+    },
+    {
+      "value": "boost",
+      "note": "Original security camera video hosted on the YouTube KOL's own channel."
+    },
+    {
+      "value": "cut",
+      "note": "Post-edited/cut-down KOL video uploaded to the official YouTube brand channel."
+    }
+  ],
+  "Creative Channel": [
+    {
+      "value": "reolink",
+      "note": "Official Reolink brand native channels, direct owned-media placements, and primary official ecosystem platforms."
+    }
+  ],
+  "Creative Discount": [
+    {
+      "value": "no disc",
+      "note": "Full-price standard creative without any discount callouts or promotional overlays."
+    },
+    {
+      "value": "flat disc",
+      "note": "Dollar-off discount creative showing a specific monetary reduction (e.g., Save $50 / $30 Off)."
+    },
+    {
+      "value": "percent disc",
+      "note": "Percentage-off discount creative showing a proportional price cut (e.g., 20% OFF / 30% OFF)."
+    },
+    {
+      "value": "spend save",
+      "note": "Tiered threshold discount creative incentivizing higher spend (e.g., Spend $200 Save $40)."
+    },
+    {
+      "value": "bundle disc",
+      "note": "Package deal creative offering bundled savings when purchasing cameras with accessories or NVR kits."
+    },
+    {
+      "value": "bogo",
+      "note": "Buy-One-Get-One or multi-buy promo creative (e.g., Buy a camera, get a free solar panel)."
+    },
+    {
+      "value": "free gift",
+      "note": "Value-add promotional creative highlighting complimentary hardware, accessories, or cloud service trials."
+    }
+  ],
+  "Creative Size": [
+    {
+      "value": "all",
+      "note": "Universal asset bundle accommodating cross-platform responsive sizes and multi-ratio aspect configurations."
+    },
+    {
+      "value": "16:9",
+      "note": "Horizontal widescreen aspect ratio optimized for YouTube desktop feeds, TV displays, and traditional landscape camera video previews."
+    },
+    {
+      "value": "9:16",
+      "note": "Full-screen vertical mobile aspect ratio tailored for TikTok, Instagram Reels, YouTube Shorts, and Meta Stories."
+    },
+    {
+      "value": "1:1",
+      "note": "Square aspect ratio standard for Meta feed image carousels, Criteo dynamic feeds, and desktop shopping placements."
+    }
+  ],
+  "KSP": [
+    {
+      "value": "allksp"
+    },
+    {
+      "value": "360"
+    },
+    {
+      "value": "180"
+    },
+    {
+      "value": "16mp"
+    },
+    {
+      "value": "4k"
+    },
+    {
+      "value": "solar"
+    },
+    {
+      "value": "continuous recording"
+    },
+    {
+      "value": "magnetic"
+    }
+  ],
+  "Project": [
+    {
+      "value": "aon",
+      "note": "Always-On: Ever-green perpetual advertising campaign running continuously outside major promotional events."
+    },
+    {
+      "value": "new",
+      "note": "New Product Launch: Go-to-market campaign introducing a newly released security camera model."
+    },
+    {
+      "value": "relaunch",
+      "note": "Re-launch Campaign: Strategic marketing push to reignite demand and sales momentum for mature camera models."
+    },
+    {
+      "value": "26spring",
+      "note": "2026 Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season."
+    },
+    {
+      "value": "26summer",
+      "note": "2026 Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling."
+    },
+    {
+      "value": "26fall",
+      "note": "2026 Fall Sale: Autumn home prep and shoulder-season promotional campaign."
+    },
+    {
+      "value": "26winter",
+      "note": "2026 Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign."
+    },
+    {
+      "value": "26anni",
+      "note": "2026 Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles."
+    },
+    {
+      "value": "26pd",
+      "note": "2026 Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion."
+    },
+    {
+      "value": "26fpd",
+      "note": "2026 Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign."
+    },
+    {
+      "value": "26bfcm",
+      "note": "2026 Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign."
+    },
+    {
+      "value": "26easter",
+      "note": "2026 Easter Sale: Spring holiday family and safety promo event."
+    },
+    {
+      "value": "26father",
+      "note": "2026 Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics."
+    },
+    {
+      "value": "26mother",
+      "note": "2026 Mother's Day Sale: Smart home peace-of-mind gift campaign."
+    },
+    {
+      "value": "26school",
+      "note": "2026 Back to School: Late-summer home and dorm/rental security campaign."
+    }
+  ]
+}
