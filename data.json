@@ -59,6 +59,44 @@
         { "value": "purchase", "label": "purchased customers", "note": "Historical buyers, used for retargeting accessories or exclusion." },
         { "value": "engaged", "label": "post / page engaged", "note": "Social media engagers who liked, commented, or shared brand posts." },
         { "value": "view", "label": "video view", "note": "Users who watched brand videos or social video ads." }
+      ],
+      "lal": [
+        { "value": "visit", "label": "lookalike of visitors", "note": "Algorithmic lookalike expansion based on website visitors matrix." },
+        { "value": "pageview", "label": "lookalike of pageviewers", "note": "Algorithmic lookalike expansion based on landing page visitors." },
+        { "value": "click", "label": "lookalike of link-clikers", "note": "Algorithmic lookalike expansion based on active link-clikers." },
+        { "value": "lead", "label": "lookalike of leads", "note": "Algorithmic lookalike expansion based on form submitters." },
+        { "value": "subscribe", "label": "lookalike of subscribers", "note": "Algorithmic lookalike expansion based on newsletter subscribers." },
+        { "value": "atc", "label": "lookalike of cart-adders", "note": "Algorithmic lookalike expansion based on add-to-cart audience." },
+        { "value": "checkout", "label": "lookalike of checkouts", "note": "Algorithmic lookalike expansion based on checkout initiators." },
+        { "value": "purchase", "label": "lookalike of purchasers", "note": "Algorithmic lookalike expansion based on high-value buyer list." },
+        { "value": "engaged", "label": "lookalike of page engagers", "note": "Algorithmic lookalike expansion based on social page engagers." },
+        { "value": "view", "label": "lookalike of video viewers", "note": "Algorithmic lookalike expansion based on video view audience." },
+        { "value": "competitor", "label": "lookalike of competitor targets", "note": "Lookalike expansion seeded from competitor keyword searchers." }
+      ],
+      "cus": [
+        { "value": "competitor", "label": "competitors intent", "note": "Custom intent targeting competitor brand keywords or website URLs." },
+        { "value": "poe", "label": "poe keywords targeting", "note": "Custom intent keywords or website positioning focused on PoE infrastructure." },
+        { "value": "battery", "label": "battery keywords targeting", "note": "Custom intent keywords or website positioning focused on standalone battery cameras." },
+        { "value": "battery wifi", "label": "battery wifi keywords targeting", "note": "Custom intent keywords or website positioning focused on wire-free battery Wi-Fi setups." },
+        { "value": "battery 4g", "label": "battery 4g keywords targeting", "note": "Custom intent keywords or website positioning focused on 4G LTE cellular battery cameras." },
+        { "value": "wifi", "label": "wi-fi keywords targeting", "note": "Custom intent keywords or website positioning focused on plug-in Wi-Fi security smart cameras." },
+        { "value": "doorbell", "label": "doorbell keywords targeting", "note": "Custom intent keywords or website positioning focused on smart video doorbells." },
+        { "value": "nvr", "label": "nvr system targeting", "note": "Custom intent keywords or website positioning focused on NVR recording servers." },
+        { "value": "kit", "label": "security kit systems", "note": "Custom intent keywords or website positioning focused on multi-camera security kit systems." },
+        { "value": "dual lens", "label": "dual-lens camera technology", "note": "Custom intent keywords or website positioning focused on dual-lens wide-angle cameras." },
+        { "value": "prospect", "label": "criteo prospecting", "note": "Exclusive Criteo engine prospecting cold audience tag." }
+      ],
+      "kwd": [
+        { "value": "competitor", "label": "competitor keywords", "note": "Search campaign intent targeting competitor brand names." },
+        { "value": "poe", "label": "poe system keywords", "note": "Search campaign intent targeting PoE security cameras queries." },
+        { "value": "battery", "label": "battery camera keywords", "note": "Search campaign intent targeting battery-powered wire-free camera queries." },
+        { "value": "battery wifi", "label": "battery wi-fi keywords", "note": "Search campaign intent targeting wire-free battery Wi-Fi system queries." },
+        { "value": "battery 4g", "label": "4g lte cellular keywords", "note": "Search campaign intent targeting 4G cellular standalone camera queries." },
+        { "value": "wifi", "label": "wi-fi security keywords", "note": "Search campaign intent targeting smart plug-in Wi-Fi camera queries." },
+        { "value": "doorbell", "label": "video doorbell keywords", "note": "Search campaign intent targeting video smart doorbell queries." },
+        { "value": "nvr", "label": "nvr recorder keywords", "note": "Search campaign intent targeting network video recorder queries." },
+        { "value": "kit", "label": "multi-camera kit keywords", "note": "Search campaign intent targeting multi-camera bundle and kit queries." },
+        { "value": "dual lens", "label": "dual-lens panoramic keywords", "note": "Search campaign intent targeting dual-lens wide-angle or dual-view camera queries." }
       ]
     },
 
@@ -80,11 +118,26 @@
     },
 
     "Data Source Detail": [
-      { "value": "n", "label": "no detail", "note": "Default clean pass-through node for general prospecting cohorts." }
+      { "value": "n", "label": "no detail", "note": "Default clean pass-through node for general prospecting cohorts." },
+      { "value": "all", "label": "all products coverage", "note": "Targeting generic multi-category brand search terms or broad array assets." },
+      { "value": "poe", "label": "poe technology series", "note": "Power over Ethernet structural camera hardware sub-category." },
+      { "value": "battery", "label": "battery-powered series", "note": "Wire-free eco standalone rechargeable battery camera solutions." },
+      { "value": "battery wifi", "label": "battery wi-fi standalone", "note": "Wire-free battery-powered standalone nodes working over residential Wi-Fi networks." },
+      { "value": "battery 4g", "label": "4g lte standalone cellular", "note": "Off-grid wire-free camera nodes transmitting data via 4G LTE mobile data bands." },
+      { "value": "wifi", "label": "wi-fi smart plugin", "note": "Continuous plug-in power hardware nodes working over residential Wi-Fi frequencies." },
+      { "value": "doorbell", "label": "smart video doorbells", "note": "Front-door entry protection, dual-power smart video doorbell systems." },
+      { "value": "nvr", "label": "network video recorders", "note": "Stand-alone multi-channel mass local storage recording servers." }
     ],
 
     "Data Window": [
-      { "value": "n", "label": "no window specified", "note": "Default open-ended lifetime cookie cache tracking without time restrictions." }
+      { "value": "n", "label": "no window specified", "note": "Default open-ended lifetime cookie cache tracking without time restrictions." },
+      { "value": "7d", "label": "7 days lookback", "note": "Ultra-fresh conversion windows, tracking recent hot intent signals inside a 7-day loop." },
+      { "value": "14d", "label": "14 days lookback", "note": "Standard e-commerce evaluation cycles matching immediate seasonal sales spikes." },
+      { "value": "30d", "label": "30 days lookback", "note": "Classic mid-funnel remarketing retargeting block capturing shopping consideration." },
+      { "value": "60d", "label": "60 days lookback", "note": "Extended consideration tracking window for major ecosystem bundles purchase cycles." },
+      { "value": "90d", "label": "90 days lookback", "note": "Quarterly operational lookback block mapping stable consumer brand awareness loops." },
+      { "value": "180d", "label": "180 days lookback", "note": "Maximum standard tracking pixel storage threshold mapping long-tail accessory sales." },
+      { "value": "365d", "label": "365 days lookback", "note": "Annual customer retention lookback, utilized for yearly upgrade or exclusion mapping." }
     ]
   },
 
