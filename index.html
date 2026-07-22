@@ -1,721 +1,469 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ad Structure Universal Hub</title>
-  <style>
-:root{--primary:#4F46E5;--primary-light:#EEF2FF;--primary-hover:#4338CA;--success:#10B981;--danger:#EF4444;--danger-light:#FEF2F2;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--bg:#F3F4F6;--card:#FFF;--shadow:0 1px 3px rgba(0,0,0,.08)}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;gap:14px}
-.header-icon{font-size:26px;line-height:1}
-.header-title{font-size:18px;font-weight:700;color:#fff}
-.header-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
-.layout{display:grid;grid-template-columns:1fr 400px;gap:20px;max-width:1200px;margin:24px auto;padding:0 20px 40px;align-items:start}
-@media(max-width:960px){.layout{grid-template-columns:1fr}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Structure Universal Hub</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --primary-color: #38bdf8;
+            --primary-hover: #0284c7;
+            --accent-color: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: #0f172a;
+            --lock-bg: #475569;
+            --success-color: #10b981;
+        }
 
-.tab-container {display:flex;background:#E5E7EB;padding:4px;border-radius:12px;margin-bottom:16px;gap:4px}
-.tab-btn {flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
-.tab-btn:hover {color:var(--text);background:rgba(255,255,255,.5)}
-.tab-btn.active {background:var(--card);color:var(--primary);box-shadow:0 2px 4px rgba(0,0,0,.04)}
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 24px; min-height: 100vh; }
+        .container { max-width: 1280px; margin: 0 auto; }
 
-.tab-panel {display:none}
-.tab-panel.active {display:block}
+        header { margin-bottom: 20px; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        header h1 { font-size: 24px; color: var(--primary-color); margin-bottom: 6px; }
+        header p { color: var(--text-muted); font-size: 13px; }
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;box-shadow:var(--shadow)}
-.card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
-.card-icon{width:32px;height:32px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.card-title{font-size:15px;font-weight:700}
-.card-desc{font-size:12px;color:var(--muted);margin-top:1px}
-.fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:600px){.fields-grid{grid-template-columns:1fr}}
-.field-full{grid-column:1/-1}
-.field-compact{display:contents}
-.field-compact .field{grid-column:span 1}
-@media(max-width:600px){.field-compact .field{grid-column:1/-1}}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
-.field-label .req{color:var(--danger);font-size:14px;line-height:1}
+        .tab-nav { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .tab-btn { background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+        .tab-btn.active { background: var(--primary-color); color: #0f172a; border-color: var(--primary-color); }
 
-.tag-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1.5px solid var(--border);border-radius:10px;min-height:44px;cursor:default;transition:border-color .15s}
-.tag{display:inline-flex;align-items:center;padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--muted);background:var(--bg);user-select:none;white-space:nowrap}
-.tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.tag.active{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:600}
-.tag.disabled{opacity:.35;pointer-events:none;cursor:not-allowed}
-.select-wrap{position:relative}
-.select-search, .custom-input{width:100%;padding:9px 36px 9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);background:var(--card);transition:border-color .15s,box-shadow .15s;cursor:pointer}
-.custom-input{padding-right:12px;cursor:text}
-.select-search::placeholder, .custom-input::placeholder{color:#9CA3AF;font-size:13px}
-.select-search:focus, .custom-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.1)}
-.select-search.has-value{color:var(--primary);font-weight:600}
-.select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:12px}
-.dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:100;display:none}
-.dropdown.open{display:block}
-.dropdown-item{padding:9px 14px;font-size:13px;cursor:pointer;transition:background .1s;color:var(--text);border-bottom:1px dashed var(--bg)}
-.dropdown-item-title{font-weight:700;color:var(--text);margin-bottom:2px}
-.dropdown-item-note{font-size:11px;color:var(--muted);font-style:italic}
-.dropdown-item:hover{background:var(--primary-light)}
-.dropdown-item:hover .dropdown-item-title{color:var(--primary)}
-.dropdown-item.selected{background:var(--primary-light)}
-.dropdown-item.selected .dropdown-item-title{color:var(--primary)}
-.custom-input.ok{border-color:var(--success);background:#F0FDF4}
-.custom-rules{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;background:#F9FAFB;padding:8px 12px;border-radius:8px;border:1px dashed var(--border)}
-.custom-help{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.custom-help-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#F3F4F6;font-size:12px;font-weight:600;color:var(--muted)}
-.custom-help-body{display:block;padding:12px 14px 14px}
-.help-group{margin-bottom:12px}
-.help-group:last-child{margin-bottom:0}
-.help-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:7px}
-.help-tags{display:flex;flex-wrap:wrap;gap:6px}
-.help-tag{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--text);background:#fff}
-.help-tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.result-sticky{position:sticky;top:20px}
-.result-dark{background:#18181B;border-radius:12px;padding:16px;margin-bottom:12px}
-.result-dark-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#71717A;margin-bottom:6px;font-weight:600}
-.result-name-display{font-size:13px;font-weight:700;color:#F4F4F5;word-break:break-all;line-height:1.5;min-height:24px}
-.seg-empty{color:#52525B;font-style:italic;font-size:12px;font-weight:400}
-.result-box-group{border-bottom:1px solid #27272A;padding-bottom:10px;margin-bottom:10px}
-.result-box-group:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
-.result-len{font-size:10px;color:#52525B;text-align:right;margin-top:2px}
-.btn-primary{width:100%;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--primary);color:#fff;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-primary:hover{background:var(--primary-hover)}
-.btn-primary.copied{background:var(--success)}
-.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.btn-secondary{padding:9px 10px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
-.btn-secondary:hover {border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.validation-warning{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:12px;color:#991B1B;display:none}
-.validation-warning.show{display:block;font-weight:500}
-.history-scroller{max-height:350px;overflow-y:auto}
-.history-row{display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
-.history-row:hover{background:var(--primary-light)}
-.history-type-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;text-transform:uppercase;margin-bottom:2px}
-.badge-c{background:#E0E7FF;color:#4338CA}
-.badge-g{background:#D1FAE5;color:#065F46}
-.badge-a{background:#FEF3C7;color:#92400E}
-.history-name{font-size:11px;font-weight:600;word-break:break-all;color:var(--text);margin-bottom:2px}
-.history-subnames-box {font-size:10px;color:var(--muted);background:#F9FAFB;padding:4px 8px;border-radius:6px;border:1px solid var(--border);margin-top:2px}
-.history-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin-top:4px}
-.datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
-.datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
-.datasource-bar.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
-.datasource-bar.loading{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
-.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.datasource-bar.ok .ds-dot{background:#10B981}
-.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
-.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover {opacity:1}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
-@keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
-  </style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .result-section { position: sticky; top: 15px; z-index: 100; background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); border: 2px solid var(--primary-color); border-radius: 12px; padding: 18px; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+        .result-title { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .result-box { display: flex; align-items: center; gap: 12px; background: var(--input-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .naming-string { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: bold; color: var(--primary-color); word-break: break-all; flex: 1; }
+        .btn-copy { background-color: var(--primary-color); color: #0f172a; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-copy:hover { background-color: var(--primary-hover); color: white; }
+
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+        .field-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .field-card:focus-within { border-color: var(--primary-color); }
+        .field-header { display: flex; justify-content: space-between; align-items: center; }
+        .field-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .badge-locked { font-size: 11px; background-color: var(--accent-color); color: white; padding: 2px 6px; border-radius: 4px; display: none; font-weight: bold; }
+
+        .select-wrapper { display: flex; gap: 6px; }
+        select, input[type="text"] { width: 100%; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 9px 12px; border-radius: 6px; font-size: 14px; outline: none; }
+        select:disabled { background: var(--lock-bg); cursor: not-allowed; opacity: 0.7; }
+        .btn-add-enum { background: #334155; color: var(--primary-color); border: 1px solid var(--border-color); padding: 0 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+
+        .field-note { font-size: 12px; color: var(--text-muted); min-height: 38px; line-height: 1.4; background: rgba(15, 23, 42, 0.5); padding: 8px; border-radius: 4px; border-left: 3px solid var(--primary-color); }
+        .error-msg { color: var(--accent-color); font-size: 12px; display: none; margin-top: 4px; }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--success-color); color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: none; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 16px 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 30px; }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-secondary:hover { background: var(--border-color); }
+    </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-icon">📋</div>
-  <div>
-    <div class="header-title">Ad Structure Universal Tab-Builder</div>
-    <div class="header-sub">Product Data Source: product-code-map.json · Clean Level Naming Engine</div>
-  </div>
+<div class="container">
+    <header>
+        <h1>📋 Ad Structure Universal Hub</h1>
+        <p>12-Field Precision Ad Naming Module · Integrated Data Source System</p>
+    </header>
+
+    <div class="tab-nav">
+        <button class="tab-btn" onclick="switchTab('campaign')">🚀 Campaign Name</button>
+        <button class="tab-btn" onclick="switchTab('adgroup')">📦 AdGroup Name</button>
+        <button class="tab-btn active" onclick="switchTab('ad')">🖼️ Ad Name (12-Field System)</button>
+    </div>
+
+    <!-- Placeholder Tab Panels -->
+    <div id="tab-campaign" class="tab-content"><div style="padding:40px; text-align:center; color:var(--text-muted);">Ad Campaign Level Workspace</div></div>
+    <div id="tab-adgroup" class="tab-content"><div style="padding:40px; text-align:center; color:var(--text-muted);">Ad Group Level Workspace</div></div>
+
+    <!-- Tab 3: 12-Field Ad Creative Naming Generator -->
+    <div id="tab-ad" class="tab-content active">
+        <div class="result-section">
+            <div class="result-title">
+                <span>生成的 Ad 名称 (Generated Ad Name)</span>
+                <span>12/12 字段有效</span>
+            </div>
+            <div class="result-box">
+                <div id="ad-naming-output" class="naming-string">--</div>
+                <button class="btn-copy" onclick="copyAdName()">复制名称 (Copy)</button>
+            </div>
+        </div>
+
+        <div class="grid-layout" id="ad-grid"></div>
+
+        <div class="toolbar">
+            <span style="font-size: 13px; color: var(--text-muted);">💡 规则：1. pic/gif 自动锁定 Source Type 为 unlisted；2. Custom 禁用下划线；3. 新增枚举持久化写入 JSON。</span>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" onclick="exportJsonConfig()">导出 JSON 字典</button>
+                <button class="btn-secondary" onclick="resetAdConfig()">恢复初始配置</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="layout">
-  <div>
-    <div class="tab-container">
-      <button class="tab-btn active" id="tab-c" onclick="switchTab('campaign')">🚀 Ad Campaign</button>
-      <button class="tab-btn" id="tab-g" onclick="switchTab('adgroup')">📦 Ad Group</button>
-      <button class="tab-btn" id="tab-a" onclick="switchTab('ad')">🖼️ Ad</button>
-    </div>
-
-    <div class="tab-panel active" id="panel-campaign">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🚀</div>
-          <div>
-            <div class="card-title">Ad Campaign Configurations</div>
-            <div class="card-desc">Independent workspace. Generates ONLY campaign string segments.</div>
-          </div>
-        </div>
-
-        <div id="datasource-status" class="datasource-bar loading">
-          <span class="ds-dot"></span>
-          <span class="ds-msg">Loading configurations...</span>
-          <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>
-        </div>
-
-        <div id="fields-container-campaign">
-          <div style="padding:40px 0;text-align:center">
-            <div class="skeleton" style="height:40px;width:100%;margin-bottom:16px"></div>
-            <div class="skeleton" style="height:40px;width:48%;display:inline-block;margin-right:2%"></div>
-            <div class="skeleton" style="height:40px;width:48%;display:inline-block"></div>
-          </div>
-        </div>
-        
-        <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('campaign')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Campaign</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="panel-adgroup">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📦</div>
-          <div>
-            <div class="card-title">Ad Group Configurations</div>
-            <div class="card-desc">Generates standalone Ad Group names (Audience to Time Window). No campaign prefix.</div>
-          </div>
-        </div>
-        
-        <div id="fields-container-adgroup"></div>
-        
-        <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('adgroup')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Group</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="panel-ad">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🖼️</div>
-          <div>
-            <div class="card-title">Ad Configurations</div>
-            <div class="card-desc">Generates standalone Ad names (Creative to Format). No parent prefixes.</div>
-          </div>
-        </div>
-        
-        <div id="fields-container-ad"></div>
-        
-        <div class="tab-footer-row">
-          <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;margin-top:12px">
-      <button class="btn-secondary" onclick="resetAll()">🔁 Reset All Fields</button>
-    </div>
-  </div>
-
-  <div class="result-sticky">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">⭐</div>
-        <div>
-          <div class="card-title">Live Preview Panel</div>
-          <div class="card-desc">Isolated levels. Form items are decoupled, generating clean code segments.</div>
-        </div>
-      </div>
-      
-      <div class="result-dark">
-        <div class="result-box-group">
-          <div class="result-dark-label">1. Ad Campaign Name</div>
-          <div class="result-name-display" id="preview-campaign"><span class="seg-empty">Incomplete...</span></div>
-          <button class="btn-primary" id="btn-copy-c" onclick="copyText('campaign')" style="margin-top:6px;padding:6px;font-size:11px;">📋 Copy Ad Campaign</button>
-        </div>
-        
-        <div class="result-box-group">
-          <div class="result-dark-label">2. Ad Group Name</div>
-          <div class="result-name-display" id="preview-adgroup"><span class="seg-empty">Incomplete...</span></div>
-          <button class="btn-primary" id="btn-copy-g" onclick="copyText('adgroup')" style="margin-top:6px;padding:6px;font-size:11px;">📋 Copy Ad Group</button>
-        </div>
-        
-        <div class="result-box-group">
-          <div class="result-dark-label">3. Ad Name</div>
-          <div class="result-name-display" id="preview-ad"><span class="seg-empty">Incomplete...</span></div>
-          <button class="btn-primary" id="btn-copy-a" onclick="copyText('ad')" style="margin-top:6px;padding:6px;font-size:11px;">📋 Copy Ad Name</button>
-        </div>
-        
-        <div id="validation-warning" class="validation-warning" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="btn-row" style="border-top:1px solid var(--border);padding-top:10px;">
-        <button class="btn-secondary" onclick="exportTXT()">📄 Export TXT</button>
-        <button class="btn-secondary" onclick="exportCSV()">📊 Export CSV</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:14px">
-      <div class="card-header" style="margin-bottom:14px;padding-bottom:12px;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="card-icon">📰</div>
-          <div class="card-title">Stored Database Logs</div>
-        </div>
-        <span style="font-size:12px;color:var(--muted);cursor:pointer" onclick="clearHistory()">Clear</span>
-      </div>
-      <div class="history-scroller" id="history-scroller">
-        <div class="empty-hint">No database records...</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="toast" class="toast">复制成功！</div>
 
 <script>
-const DATA_URL = './data.json';
-const MAP_URL = './product-code-map.json';
-const STORAGE_KEY = 'universal_tab_structure_history_v7';
-
-const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
-const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
-const AD_WHITELIST = ['creative-concept', 'format---size'];
-
-const FIELD_TYPES = {
-  "market": "dropdown", "product-type": "dropdown", "product-code": "dropdown",
-  "media-funnel": "tag", "ad-product": "tag", "bidding-goal": "tag", "url": "tag", "custom": "custom",
-  "audience-category": "dropdown", "audience-tag": "dropdown", "data-source": "dropdown", 
-  "data-source-detail": "dropdown", "data-window": "dropdown", "ag-custom": "custom",
-  "creative-concept": "dropdown", "format---size": "dropdown"
+// Master Config Structure for Ad Level
+const defaultAdSchema = {
+  "fields": [
+    {
+      "id": "landing-page", "name": "1. landing-page (Landing Page)", "type": "select", "allow_custom": true,
+      "options": [
+        {"value": "deal page", "note": "Promotional landing catalog featuring discounted prices, seasonal holiday sales, and special bundles for security cameras."},
+        {"value": "web home page", "note": "The primary root storefront homepage showcasing flagship security camera models and new technology launches."},
+        {"value": "store home page", "note": "The main catalog landing page for the marketplace storefront filtering active security camera inventory."},
+        {"value": "store poe page", "note": "Collection page dedicated to Power over Ethernet (PoE) wired security cameras and local recording network infrastructures."},
+        {"value": "store doorbell page", "note": "Collection page concentrating on smart video doorbells, front-door entry security, and chime hardware accessories."},
+        {"value": "store battery wifi page", "note": "Collection page tracking standalone wire-free rechargeable battery security cameras powered via residential Wi-Fi."},
+        {"value": "store battery 4g page", "note": "Collection page filtering off-grid wire-free cellular LTE battery security cameras built for remote or rural locations."},
+        {"value": "store wifi page", "note": "Collection page mapping continuous plug-in powered security cameras connecting via Wi-Fi networks."},
+        {"value": "store system page", "note": "Collection page focusing on multi-camera security system kits bundled with local storage NVR servers."},
+        {"value": "store dual lens page", "note": "Collection page centered on dual-lens wide-angle stitch technology security cameras for panoramic coverage."},
+        {"value": "store home hub page", "note": "Collection page highlighting next-generation smart automation base hubs coordinating multiple security cameras."},
+        {"value": "store floodlight page", "note": "Collection page targeting ultra-bright motion-activated protective lighting security cameras for active night defense."},
+        {"value": "reseller page", "note": "B2B intake lead portals for wholesale operations, distribution partners, or certified security custom installers."},
+        {"value": "ptz wifi page", "note": "Collection page tracking motorized pan-tilt-zoom smart tracking Wi-Fi cameras with auto-patrol features."},
+        {"value": "vp series page", "note": "Exclusive showcase landing page for high-performance Value-Plus series security cameras targeting premium configurations."},
+        {"value": "prof series page", "note": "Dedicated landing catalog mapping professional-grade heavy DIY security cameras for commercial and enterprise setups."},
+        {"value": "event page", "note": "Custom localized campaign hubs for massive brand milestones, collaborative product rollouts, or new security camera launches."},
+        {"value": "16mp page", "note": "E-commerce category section capturing next-level ultra-HD 16-megapixel panoramic sensor security cameras."},
+        {"value": "floodlight page", "note": "Standalone hardware landing page focusing exclusively on outdoor motion-triggered floodlight surveillance cameras."},
+        {"value": "hub mini series page", "note": "Collection page targeting compact local network sync hosts designed to manage smaller residential security camera nodes."},
+        {"value": "omvi series page", "note": "Exclusive tech showcase filtering the Omvi smart security ecosystem with advanced cloud AI software integrations."},
+        {"value": "anniversary page", "note": "High-conversion clearance event page celebrating the annual brand anniversary milestone with major site-wide camera deals."}
+      ]
+    },
+    {
+      "id": "creative-product-type", "name": "2. creative-product-type (Creative Product Type)", "type": "select", "allow_custom": false,
+      "options": [
+        {"value": "all", "note": "All product types"},
+        {"value": "poe", "note": "Power over Ethernet series"},
+        {"value": "doorbell", "note": "Smart doorbell series"},
+        {"value": "wifi", "note": "Wi-Fi smart camera series"},
+        {"value": "battery wifi", "note": "Rechargeable battery Wi-Fi series"},
+        {"value": "battery 4g", "note": "Cellular 4G LTE battery series"},
+        {"value": "nvr", "note": "Network Video Recorder systems"}
+      ]
+    },
+    {
+      "id": "creative-product", "name": "3. creative-product (Creative Product)", "type": "select", "allow_custom": false,
+      "options": [{"value": "all", "note": "Universal model selection"}]
+    },
+    {
+      "id": "creative-type", "name": "4. creative-type (Creative Type)", "type": "select", "allow_custom": false,
+      "options": [
+        {"value": "vid", "note": "Standard video ad creative covering product features, unboxing, security camera installations, or real defense footage clips."},
+        {"value": "pic", "note": "Static single-image creative used for showcasing security camera industrial design or hardware crisp details."},
+        {"value": "carousel pic", "note": "Multi-card image carousel displaying a series of different security cameras or sequential lifestyle setups."},
+        {"value": "carousel vid", "note": "Multi-card video carousel ad displaying sequential hardware operations, tracking tech, or multi-scenario camera feature breakdowns."},
+        {"value": "text", "note": "Pure text copy variations reserved primarily for intent-driven search engine ad extensions or textual forum segments."},
+        {"value": "gif", "note": "Short animated looping graphic highlighting quick key app interactions or security camera motion sensor triggers."},
+        {"value": "adaptive", "note": "Criteo adaptive ad format that intelligently modifies layout, imagery, and copywriting variations to fit different app placement sizes."},
+        {"value": "feed", "note": "Criteo dynamic ad format utilizing automated catalog feeds to dynamically retarget viewers based on viewed security camera SKUs."}
+      ]
+    },
+    {
+      "id": "creative-source", "name": "5. creative-source (Creative Source)", "type": "select", "allow_custom": false,
+      "options": [
+        {"value": "bgc", "note": "Brand Generated Content: Official high-production studio assets, product renders, and slick marketing videos showcasing security camera industrial design."},
+        {"value": "ugc", "note": "User Generated Content: Highly authentic, native-style creator videos demonstrating security camera unboxing, home installation, or real-life backyard capture footage."},
+        {"value": "kol", "note": "Key Opinion Leader: Professional influencer collaborations and tech reviewer content lending authority and deep technical walkthroughs for the security camera."}
+      ]
+    },
+    {
+      "id": "creative-source-type", "name": "6. creative-source-type (Creative Source Type)", "type": "select", "allow_custom": false,
+      "options": [
+        {"value": "unlisted", "note": "Non-public BGC video on official YouTube channel, pic/gif, or native video on other platforms."},
+        {"value": "public", "note": "Public BGC video published on the official YouTube brand channel."},
+        {"value": "boost", "note": "Original security camera video hosted on the YouTube KOL's own channel."},
+        {"value": "cut", "note": "Post-edited/cut-down KOL video uploaded to the official YouTube brand channel."}
+      ]
+    },
+    {
+      "id": "creative-channel", "name": "7. creative-channel (Creative Channel)", "type": "select", "allow_custom": true,
+      "options": [
+        {"value": "reolink", "note": "Official Reolink brand native channels, direct owned-media placements, and primary official ecosystem platforms."}
+      ]
+    },
+    {
+      "id": "creative-discount", "name": "8. creative-discount (Creative Discount)", "type": "select", "allow_custom": true,
+      "options": [
+        {"value": "no disc", "note": "Full-price standard creative without any discount callouts or promotional overlays."},
+        {"value": "flat disc", "note": "Dollar-off discount creative showing a specific monetary reduction (e.g., Save $50 / $30 Off)."},
+        {"value": "percent disc", "note": "Percentage-off discount creative showing a proportional price cut (e.g., 20% OFF / 30% OFF)."},
+        {"value": "spend save", "note": "Tiered threshold discount creative incentivizing higher spend (e.g., Spend $200 Save $40)."},
+        {"value": "bundle disc", "note": "Package deal creative offering bundled savings when purchasing cameras with accessories or NVR kits."},
+        {"value": "bogo", "note": "Buy-One-Get-One or multi-buy promo creative (e.g., Buy a camera, get a free solar panel)."},
+        {"value": "free gift", "note": "Value-add promotional creative highlighting complimentary hardware, accessories, or cloud service trials."}
+      ]
+    },
+    {
+      "id": "creative-size", "name": "9. creative-size (Creative Size)", "type": "select", "allow_custom": false,
+      "options": [
+        {"value": "all", "note": "Universal asset bundle accommodating cross-platform responsive sizes and multi-ratio aspect configurations."},
+        {"value": "16:9", "note": "Horizontal widescreen aspect ratio optimized for YouTube desktop feeds, TV displays, and traditional landscape camera video previews."},
+        {"value": "9:16", "note": "Full-screen vertical mobile aspect ratio tailored for TikTok, Instagram Reels, YouTube Shorts, and Meta Stories."},
+        {"value": "1:1", "note": "Square aspect ratio standard for Meta feed image carousels, Criteo dynamic feeds, and desktop shopping placements."}
+      ]
+    },
+    {
+      "id": "ksp", "name": "10. ksp (KSP)", "type": "select", "allow_custom": true,
+      "options": [
+        {"value": "allksp"}, {"value": "360"}, {"value": "180"}, {"value": "16mp"},
+        {"value": "4k"}, {"value": "solar"}, {"value": "continuous recording"}, {"value": "magnetic"}
+      ]
+    },
+    {
+      "id": "project", "name": "11. project (Project)", "type": "select", "allow_custom": true,
+      "options": [
+        {"value": "aon", "note": "Always-On: Ever-green perpetual advertising campaign running continuously outside major promotional events."},
+        {"value": "new", "note": "New Product Launch: Go-to-market campaign introducing a newly released security camera model."},
+        {"value": "relaunch", "note": "Re-launch Campaign: Strategic marketing push to reignite demand and sales momentum for mature camera models."},
+        {"value": "26spring", "note": "2026 Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season."},
+        {"value": "26summer", "note": "2026 Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling."},
+        {"value": "26fall", "note": "2026 Fall Sale: Autumn home prep and shoulder-season promotional campaign."},
+        {"value": "26winter", "note": "2026 Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign."},
+        {"value": "26anni", "note": "2026 Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles."},
+        {"value": "26pd", "note": "2026 Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion."},
+        {"value": "26fpd", "note": "2026 Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign."},
+        {"value": "26bfcm", "note": "2026 Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign."},
+        {"value": "26easter", "note": "2026 Easter Sale: Spring holiday family and safety promo event."},
+        {"value": "26father", "note": "2026 Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics."},
+        {"value": "26mother", "note": "2026 Mother's Day Sale: Smart home peace-of-mind gift campaign."},
+        {"value": "26school", "note": "2026 Back to School: Late-summer home and dorm/rental security campaign."}
+      ]
+    },
+    {
+      "id": "custom", "name": "12. custom (Custom)", "type": "input",
+      "placeholder": "e.g. hero-v1 (lowercase, hyphens allowed, no underscores)"
+    }
+  ]
 };
 
-let FIELD_LABELS = {
-  "audience-category": "Audience Category", "audience-tag": "Audience Tag",
-  "data-source": "Data Source", "data-source-detail": "Data Source Detail",
-  "data-window": "Data Window", "ag-custom": "Custom"
-};
-let OPTIONS = {};
-let PRODUCT_RELATION_MAP = {}; 
-let DATA_READY = false;
-const sel = {};
-let copyHistory = [];
+let currentAdConfig = JSON.parse(localStorage.getItem('ad_naming_config_v12')) || defaultAdSchema;
+let productCodeMap = {};
+let adSelectedValues = {};
 
-const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
+async function loadProductCodeMap() {
+    try {
+        const resp = await fetch('./product-code-map.json?t=' + Date.now());
+        if (resp.ok) {
+            productCodeMap = await resp.json();
+            updateProductCodeDropdown();
+        }
+    } catch (e) {
+        console.warn('product-code-map.json not found, using fallback options.');
+    }
+}
 
 function switchTab(layer) {
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-  document.getElementById('tab-' + (layer === 'campaign' ? 'c' : (layer === 'adgroup' ? 'g' : 'a'))).classList.add('active');
-  document.getElementById('panel-' + layer).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${layer}')"]`).classList.add('active');
+  document.getElementById(`tab-${layer}`).classList.add('active');
 }
 
-function initHistoryFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) { copyHistory = JSON.parse(raw); }
-  } catch(e) { console.warn('History storage cache skipped', e); }
-}
+function initAdForm() {
+  const grid = document.getElementById('ad-grid');
+  grid.innerHTML = '';
 
-function cleanKey(str) {
-  return str.toLowerCase().replace(/ \/ /g, '-').replace(/ /g, '-');
-}
+  currentAdConfig.fields.forEach(field => {
+    const card = document.createElement('div');
+    card.className = 'field-card';
 
-async function loadData() {
-  showDatasourceStatus('loading', 'Resolving configuration layers...');
-  initHistoryFromStorage();
-  try {
-    const [dataResp, mapResp] = await Promise.all([
-      fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
-      fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" })
-    ]);
-    if (!dataResp.ok || !mapResp.ok) throw new Error('Network file lookup error');
+    let headerHTML = `
+      <div class="field-header">
+        <span class="field-title">${field.name}</span>
+        <span class="badge-locked" id="lock-badge-${field.id}">LOCKED</span>
+      </div>
+    `;
 
-    const dataJson = await dataResp.json();
-    PRODUCT_RELATION_MAP = await mapResp.json();
-
-    OPTIONS = {};
-    
-    if(dataJson["Ad-Campaign"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad-Campaign"])) {
-        const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = (k === 'product-code') ? [] : vals;
-      }
-    }
-    if(dataJson["Ad-Group"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad-Group"])) {
-        const k = cleanKey(col);
-        if(k === 'audience-tag-map' || k === 'data-source-map') { OPTIONS[k] = vals; }
-        else if(k === 'custom') { FIELD_LABELS['ag-custom'] = "Custom"; OPTIONS['ag-custom'] = vals; }
-        else { FIELD_LABELS[k] = col; OPTIONS[k] = vals; }
-      }
-    }
-    if(dataJson["Ad"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad"])) {
-        const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = vals;
-      }
+    let bodyHTML = '';
+    if (field.type === 'select') {
+      let optionsHTML = field.options.map(opt => `<option value="${opt.value}">${opt.value}</option>`).join('');
+      bodyHTML = `
+        <div class="select-wrapper">
+          <select id="input-${field.id}" onchange="handleSelectChange('${field.id}')">
+            ${optionsHTML}
+          </select>
+          ${field.allow_custom ? `<button class="btn-add-enum" title="添加新枚举" onclick="addNewEnum('${field.id}')">+</button>` : ''}
+        </div>
+        <div class="field-note" id="note-${field.id}">--</div>
+      `;
+    } else if (field.type === 'input') {
+      bodyHTML = `
+        <input type="text" id="input-${field.id}" placeholder="${field.placeholder}" oninput="handleInputChange('${field.id}')" />
+        <div class="error-msg" id="error-${field.id}">严禁下划线 (_)！只允许小写字母、数字及中划线 (-)。</div>
+        <div class="field-note" id="note-${field.id}">自定义后缀标识（只能用小写字母、数字和中划线 -，禁止下划线）</div>
+      `;
     }
 
-    renderAllFields();
-    renderHistory();
-    DATA_READY = true;
-    showDatasourceStatus('ok', 'Data synchronized.');
-  } catch(err) {
-    console.error(err);
-    showDatasourceStatus('error', 'Sync structural breakdown.');
-  }
-}
+    card.innerHTML = headerHTML + bodyHTML;
+    grid.appendChild(card);
 
-function showDatasourceStatus(state, msg) {
-  const el = document.getElementById('datasource-status'); if(!el) return;
-  el.className = 'datasource-bar ' + state;
-  el.innerHTML = '<span class="ds-dot"></span><span class="ds-msg">' + msg + '</span><span class="ds-refresh" onclick="loadData()">[REFRESH]</span>';
-}
-
-function renderFieldHTML(f) {
-  const ft = FIELD_TYPES[f] || 'dropdown';
-  const label = FIELD_LABELS[f] || f;
-
-  if (ft === 'dropdown') {
-    const isFullWidth = (f === 'product-code' || f === 'audience-tag' || f === 'data-source-detail' || f === 'creative-concept');
-    return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
-  } else if (ft === 'tag') {
-    const opts = OPTIONS[f] || [];
-    return '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
-  } else if (f === 'custom') {
-    // 💡 修复细节2：Campaign Custom 推荐升级，拆分 Search Ad 和 Pmax Ad 两个完整的阵列
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Auto-Fill Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div><div class="help-group" style="margin-top:10px;"><div class="help-group-title">Pmax Ad Tags</div><div class="help-tags">' + ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
-  } else if (f === 'ag-custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Omitted if empty.</div></div></div>';
-  }
-  return '';
-}
-
-function renderAllFields() {
-  let cHtml = '<div class="fields-grid">';
-  for (const f of CAMPAIGN_WHITELIST) { if (f === 'market') cHtml += '<div class="field-compact">'; cHtml += renderFieldHTML(f); if (f === 'product-type') cHtml += '</div>'; }
-  cHtml += '</div>';
-  document.getElementById('fields-container-campaign').innerHTML = cHtml;
-
-  let gHtml = '<div class="fields-grid">';
-  for (const f of ADGROUP_WHITELIST) { gHtml += renderFieldHTML(f); }
-  gHtml += '</div>';
-  document.getElementById('fields-container-adgroup').innerHTML = gHtml;
-
-  let aHtml = '<div class="fields-grid">';
-  for (const f of AD_WHITELIST) { aHtml += renderFieldHTML(f); }
-  aHtml += '</div>';
-  document.getElementById('fields-container-ad').innerHTML = aHtml;
-
-  updateAllPreviews();
-}
-
-function renderTagOptions(fieldKey, opts) {
-  let disabledGoals = null;
-  if (fieldKey === 'bidding-goal' && sel['media-funnel']) disabledGoals = FUNNEL_GOAL_MAP[sel['media-funnel']];
-  let html = '';
-  for(let i=0; i<opts.length; i++) {
-    const v = opts[i]; const isDisabled = disabledGoals && !disabledGoals.includes(v);
-    html += '<div class="tag' + (isDisabled ? ' disabled' : '') + (sel[fieldKey]===v ? ' active' : '') + '" data-val="' + escAttr(v) + '" onclick="' + (isDisabled ? '' : 'selectTag(\'' + fieldKey + '\', \'' + escJs(v) + '\')') + '">' + escHtml(v) + '</div>';
-  }
-  return html;
-}
-
-function handleCustomInput(inp) {
-  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
-  updateAllPreviews();
-}
-
-function handleAgCustomInput(inp) {
-  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
-  if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
-  updateAllPreviews();
-}
-
-function escHtml(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
-function escAttr(s) { return s ? s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;") : ''; }
-function escJs(s) { return s ? s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/\n/g,'\\n') : ''; }
-
-function getFieldRuntimeOptions(field) {
-  if (field === 'product-code') {
-    const currentType = sel['product-type'];
-    if (!currentType || currentType === 'all') {
-      let allMergedCodes = ['all'];
-      for (const [typeKey, codesArray] of Object.entries(PRODUCT_RELATION_MAP)) {
-        if (Array.isArray(codesArray)) allMergedCodes = allMergedCodes.concat(codesArray);
-      }
-      return ['all'].concat([...new Set(allMergedCodes)].filter(c => c !== 'all').sort());
-    }
-    return PRODUCT_RELATION_MAP[currentType] || [];
-  }
-
-  // 💡 完整保留人群强制条件绑定规则
-  if (field === 'audience-tag') {
-    const cat = sel['audience-category'];
-    if(!cat) {
-      let merged = []; const map = OPTIONS['audience-tag-map'] || {};
-      Object.values(map).forEach(arr => { merged = merged.concat(arr); });
-      return [...new Map(merged.map(item => [item.value, item])).values()];
-    }
-    return (OPTIONS['audience-tag-map'] || {})[cat] || [];
-  }
-
-  if (field === 'data-source') {
-    const cat = sel['audience-category'];
-    const map = OPTIONS['data-source-map'] || {};
-    if(!cat) {
-      let merged = []; Object.values(map).forEach(arr => { merged = merged.concat(arr); });
-      return [...new Map(merged.map(item => [item.value, item])).values()];
-    }
-    if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(cat)) {
-      return map["拉新客人群适用机制 (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || [];
+    if (field.type === 'select' && field.options.length > 0) {
+      adSelectedValues[field.id] = field.options[0].value;
     } else {
-      return map["重定向人群适用机制 (rm, lal)"] || [];
-    }
-  }
-
-  return OPTIONS[field] || [];
-}
-
-function buildDropdown(field) {
-  const drop = document.getElementById('drop-' + field); if (!drop) return;
-  const opts = getFieldRuntimeOptions(field);
-  let html = '';
-  for(let i=0; i<opts.length; i++) {
-    const o = opts[i];
-    if(typeof o === 'object') {
-      html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + ' (' + escHtml(o.label) + ')</div><div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div></div>';
-    } else {
-      html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
-    }
-  }
-  drop.innerHTML = html;
-}
-
-function openDropdown(field) { buildDropdown(field); document.getElementById('drop-' + field).classList.add('open'); document.getElementById('search-' + field).select(); }
-
-function filterDropdown(field, q) {
-  const drop = document.getElementById('drop-' + field); if (!drop) return;
-  drop.classList.add('open');
-  const baseOpts = getFieldRuntimeOptions(field);
-  const filtered = q.trim() === '' ? baseOpts : baseOpts.filter(o => {
-    const targetStr = (typeof o === 'object') ? (o.value + ' ' + o.label + ' ' + o.note) : o;
-    return targetStr.toLowerCase().includes(q.toLowerCase());
-  });
-  
-  let html = '';
-  for(let i=0; i<filtered.length; i++) {
-    const o = filtered[i];
-    if(typeof o === 'object') {
-      html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + ' (' + escHtml(o.label) + ')</div><div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div></div>';
-    } else {
-      html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
-    }
-  }
-  drop.innerHTML = html || '<div class="dropdown-item no-match">No results found</div>';
-}
-
-function pickDropdown(field, val, e) {
-  if(e) e.preventDefault();
-  sel[field] = val;
-  const inp = document.getElementById('search-' + field);
-  if(inp) { inp.value = val; inp.classList.add('has-value'); }
-  if(document.getElementById('drop-' + field)) document.getElementById('drop-' + field).classList.remove('open');
-  
-  if (field === 'product-type' && val !== 'all') {
-     const allowed = PRODUCT_RELATION_MAP[val] || [];
-     if (sel['product-code'] && !allowed.includes(sel['product-code'])) { resetInputNode('product-code'); }
-  }
-
-  // 💡 人群机制强制条件触发：保留
-  if (field === 'audience-category') {
-     const tags = (OPTIONS['audience-tag-map'] || {})[val] || [];
-     if(tags.length > 0) { forceFillInputNode('audience-tag', tags[0].value); } else { resetInputNode('audience-tag'); }
-     
-     if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(val)) {
-       forceFillInputNode('data-source', 'n');
-       forceFillInputNode('data-source-detail', 'n');
-       forceFillInputNode('data-window', 'n');
-     } else {
-       resetInputNode('data-source'); resetInputNode('data-source-detail'); resetInputNode('data-window');
-     }
-  }
-  updateAllPreviews();
-}
-
-function forceFillInputNode(f, val) {
-  sel[f] = val; const i = document.getElementById('search-' + f); if(i) { i.value = val; i.classList.add('has-value'); }
-}
-
-function resetInputNode(f) {
-  delete sel[f]; const i = document.getElementById('search-' + f); if(i) { i.value = ''; i.classList.remove('has-value'); }
-}
-
-function blurDropdown(field) {
-  setTimeout(function() {
-    if(document.getElementById('drop-' + field)) document.getElementById('drop-' + field).classList.remove('open');
-    const inp = document.getElementById('search-' + field); if(!inp) return;
-    if (sel[field]) { inp.value = sel[field]; inp.classList.add('has-value'); } else { inp.value = ''; inp.classList.remove('has-value'); }
-  }, 150);
-}
-
-function selectTag(field, val) {
-  if (sel[field] === val) delete sel[field]; else sel[field] = val;
-  const container = document.getElementById('tags-' + field);
-  if (container) { container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[field])); }
-  if (field === 'media-funnel') {
-    const goalContainer = document.getElementById('tags-bidding-goal');
-    if(goalContainer) goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
-    if(sel['bidding-goal'] && FUNNEL_GOAL_MAP[sel['media-funnel']] && !FUNNEL_GOAL_MAP[sel['media-funnel']].includes(sel['bidding-goal'])) delete sel['bidding-goal'];
-  }
-  updateAllPreviews();
-}
-
-function validateLayer(layer) {
-  const missing = [];
-  if (layer === 'campaign') {
-    CAMPAIGN_WHITELIST.forEach(f => { if (f !== 'custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
-    if (missing.length > 0) return { ok: false, msg: 'Missing Campaign fields: ' + missing.join(', ') };
-  }
-  if (layer === 'adgroup') {
-    ADGROUP_WHITELIST.forEach(f => { if (f !== 'ag-custom' && !sel[f]) missing.push(FIELD_LABELS[f] || f); });
-    if (missing.length > 0) return { ok: false, msg: 'Missing Ad Group fields: ' + missing.join(', ') };
-  }
-  if (layer === 'ad') {
-    if(!sel['creative-concept']) missing.push('Creative Concept');
-    if(!sel['format---size']) missing.push('Format / Size');
-    if (missing.length > 0) return { ok: false, msg: 'Missing Ad fields: ' + missing.join(', ') };
-  }
-  return { ok: true };
-}
-
-// 💡 核心大修正3：彻底砍断级联包含！各层命名完全独立，仅按该层字段规则组装字符串
-function compileNames() {
-  // 1. Campaign Name：仅拼 Campaign 自身字段
-  const campaignParts = [];
-  for (const f of CAMPAIGN_WHITELIST) {
-    if (f === 'custom') {
-      const cv = document.getElementById('custom-input') ? document.getElementById('custom-input').value.trim() : '';
-      if (cv) campaignParts.push(cv);
-    } else if (sel[f]) { campaignParts.push(sel[f].trim()); }
-  }
-  const cName = campaignParts.join('_');
-
-  // 2. Ad Group Name：不再携带 cName！直接从 Audience Category 拼到 Custom
-  const agParts = [];
-  if(sel['audience-category']) agParts.push(sel['audience-category'].trim());
-  if(sel['audience-tag']) agParts.push(sel['audience-tag'].trim());
-  if(sel['data-source']) agParts.push(sel['data-source'].trim());
-  if(sel['data-source-detail']) agParts.push(sel['data-source-detail'].trim());
-  if(sel['data-window']) agParts.push(sel['data-window'].trim());
-  const agCustomVal = document.getElementById('ag-custom') ? document.getElementById('ag-custom').value.trim() : '';
-  if(agCustomVal) agParts.push(agCustomVal);
-  const gName = agParts.join('_');
-
-  // 3. Ad Name：跨度只拼 Creative Concept + Size，没有父级累加
-  const adParts = [];
-  if(sel['creative-concept']) adParts.push(sel['creative-concept'].trim());
-  if(sel['format---size']) adParts.push(sel['format---size'].trim());
-  const aName = adParts.join('_');
-
-  return { campaign: cName, adgroup: gName, ad: aName };
-}
-
-function updateAllPreviews() {
-  const names = compileNames();
-  const warEl = document.getElementById('validation-warning'); if(warEl) warEl.classList.remove('show');
-
-  const cEl = document.getElementById('preview-campaign');
-  if (names.campaign) { cEl.innerHTML = escHtml(names.campaign) + '<div class="result-len">' + names.campaign.length + ' chars</div>'; }
-  else { cEl.innerHTML = '<span class="seg-empty">Awaiting Ad Campaign fields...</span>'; }
-
-  const gEl = document.getElementById('preview-adgroup');
-  if (names.adgroup) { gEl.innerHTML = escHtml(names.adgroup) + '<div class="result-len">' + names.adgroup.length + ' chars</div>'; }
-  else { gEl.innerHTML = '<span class="seg-empty">Awaiting Ad Group fields...</span>'; }
-
-  const aEl = document.getElementById('preview-ad');
-  if (names.ad) { aEl.innerHTML = escHtml(names.ad) + '<div class="result-len">' + names.ad.length + ' chars</div>'; }
-  else { aEl.innerHTML = '<span class="seg-empty">Awaiting Ad fields...</span>'; }
-}
-
-function copyText(layer) {
-  const names = compileNames(); if(!names[layer]) return; doClipboard(names[layer]);
-  let btnId = layer === 'campaign' ? 'btn-copy-c' : (layer === 'adgroup' ? 'btn-copy-g' : 'btn-copy-a');
-  let originalTxt = layer === 'campaign' ? '📋 Copy Ad Campaign' : (layer === 'adgroup' ? '📋 Copy Ad Group' : '📋 Copy Ad Name');
-  const btn = document.getElementById(btnId); btn.textContent = '✅ Copied!';
-  setTimeout(() => { btn.innerHTML = originalTxt; }, 1200);
-}
-
-function storeLayer(layer) {
-  const check = validateLayer(layer);
-  if (!check.ok) {
-    const warEl = document.getElementById('validation-warning'); if(warEl) { warEl.textContent = check.msg; warEl.classList.add('show'); } return;
-  }
-  const names = compileNames();
-  const snapshot = {
-    sel: JSON.parse(JSON.stringify(sel)),
-    custom: document.getElementById('custom-input') ? document.getElementById('custom-input').value : '',
-    agCustom: document.getElementById('ag-custom') ? document.getElementById('ag-custom').value : ''
-  };
-
-  copyHistory.unshift({
-    type: layer, name: names[layer], cCol: names.campaign, gCol: names.adgroup, aCol: names.ad,
-    time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}), snapshot: snapshot
-  });
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(copyHistory)); } catch(e){}
-  renderHistory();
-}
-
-function renderHistory(){
-  const el = document.getElementById('history-scroller'); if(!el) return;
-  if(copyHistory.length === 0){ el.innerHTML = '<div class="empty-hint">No database storage records...</div>'; return; }
-  let html = '';
-  for(let i=0; i<copyHistory.length; i++) {
-    const h = copyHistory[i]; let badgeClass = h.type === 'campaign' ? 'badge-c' : (h.type === 'adgroup' ? 'badge-g' : 'badge-a');
-    html += '<div class="history-row" onclick="restoreUniversalSnapshot(' + i + ')" title="Instant rollback form state"><div><span class="history-type-badge ' + badgeClass + '">' + h.type.toUpperCase() + '</span></div><div class="history-name">' + escHtml(h.name) + '</div><div class="history-subnames-box">';
-    if(h.cCol) html += '<div>🚀 C: ' + escHtml(h.cCol) + '</div>';
-    if(h.gCol) html += '<div>📦 G: ' + escHtml(h.gCol) + '</div>';
-    if(h.aCol) html += '<div>🖼️ A: ' + escHtml(h.aCol) + '</div>';
-    html += '</div><div class="history-meta"><span>🕒 ' + h.time + '</span><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></div></div>';
-  }
-  el.innerHTML = html;
-}
-
-function restoreUniversalSnapshot(idx) {
-  const r = copyHistory[idx]; if(!r || !r.snapshot) return; const snap = r.snapshot;
-  Object.keys(sel).forEach(k => delete sel[k]); Object.assign(sel, snap.sel);
-
-  const allFields = CAMPAIGN_WHITELIST.concat(ADGROUP_WHITELIST).concat(AD_WHITELIST);
-  allFields.forEach(f => {
-    const ft = FIELD_TYPES[f]; const inp = document.getElementById('search-' + f);
-    if(ft === 'dropdown' && inp) {
-      inp.value = sel[f] || ''; if(sel[f]) inp.classList.add('has-value'); else inp.classList.remove('has-value');
-    } else if(ft === 'tag') {
-      const container = document.getElementById('tags-' + f);
-      if(container) { container.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel[f])); }
+      adSelectedValues[field.id] = '';
     }
   });
 
-  if(document.getElementById('custom-input')) document.getElementById('custom-input').value = snap.custom || '';
-  if(document.getElementById('ag-custom')) document.getElementById('ag-custom').value = snap.agCustom || '';
+  loadProductCodeMap();
+  updateNotesAll();
+  evaluateCascadeRules();
+  generateAdNaming();
+}
 
-  const goalContainer = document.getElementById('tags-bidding-goal');
-  if(goalContainer) {
-    goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
-    goalContainer.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.dataset.val === sel['bidding-goal']));
+function handleSelectChange(fieldId) {
+  const selectElem = document.getElementById(`input-${fieldId}`);
+  adSelectedValues[fieldId] = selectElem.value;
+
+  if (fieldId === 'creative-product-type') {
+      updateProductCodeDropdown();
   }
-  switchTab(r.type); updateAllPreviews();
+
+  updateNote(fieldId);
+  if (fieldId === 'creative-type') evaluateCascadeRules();
+  generateAdNaming();
 }
 
-function clearHistory(){ copyHistory.length=0; try { localStorage.removeItem(STORAGE_KEY); } catch(e){} renderHistory(); }
-function exportTXT(){
-  if(!copyHistory.length) return; let divider = '-'.repeat(120) + '\n';
-  let txt = 'Universal Clean Segment Export Map\nExported: ' + new Date().toLocaleString() + '\n' + divider + 'Ad Campaign'.padEnd(45) + ' | ' + 'Ad Group'.padEnd(45) + ' | ' + 'Ad\n' + divider;
-  copyHistory.forEach(h => { txt += (h.cCol || '-').padEnd(45) + ' | ' + (h.gCol || '-').padEnd(45) + ' | ' + (h.aCol || '-') + '\n'; });
-  dlBlob(txt, 'ad-structure-matrix-' + fmt() + '.txt', 'text/plain;charset=utf-8');
-}
-function exportCSV(){
-  if(!copyHistory.length) return;
-  dlBlob('\ufeff' + [['Log Time', 'Stored Type', 'Ad Campaign', 'Ad Group', 'Ad'], ...copyHistory.map(h => [h.time, h.type.toUpperCase(), h.cCol || '', h.gCol || '', h.aCol || ''])].map(r => r.map(c => '"' + c + '"').join(',')).join('\n'), 'ad-structure-matrix-' + fmt() + '.csv', 'text/csv;charset=utf-8');
-}
-function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
-function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
-function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
+function updateProductCodeDropdown() {
+  const typeVal = adSelectedValues['creative-product-type'] || 'all';
+  const prodSelect = document.getElementById('input-creative-product');
+  if (!prodSelect) return;
 
-function resetAll() {
-  Object.keys(FIELD_TYPES).forEach(f => {
-    delete sel[f]; const i = document.getElementById('search-' + f); if(i){ i.value = ''; i.classList.remove('has-value'); }
-    const c = document.getElementById('tags-' + f); if(c){ c.querySelectorAll('.tag').forEach(t => t.classList.remove('active')); }
-  });
-  if(document.getElementById('custom-input')) { document.getElementById('custom-input').value = ''; document.getElementById('custom-input').classList.remove('ok'); }
-  if(document.getElementById('ag-custom')) { document.getElementById('ag-custom').value = ''; document.getElementById('ag-custom').classList.remove('ok'); }
-  if(document.getElementById('validation-warning')) document.getElementById('validation-warning').classList.remove('show');
-  const goalContainer = document.getElementById('tags-bidding-goal'); if(goalContainer) goalContainer.innerHTML = renderTagOptions('bidding-goal', OPTIONS['bidding-goal'] || []);
-  updateAllPreviews();
+  let codes = ['all'];
+  if (productCodeMap[typeVal]) {
+      codes = productCodeMap[typeVal];
+  } else if (typeVal === 'all') {
+      let merged = [];
+      Object.values(productCodeMap).forEach(arr => { if (Array.isArray(arr)) merged = merged.concat(arr); });
+      codes = ['all'].concat([...new Set(merged)].filter(c => c !== 'all').sort());
+  }
+
+  prodSelect.innerHTML = codes.map(c => `<option value="${c}">${c}</option>`).join('');
+  adSelectedValues['creative-product'] = codes[0] || 'all';
+  prodSelect.value = adSelectedValues['creative-product'];
 }
 
-document.addEventListener('click',function(e){if(!e.target.closest('.select-wrap'))document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'))});
-loadData();
+function handleInputChange(fieldId) {
+  const inputElem = document.getElementById(`input-${fieldId}`);
+  const errorElem = document.getElementById(`error-${fieldId}`);
+  let val = inputElem.value.toLowerCase().replace(/_/g, '-');
+  inputElem.value = val;
+
+  if (val && !/^[a-z0-9-]+$/.test(val)) {
+    errorElem.style.display = 'block';
+  } else {
+    errorElem.style.display = 'none';
+  }
+
+  adSelectedValues[fieldId] = val;
+  generateAdNaming();
+}
+
+function evaluateCascadeRules() {
+  const typeValue = adSelectedValues['creative-type'];
+  const sourceTypeSelect = document.getElementById('input-creative-source-type');
+  const lockBadge = document.getElementById('lock-badge-creative-source-type');
+
+  if (typeValue === 'pic' || typeValue === 'gif') {
+    sourceTypeSelect.value = 'unlisted';
+    sourceTypeSelect.disabled = true;
+    adSelectedValues['creative-source-type'] = 'unlisted';
+    lockBadge.style.display = 'inline-block';
+    lockBadge.innerText = 'LOCKED (pic/gif)';
+  } else {
+    sourceTypeSelect.disabled = false;
+    lockBadge.style.display = 'none';
+  }
+  updateNote('creative-source-type');
+}
+
+function updateNote(fieldId) {
+  const fieldObj = currentAdConfig.fields.find(f => f.id === fieldId);
+  const noteElem = document.getElementById(`note-${fieldId}`);
+  if (!fieldObj || fieldObj.type !== 'select') return;
+
+  const currentVal = adSelectedValues[fieldId];
+  const optObj = fieldObj.options ? fieldObj.options.find(o => o.value === currentVal) : null;
+  noteElem.innerText = (optObj && optObj.note) ? optObj.note : '（无特定说明）';
+}
+
+function updateNotesAll() {
+  currentAdConfig.fields.forEach(f => { if (f.type === 'select') updateNote(f.id); });
+}
+
+function addNewEnum(fieldId) {
+  const fieldObj = currentAdConfig.fields.find(f => f.id === fieldId);
+  const newVal = prompt(`要在 [${fieldObj.name}] 中新增的枚举值：`);
+  if (!newVal || !newVal.trim()) return;
+
+  const cleanVal = newVal.trim().toLowerCase();
+  if (fieldObj.options.some(o => o.value === cleanVal)) {
+    alert('该枚举值已存在！'); return;
+  }
+
+  const noteInput = prompt(`（可选）输入 [${cleanVal}] 的说明 note：`) || '';
+  fieldObj.options.push({ value: cleanVal, note: noteInput.trim() });
+  localStorage.setItem('ad_naming_config_v12', JSON.stringify(currentAdConfig));
+
+  const selectElem = document.getElementById(`input-${fieldId}`);
+  const newOption = document.createElement('option');
+  newOption.value = cleanVal;
+  newOption.innerText = cleanVal;
+  selectElem.appendChild(newOption);
+  selectElem.value = cleanVal;
+
+  adSelectedValues[fieldId] = cleanVal;
+  updateNote(fieldId);
+  generateAdNaming();
+  showToast(`新枚举 [${cleanVal}] 已成功追加！`);
+}
+
+function generateAdNaming() {
+  const parts = currentAdConfig.fields.map(f => (adSelectedValues[f.id] || '').trim());
+  document.getElementById('ad-naming-output').innerText = parts.join('_');
+}
+
+function copyAdName() {
+  const str = document.getElementById('ad-naming-output').innerText;
+  if (!str || str === '--') return;
+  navigator.clipboard.writeText(str).then(() => showToast('已复制广告素材名称！'));
+}
+
+function exportJsonConfig() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentAdConfig, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", "ad-name-config.json");
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+}
+
+function resetAdConfig() {
+    if (confirm('确定恢复初始配置吗？')) {
+        localStorage.removeItem('ad_naming_config_v12');
+        currentAdConfig = JSON.parse(JSON.stringify(defaultAdSchema));
+        initAdForm();
+        showToast('已重置为初始默认配置！');
+    }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display = 'none', 2000);
+}
+
+window.onload = initAdForm;
 </script>
 </body>
 </html>
