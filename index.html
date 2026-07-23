@@ -450,7 +450,7 @@ function generateSmartNote(fieldKey, value) {
   return `Custom ${fieldKey} taxonomy tag for ${val}.`;
 }
 
-/* ===== 🚀 GITHUB API DIRECT COMMIT MODULE ===== */
+/* ===== 🚀 GITHUB API DIRECT COMMIT MODULE (实时 SHA 防冲突强化) ===== */
 function openGitHubSettings() {
   if (!isAdminUnlocked) return;
   const currentConfig = getGitHubConfig();
@@ -482,7 +482,7 @@ async function commitFileToGitHub(path, contentObj, commitMessage) {
     return false;
   }
 
-  showDatasourceStatus('loading', `Committing ${path} to GitHub...`);
+  showDatasourceStatus('loading', `Syncing ${path} with GitHub...`);
 
   try {
     const apiBase = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
@@ -492,15 +492,14 @@ async function commitFileToGitHub(path, contentObj, commitMessage) {
       'Content-Type': 'application/json'
     };
 
-    // Step 1: Get current file SHA
+    // 💡 实时抓取远端最新的 SHA 值，彻底解决 SHA mismatch 错位问题
     let sha = '';
-    const getResp = await fetch(`${apiBase}?ref=${cfg.branch || 'main'}`, { headers });
+    const getResp = await fetch(`${apiBase}?ref=${cfg.branch || 'main'}&t=${Date.now()}`, { headers, cache: "no-store" });
     if (getResp.ok) {
       const fileData = await getResp.json();
       sha = fileData.sha;
     }
 
-    // Step 2: Push update (Put request)
     const jsonStr = JSON.stringify(contentObj, null, 2);
     const contentEncoded = btoa(unescape(encodeURIComponent(jsonStr)));
 
