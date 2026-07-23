@@ -30,11 +30,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .datasource-bar .ds-refresh:hover{background:rgba(255,255,255,0.35)}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 
-.layout{display:grid;grid-template-columns:1fr 400px;gap:20px;max-width:1200px;margin:24px auto;padding:0 20px 40px;align-items:start}
+.layout{display:grid;grid-template-columns:1fr 400px;gap:20px;max-width:1240px;margin:24px auto;padding:0 20px 40px;align-items:start}
 @media(max-width:960px){.layout{grid-template-columns:1fr}}
 
-.tab-container {display:flex;background:#E5E7EB;padding:4px;border-radius:12px;margin-bottom:16px;gap:4px}
-.tab-btn {flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.tab-container {display:flex;background:#E5E7EB;padding:4px;border-radius:12px;margin-bottom:16px;gap:4px;overflow-x:auto}
+.tab-btn {flex:1;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
 .tab-btn:hover {color:var(--text);background:rgba(255,255,255,.5)}
 .tab-btn.active {background:var(--card);color:var(--primary);box-shadow:0 2px 4px rgba(0,0,0,.04)}
 
@@ -168,6 +168,7 @@ body.is-admin div.admin-only {display:block !important}
       <button class="tab-btn" id="tab-g" onclick="switchTab('adgroup')">📦 Ad Group</button>
       <button class="tab-btn" id="tab-a" onclick="switchTab('ad')">🖼️ Ad</button>
       <button class="tab-btn" id="tab-p" onclick="switchTab('product')">🛠️ Product Map Manager</button>
+      <button class="tab-btn" id="tab-aud" onclick="switchTab('audience')">👥 Audience Manager</button>
     </div>
 
     <!-- Panel 1: Campaign -->
@@ -228,8 +229,7 @@ body.is-admin div.admin-only {display:block !important}
         <div id="fields-container-ad"></div>
         
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
-          <button class="btn-secondary admin-only" onclick="exportCustomJson()">📥 Export Custom JSON</button>
-          <div></div>
+          <button class="btn-secondary" onclick="exportCustomJson()">📥 Export Custom JSON</button>
           <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
         </div>
       </div>
@@ -268,6 +268,37 @@ body.is-admin div.admin-only {display:block !important}
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
           <span style="font-size:12px; color:var(--muted)">Changes apply instantly to current session.</span>
           <button class="btn-primary admin-only" onclick="exportProductCodeMapJson()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export product-code-map.json</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 5: Audience Manager -->
+    <div class="tab-panel" id="panel-audience">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👥</div>
+          <div>
+            <div class="card-title">Audience Category Manager</div>
+            <div class="card-desc">Manage Audience Tags for Categories: scene, int, id. (Admin Permission Required)</div>
+          </div>
+        </div>
+
+        <div class="pm-add-box admin-only">
+          <select id="aud-add-category" class="custom-input" style="padding:7px 10px; cursor:pointer;">
+            <option value="scene">scene (scene tags)</option>
+            <option value="int">int (interest tags)</option>
+            <option value="id">id (identity tags)</option>
+          </select>
+          <input type="text" id="aud-add-tag" class="custom-input" placeholder="Enter new tag value (e.g., smart-home)..." />
+          <input type="text" id="aud-add-label" class="custom-input" placeholder="(Optional) Label..." style="width:120px;" />
+          <button class="btn-primary" onclick="addNewAudienceTag()" style="width:auto; padding:8px 16px;">+ Add Tag</button>
+        </div>
+
+        <div id="aud-list-container"></div>
+
+        <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--muted)">Manages Audience Tag Map for scene, int & id.</span>
+          <button class="btn-primary admin-only" onclick="exportDataJsonWithAudience()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export data.json</button>
         </div>
       </div>
     </div>
@@ -331,7 +362,7 @@ body.is-admin div.admin-only {display:block !important}
 </div>
 
 <script>
-// 🔑 管理员密码定义（随时可在代码里修改）
+// 🔑 管理员密码定义
 const ADMIN_PASSWORD = 'admin123';
 let isAdminUnlocked = false;
 
@@ -339,7 +370,8 @@ const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
 const CUSTOM_JSON_URL = './custom-options.json';
 
-const STORAGE_KEY = 'universal_tab_structure_history_v15';
+// 📌 锁定为永久存储 Key，防止版本更新丢失历史记录
+const STORAGE_KEY = 'ad_namebuilder_permanent_history';
 const LOCAL_CUSTOM_KEY = 'ad_namebuilder_user_extensions_v1';
 const LOCAL_PRODUCT_MAP_KEY = 'ad_namebuilder_product_map_v1';
 
@@ -353,7 +385,10 @@ const AD_WHITELIST = [
   'ksp', 'project', 'ad-custom'
 ];
 
+// 普通用户可以增加的字段
 const ALLOW_NEW_ENUM_FIELDS = ['creative-channel', 'ksp', 'project'];
+// 必须管理员才能增加的字段
+const ADMIN_ONLY_ADD_ENUM_FIELDS = ['landing-page'];
 
 const FIELD_TYPES = {
   "market": "dropdown", "product-type": "dropdown", "product-code": "dropdown",
@@ -389,7 +424,32 @@ let copyHistory = [];
 
 const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
 
-/* ===== 管理员解锁逻辑 ===== */
+// 🤖 智能 Note 自动生成引擎 (AI Engine)
+function generateSmartNote(fieldKey, value) {
+  const val = value.trim().toLowerCase();
+  
+  if (fieldKey === 'project') {
+    let year = val.match(/\d+/)?.[0] || '2026';
+    let topic = val.replace(/\d+/, '').replace(/[-_]/g, ' ');
+    topic = topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : 'Marketing';
+    return `${year} ${topic} Campaign: Promotional marketing push targeting seasonal security camera sales events.`;
+  }
+  
+  if (fieldKey === 'ksp') {
+    return `Key Selling Point highlighting ${val.toUpperCase()} camera hardware or AI software feature integration.`;
+  }
+  
+  if (fieldKey === 'landing-page') {
+    return `Dedicated landing catalog page filtering security cameras for ${val} solutions.`;
+  }
+  
+  if (fieldKey === 'scene' || fieldKey === 'int' || fieldKey === 'id') {
+    return `Contextual audience taxonomy mapping ${val} behaviors and user preferences.`;
+  }
+
+  return `Custom ${fieldKey} taxonomy tag for ${val}.`;
+}
+
 function toggleAdminLock() {
   if (isAdminUnlocked) {
     isAdminUnlocked = false;
@@ -398,8 +458,9 @@ function toggleAdminLock() {
     document.getElementById('admin-label').innerText = 'Admin Locked';
     document.getElementById('btn-admin-toggle').classList.remove('unlocked');
     renderProductManagerUI();
+    renderAudienceManagerUI();
   } else {
-    const pwd = prompt('Enter Admin Password to unlock edit & export permissions:');
+    const pwd = prompt('Enter Admin Password:');
     if (pwd === ADMIN_PASSWORD) {
       isAdminUnlocked = true;
       document.body.classList.add('is-admin');
@@ -407,6 +468,7 @@ function toggleAdminLock() {
       document.getElementById('admin-label').innerText = 'Admin Unlocked';
       document.getElementById('btn-admin-toggle').classList.add('unlocked');
       renderProductManagerUI();
+      renderAudienceManagerUI();
       alert('Admin permissions unlocked!');
     } else if (pwd !== null) {
       alert('Incorrect Password!');
@@ -422,13 +484,13 @@ function switchTab(layer) {
   if(layer === 'adgroup') tabId = 'tab-g';
   else if(layer === 'ad') tabId = 'tab-a';
   else if(layer === 'product') tabId = 'tab-p';
+  else if(layer === 'audience') tabId = 'tab-aud';
 
   document.getElementById(tabId).classList.add('active');
   document.getElementById('panel-' + layer).classList.add('active');
 
-  if(layer === 'product') {
-    renderProductManagerUI();
-  }
+  if(layer === 'product') renderProductManagerUI();
+  if(layer === 'audience') renderAudienceManagerUI();
 }
 
 function initHistoryFromStorage() {
@@ -545,11 +607,19 @@ function showDatasourceStatus(state, msg) {
 function renderFieldHTML(f) {
   const ft = FIELD_TYPES[f] || 'dropdown';
   const label = FIELD_LABELS[f] || f;
-  const allowNew = ALLOW_NEW_ENUM_FIELDS.includes(f);
+  
+  const allowPublicNew = ALLOW_NEW_ENUM_FIELDS.includes(f);
+  const allowAdminNew = ADMIN_ONLY_ADD_ENUM_FIELDS.includes(f);
 
   if (ft === 'dropdown') {
     const isFullWidth = (f === 'product-code' || f === 'audience-tag' || f === 'data-source-detail' || f === 'landing-page' || f === 'creative-product');
-    let addBtnHTML = allowNew ? '<button class="btn-add-enum admin-only" title="Add custom enum & save to custom-options.json" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>' : '';
+    
+    let addBtnHTML = '';
+    if (allowPublicNew) {
+      addBtnHTML = '<button class="btn-add-enum" title="Add custom option" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>';
+    } else if (allowAdminNew) {
+      addBtnHTML = '<button class="btn-add-enum admin-only" title="Add custom option (Admin Required)" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>';
+    }
     
     return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><div class="field-label-left"><span class="req">*</span> ' + escHtml(label) + '</div>' + addBtnHTML + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
   } else if (ft === 'tag') {
@@ -566,15 +636,28 @@ function renderFieldHTML(f) {
 }
 
 function addNewEnumPrompt(fieldKey) {
-  if (!isAdminUnlocked) return;
+  if (ADMIN_ONLY_ADD_ENUM_FIELDS.includes(fieldKey) && !isAdminUnlocked) {
+    alert("Admin permission required to add options to this field!");
+    return;
+  }
+
   const label = FIELD_LABELS[fieldKey] || fieldKey;
   const val = prompt(`Add new custom option to [${label}]:`);
   if (!val || !val.trim()) return;
 
   const cleanVal = val.trim().toLowerCase();
-  const note = prompt(`(Optional) Enter short note explanation for [${cleanVal}]:`) || '';
+  let newItem = { value: cleanVal };
 
-  const newItem = note ? { value: cleanVal, note: note.trim() } : { value: cleanVal };
+  // Creative Channel 完全不处理 note
+  if (fieldKey !== 'creative-channel') {
+    // 🤖 AI 预填 Note 生成，可按 Enter 直接跳过/确认
+    const defaultAiNote = generateSmartNote(fieldKey, cleanVal);
+    const note = prompt(`AI Auto-Generated Note for [${cleanVal}]:\n(Edit or press OK/Enter to accept default)`, defaultAiNote);
+    
+    if (note && note.trim()) {
+      newItem.note = note.trim();
+    }
+  }
 
   if(!OPTIONS[fieldKey]) OPTIONS[fieldKey] = [];
   if(OPTIONS[fieldKey].some(o => (typeof o==='object'? o.value: o) === cleanVal)) {
@@ -592,13 +675,12 @@ function addNewEnumPrompt(fieldKey) {
   } catch(e) {}
 
   pickDropdown(fieldKey, cleanVal, null);
-  alert(`New enum [${cleanVal}] added and saved into custom-options memory!`);
+  alert(`New enum [${cleanVal}] added and saved successfully!`);
 }
 
 function exportCustomJson() {
-  if (!isAdminUnlocked) return;
   if (Object.keys(userCustomOptions).length === 0) {
-    alert("No custom options added yet. Click [+ Add] next to field labels to add custom enums.");
+    alert("No custom options added yet.");
     return;
   }
 
@@ -683,6 +765,91 @@ function exportProductCodeMapJson() {
   const dlAnchor = document.createElement('a');
   dlAnchor.setAttribute("href", dataStr);
   dlAnchor.setAttribute("download", "product-code-map.json");
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+}
+
+/* ===== AUDIENCE MANAGER MODULE (scene, int, id) ===== */
+function renderAudienceManagerUI() {
+  const container = document.getElementById('aud-list-container');
+  if(!container) return;
+
+  const targetCategories = ['scene', 'int', 'id'];
+  let map = OPTIONS['audience-tag-map'] || {};
+  let html = '';
+
+  targetCategories.forEach(cat => {
+    const list = map[cat] || [];
+    html += '<div class="pm-type-group">';
+    html += '<div class="pm-type-title"><span>Audience Category: ' + escHtml(cat) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + list.length + ' tags</span></div>';
+    html += '<div class="pm-tag-list">';
+
+    list.forEach(item => {
+      let valStr = typeof item === 'object' ? item.value : item;
+      let labelStr = typeof item === 'object' && item.label ? ' (' + item.label + ')' : '';
+      let delBtn = isAdminUnlocked ? '<span class="pm-item-del" title="Delete audience tag" onclick="deleteAudienceTag(\'' + cat + '\', \'' + escJs(valStr) + '\')">&times;</span>' : '';
+      html += '<span class="pm-item-tag">' + escHtml(valStr) + escHtml(labelStr) + ' ' + delBtn + '</span>';
+    });
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function addNewAudienceTag() {
+  if (!isAdminUnlocked) return;
+  const catSelect = document.getElementById('aud-add-category');
+  const tagInput = document.getElementById('aud-add-tag');
+  const labelInput = document.getElementById('aud-add-label');
+
+  if(!catSelect || !tagInput) return;
+  const cat = catSelect.value;
+  const newTag = tagInput.value.trim().toLowerCase();
+  const newLabel = labelInput.value ? labelInput.value.trim() : '';
+
+  if(!newTag) { alert('Please enter a valid tag value!'); return; }
+
+  if(!OPTIONS['audience-tag-map']) OPTIONS['audience-tag-map'] = {};
+  if(!OPTIONS['audience-tag-map'][cat]) OPTIONS['audience-tag-map'][cat] = [];
+
+  if(OPTIONS['audience-tag-map'][cat].some(i => (typeof i === 'object' ? i.value : i) === newTag)) {
+    alert('Tag already exists in category [' + cat + ']!');
+    return;
+  }
+
+  // 🤖 AI 智能自动预填生成 Audience Tag Note
+  const aiNote = generateSmartNote(cat, newTag);
+  const itemObj = { value: newTag, label: newLabel || newTag, note: aiNote };
+  OPTIONS['audience-tag-map'][cat].push(itemObj);
+
+  tagInput.value = '';
+  if(labelInput) labelInput.value = '';
+  renderAudienceManagerUI();
+  alert('Audience tag [' + newTag + '] added to [' + cat + '] successfully!');
+}
+
+function deleteAudienceTag(cat, tagVal) {
+  if (!isAdminUnlocked) return;
+  if(!confirm('Are you sure you want to delete tag [' + tagVal + '] from category [' + cat + ']?')) return;
+
+  if(OPTIONS['audience-tag-map'] && OPTIONS['audience-tag-map'][cat]) {
+    OPTIONS['audience-tag-map'][cat] = OPTIONS['audience-tag-map'][cat].filter(i => (typeof i === 'object' ? i.value : i) !== tagVal);
+    renderAudienceManagerUI();
+  }
+}
+
+function exportDataJsonWithAudience() {
+  if (!isAdminUnlocked) return;
+  const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
+  if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
+  exportCopy["Ad-Group"]["Audience Tag Map"] = OPTIONS['audience-tag-map'];
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportCopy, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", "data.json");
   document.body.appendChild(dlAnchor);
   dlAnchor.click();
   dlAnchor.remove();
@@ -799,7 +966,7 @@ function buildDropdown(field) {
     const o = opts[i];
     if(typeof o === 'object') {
       let labelText = o.label ? ' (' + escHtml(o.label) + ')' : '';
-      let noteText = o.note ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
+      let noteText = (o.note && field !== 'creative-channel') ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
       html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + labelText + '</div>' + noteText + '</div>';
     } else {
       html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
@@ -824,7 +991,7 @@ function filterDropdown(field, q) {
     const o = filtered[i];
     if(typeof o === 'object') {
       let labelText = o.label ? ' (' + escHtml(o.label) + ')' : '';
-      let noteText = o.note ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
+      let noteText = (o.note && field !== 'creative-channel') ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
       html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + labelText + '</div>' + noteText + '</div>';
     } else {
       html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
@@ -1056,7 +1223,7 @@ function exportCSV(){
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
+function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
 function resetAll() {
   Object.keys(FIELD_TYPES).forEach(f => {
