@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @media(max-width:960px){.layout{grid-template-columns:1fr}}
 
 .tab-container {display:flex;background:#E5E7EB;padding:4px;border-radius:12px;margin-bottom:16px;gap:4px}
-.tab-btn {flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab-btn {flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
 .tab-btn:hover {color:var(--text);background:rgba(255,255,255,.5)}
 .tab-btn.active {background:var(--card);color:var(--primary);box-shadow:0 2px 4px rgba(0,0,0,.04)}
 
@@ -116,6 +116,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* Product Manager Styles */
+.pm-add-box{display:grid;grid-template-columns:160px 1fr auto;gap:10px;margin-bottom:20px;align-items:center;background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border)}
+.pm-type-group{margin-bottom:16px;border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}
+.pm-type-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.pm-tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.pm-item-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--text)}
+.pm-item-del{color:var(--danger);cursor:pointer;font-weight:700;font-size:12px;padding:0 2px}
+.pm-item-del:hover{color:#b91c1c}
   </style>
 </head>
 <body>
@@ -142,8 +151,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       <button class="tab-btn active" id="tab-c" onclick="switchTab('campaign')">🚀 Ad Campaign</button>
       <button class="tab-btn" id="tab-g" onclick="switchTab('adgroup')">📦 Ad Group</button>
       <button class="tab-btn" id="tab-a" onclick="switchTab('ad')">🖼️ Ad</button>
+      <button class="tab-btn" id="tab-p" onclick="switchTab('product')">🛠️ Product Map Manager</button>
     </div>
 
+    <!-- Panel 1: Campaign -->
     <div class="tab-panel active" id="panel-campaign">
       <div class="card">
         <div class="card-header">
@@ -168,6 +179,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
+    <!-- Panel 2: AdGroup -->
     <div class="tab-panel" id="panel-adgroup">
       <div class="card">
         <div class="card-header">
@@ -186,6 +198,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
       </div>
     </div>
 
+    <!-- Panel 3: Ad -->
     <div class="tab-panel" id="panel-ad">
       <div class="card">
         <div class="card-header">
@@ -201,6 +214,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
           <button class="btn-secondary" onclick="exportCustomJson()">📥 Export Custom JSON</button>
           <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Product Map Manager -->
+    <div class="tab-panel" id="panel-product">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🛠️</div>
+          <div>
+            <div class="card-title">Product Code Map Manager</div>
+            <div class="card-desc">View, add, or delete product codes dynamically. Export updated product-code-map.json.</div>
+          </div>
+        </div>
+
+        <div class="pm-add-box">
+          <select id="pm-add-type" class="custom-input" style="padding:7px 10px; cursor:pointer;">
+            <option value="poe">poe</option>
+            <option value="wifi">wifi</option>
+            <option value="battery wifi">battery wifi</option>
+            <option value="battery 4g">battery 4g</option>
+            <option value="doorbell">doorbell</option>
+            <option value="nvr">nvr</option>
+          </select>
+          <input type="text" id="pm-add-code" class="custom-input" placeholder="Enter new product code (e.g., rlc-999a)..." />
+          <button class="btn-primary" onclick="addNewProductCode()" style="width:auto; padding:8px 16px;">+ Add Product</button>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <input type="text" id="pm-search-filter" class="custom-input" placeholder="🔍 Search product model across categories..." oninput="renderProductManagerUI()" />
+        </div>
+
+        <div id="pm-list-container"></div>
+
+        <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--muted)">Changes apply instantly to current session.</span>
+          <button class="btn-primary" onclick="exportProductCodeMapJson()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export product-code-map.json</button>
         </div>
       </div>
     </div>
@@ -266,10 +316,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
-const CUSTOM_JSON_URL = './custom-options.json'; // 👈 独立的用户扩展 JSON 文件
+const CUSTOM_JSON_URL = './custom-options.json';
 
-const STORAGE_KEY = 'universal_tab_structure_history_v13';
+const STORAGE_KEY = 'universal_tab_structure_history_v14';
 const LOCAL_CUSTOM_KEY = 'ad_namebuilder_user_extensions_v1';
+const LOCAL_PRODUCT_MAP_KEY = 'ad_namebuilder_product_map_v1';
 
 const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
 const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
@@ -308,7 +359,7 @@ let FIELD_LABELS = {
 };
 
 let rawDataJson = {};
-let userCustomOptions = {}; // 👈 仅保存用户新增的扩展项
+let userCustomOptions = {}; 
 let OPTIONS = {};
 let PRODUCT_RELATION_MAP = {}; 
 let DATA_READY = false;
@@ -320,8 +371,18 @@ const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['cl
 function switchTab(layer) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-  document.getElementById('tab-' + (layer === 'campaign' ? 'c' : (layer === 'adgroup' ? 'g' : 'a'))).classList.add('active');
+  
+  let tabId = 'tab-c';
+  if(layer === 'adgroup') tabId = 'tab-g';
+  else if(layer === 'ad') tabId = 'tab-a';
+  else if(layer === 'product') tabId = 'tab-p';
+
+  document.getElementById(tabId).classList.add('active');
   document.getElementById('panel-' + layer).classList.add('active');
+
+  if(layer === 'product') {
+    renderProductManagerUI();
+  }
 }
 
 function initHistoryFromStorage() {
@@ -339,7 +400,6 @@ async function loadData() {
   showDatasourceStatus('loading', 'Loading data.json, custom-options.json & product-code-map.json...');
   initHistoryFromStorage();
   try {
-    // 三源异步流：同时读取主文件、自定义扩展文件、产品映射表
     const [dataResp, mapResp, customResp] = await Promise.all([
       fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
       fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" }),
@@ -348,7 +408,6 @@ async function loadData() {
 
     if (!dataResp.ok || !mapResp.ok) throw new Error('Network file lookup error');
 
-    // Extract Last-Modified Header
     const lastModifiedHeader = mapResp.headers.get('Last-Modified');
     if (lastModifiedHeader) {
       const d = new Date(lastModifiedHeader);
@@ -360,7 +419,12 @@ async function loadData() {
     rawDataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
 
-    // 如果根目录下存在 custom-options.json，则优先读取
+    // Restore local product map overrides if present
+    try {
+      const savedMap = localStorage.getItem(LOCAL_PRODUCT_MAP_KEY);
+      if(savedMap) PRODUCT_RELATION_MAP = JSON.parse(savedMap);
+    } catch(e){}
+
     if (customResp.ok) {
       try { userCustomOptions = await customResp.json(); } catch(e){}
     }
@@ -388,7 +452,6 @@ async function loadData() {
       }
     }
 
-    // 合并 LocalStorage 缓存与远程 custom-options.json
     mergeCustomOptions();
 
     renderAllFields();
@@ -417,7 +480,6 @@ function mergeCustomOptions() {
     }
   } catch(e){}
 
-  // 将用户自定义的项注入到当前运行环境的 OPTIONS 中
   for (const [fieldKey, newItems] of Object.entries(userCustomOptions)) {
     if (OPTIONS[fieldKey] && Array.isArray(newItems)) {
       newItems.forEach(item => {
@@ -474,24 +536,19 @@ function addNewEnumPrompt(fieldKey) {
     return;
   }
 
-  // 追加到运行内存
   OPTIONS[fieldKey].push(newItem);
 
-  // 记录到独立的 userCustomOptions 对象中
   if (!userCustomOptions[fieldKey]) userCustomOptions[fieldKey] = [];
   userCustomOptions[fieldKey].push(newItem);
 
-  // 持久化到 LocalStorage
   try {
     localStorage.setItem(LOCAL_CUSTOM_KEY, JSON.stringify(userCustomOptions));
   } catch(e) {}
 
-  // 自动选中新加的值
   pickDropdown(fieldKey, cleanVal, null);
   alert(`New enum [${cleanVal}] added and saved into custom-options memory!`);
 }
 
-// 💡 核心升级：仅导出用户新增的 custom-options.json，绝不影响 data.json
 function exportCustomJson() {
   if (Object.keys(userCustomOptions).length === 0) {
     alert("No custom options added yet. Click [+ Add] next to field labels to add custom enums.");
@@ -502,6 +559,79 @@ function exportCustomJson() {
   const dlAnchor = document.createElement('a');
   dlAnchor.setAttribute("href", dataStr);
   dlAnchor.setAttribute("download", "custom-options.json");
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+}
+
+/* ===== PRODUCT MAP MANAGER MODULE ===== */
+function renderProductManagerUI() {
+  const container = document.getElementById('pm-list-container');
+  if(!container) return;
+
+  const query = (document.getElementById('pm-search-filter') ? document.getElementById('pm-search-filter').value : '').toLowerCase().trim();
+  let html = '';
+
+  for (const [typeKey, codes] of Object.entries(PRODUCT_RELATION_MAP)) {
+    if(typeKey === 'all') continue;
+    const filteredCodes = query ? codes.filter(c => c.toLowerCase().includes(query)) : codes;
+    if(query && filteredCodes.length === 0) continue;
+
+    html += '<div class="pm-type-group">';
+    html += '<div class="pm-type-title"><span>' + escHtml(typeKey) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + filteredCodes.length + ' models</span></div>';
+    html += '<div class="pm-tag-list">';
+
+    filteredCodes.forEach(code => {
+      if(code === 'all') return;
+      html += '<span class="pm-item-tag">' + escHtml(code) + ' <span class="pm-item-del" title="Delete model" onclick="deleteProductCode(\'' + typeKey + '\', \'' + escJs(code) + '\')">&times;</span></span>';
+    });
+
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html || '<div class="empty-hint">No matching product codes found...</div>';
+}
+
+function addNewProductCode() {
+  const typeSelect = document.getElementById('pm-add-type');
+  const codeInput = document.getElementById('pm-add-code');
+  if(!typeSelect || !codeInput) return;
+
+  const targetType = typeSelect.value;
+  let newCode = codeInput.value.trim().toLowerCase();
+
+  if(!newCode) { alert('Please enter a valid product code!'); return; }
+
+  if(!PRODUCT_RELATION_MAP[targetType]) PRODUCT_RELATION_MAP[targetType] = ['all'];
+  if(PRODUCT_RELATION_MAP[targetType].includes(newCode)) {
+    alert('Product code already exists in category [' + targetType + ']!');
+    return;
+  }
+
+  PRODUCT_RELATION_MAP[targetType].push(newCode);
+
+  try { localStorage.setItem(LOCAL_PRODUCT_MAP_KEY, JSON.stringify(PRODUCT_RELATION_MAP)); } catch(e){}
+
+  codeInput.value = '';
+  renderProductManagerUI();
+  alert('Product code [' + newCode + '] added successfully!');
+}
+
+function deleteProductCode(typeKey, code) {
+  if(!confirm('Are you sure you want to remove [' + code + '] from [' + typeKey + ']?')) return;
+
+  if(PRODUCT_RELATION_MAP[typeKey]) {
+    PRODUCT_RELATION_MAP[typeKey] = PRODUCT_RELATION_MAP[typeKey].filter(c => c !== code);
+    try { localStorage.setItem(LOCAL_PRODUCT_MAP_KEY, JSON.stringify(PRODUCT_RELATION_MAP)); } catch(e){}
+    renderProductManagerUI();
+  }
+}
+
+function exportProductCodeMapJson() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(PRODUCT_RELATION_MAP, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", "product-code-map.json");
   document.body.appendChild(dlAnchor);
   dlAnchor.click();
   dlAnchor.remove();
@@ -875,7 +1005,7 @@ function exportCSV(){
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
+function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
 function resetAll() {
   Object.keys(FIELD_TYPES).forEach(f => {
