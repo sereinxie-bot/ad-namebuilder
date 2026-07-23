@@ -3,15 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ad Structure Universal Hub</title>
+  <title>Ad Namebuilder</title>
   <style>
 :root{--primary:#4F46E5;--primary-light:#EEF2FF;--primary-hover:#4338CA;--success:#10B981;--danger:#EF4444;--danger-light:#FEF2F2;--border:#E5E7EB;--text:#111827;--muted:#6B7280;--bg:#F3F4F6;--card:#FFF;--shadow:0 1px 3px rgba(0,0,0,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:var(--primary);padding:18px 28px;display:flex;align-items:center;gap:14px}
-.header-icon{font-size:26px;line-height:1}
-.header-title{font-size:18px;font-weight:700;color:#fff}
-.header-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px}
+
+.header{background:var(--primary);padding:20px 28px 16px;display:flex;flex-direction:column;gap:12px}
+.header-top{display:flex;align-items:center;gap:14px}
+.header-icon{font-size:28px;line-height:1}
+.header-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em}
+.header-sub{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-family:monospace}
+
+.datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:12px;background:rgba(255,255,255,0.15);color:#fff;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2)}
+.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.datasource-bar.ok .ds-dot{background:#10B981}
+.datasource-bar.error .ds-dot{background:#EF4444}
+.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
+.datasource-bar .ds-msg{flex:1;font-weight:500}
+.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:4px;transition:all .15s}
+.datasource-bar .ds-refresh:hover{background:rgba(255,255,255,0.35)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
 .layout{display:grid;grid-template-columns:1fr 400px;gap:20px;max-width:1200px;margin:24px auto;padding:0 20px 40px;align-items:start}
 @media(max-width:960px){.layout{grid-template-columns:1fr}}
 
@@ -35,8 +48,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .field-compact .field{grid-column:span 1}
 @media(max-width:600px){.field-compact .field{grid-column:1/-1}}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
+.field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;gap:5px}
+.field-label-left{display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
+
+.btn-add-enum{background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:1px 7px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px;transition:all .15s}
+.btn-add-enum:hover{background:var(--primary);color:#fff}
 
 .tag-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1.5px solid var(--border);border-radius:10px;min-height:44px;cursor:default;transition:border-color .15s}
 .tag{display:inline-flex;align-items:center;padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;color:var(--muted);background:var(--bg);user-select:none;white-space:nowrap}
@@ -96,15 +113,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .history-name{font-size:11px;font-weight:600;word-break:break-all;color:var(--text);margin-bottom:2px}
 .history-subnames-box {font-size:10px;color:var(--muted);background:#F9FAFB;padding:4px 8px;border-radius:6px;border:1px solid var(--border);margin-top:2px}
 .history-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin-top:4px}
-.datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:11px;margin-bottom:16px}
-.datasource-bar.ok{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
-.datasource-bar.error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}
-.datasource-bar.loading{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}
-.datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.datasource-bar.ok .ds-dot{background:#10B981}
-.datasource-bar.loading .ds-dot{background:#F59E0B;animation:pulse-dot 1s infinite}
-.datasource-bar .ds-refresh{cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;opacity:.7;transition:opacity .15s}
-.datasource-bar .ds-refresh:hover {opacity:1}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
@@ -113,10 +121,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <body>
 
 <div class="header">
-  <div class="header-icon">📋</div>
-  <div>
-    <div class="header-title">Ad Structure Universal Tab-Builder</div>
-    <div class="header-sub">Product Data Source: product-code-map.json · Clean Level Naming Engine</div>
+  <div class="header-top">
+    <div class="header-icon">📋</div>
+    <div>
+      <div class="header-title">Ad Namebuilder</div>
+      <div class="header-sub">product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+    </div>
+  </div>
+  
+  <div id="datasource-status" class="datasource-bar loading">
+    <span class="ds-dot"></span>
+    <span class="ds-msg">Loading configuration files...</span>
+    <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>
   </div>
 </div>
 
@@ -136,12 +152,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
             <div class="card-title">Ad Campaign Configurations</div>
             <div class="card-desc">Independent workspace. Generates ONLY campaign string segments.</div>
           </div>
-        </div>
-
-        <div id="datasource-status" class="datasource-bar loading">
-          <span class="ds-dot"></span>
-          <span class="ds-msg">Loading configurations...</span>
-          <span class="ds-refresh" onclick="loadData()">[REFRESH]</span>
         </div>
 
         <div id="fields-container-campaign">
@@ -188,7 +198,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         
         <div id="fields-container-ad"></div>
         
-        <div class="tab-footer-row">
+        <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
+          <button class="btn-secondary" onclick="exportCustomJson()">📥 Export Custom JSON</button>
           <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
         </div>
       </div>
@@ -255,18 +266,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <script>
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
-const STORAGE_KEY = 'universal_tab_structure_history_v10';
+const CUSTOM_JSON_URL = './custom-options.json'; // 👈 独立的用户扩展 JSON 文件
+
+const STORAGE_KEY = 'universal_tab_structure_history_v13';
+const LOCAL_CUSTOM_KEY = 'ad_namebuilder_user_extensions_v1';
 
 const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
 const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
 
-// 12 Exact Ad Fields
 const AD_WHITELIST = [
   'landing-page', 'creative-product-type', 'creative-product',
   'creative-type', 'creative-source', 'creative-source-type',
   'creative-channel', 'creative-discount', 'creative-size',
   'ksp', 'project', 'ad-custom'
 ];
+
+const ALLOW_NEW_ENUM_FIELDS = ['creative-channel', 'ksp', 'project'];
 
 const FIELD_TYPES = {
   "market": "dropdown", "product-type": "dropdown", "product-code": "dropdown",
@@ -292,6 +307,8 @@ let FIELD_LABELS = {
   "creative-size": "Creative Size", "ksp": "KSP", "project": "Project", "ad-custom": "Custom"
 };
 
+let rawDataJson = {};
+let userCustomOptions = {}; // 👈 仅保存用户新增的扩展项
 let OPTIONS = {};
 let PRODUCT_RELATION_MAP = {}; 
 let DATA_READY = false;
@@ -319,40 +336,60 @@ function cleanKey(str) {
 }
 
 async function loadData() {
-  showDatasourceStatus('loading', 'Resolving configuration layers...');
+  showDatasourceStatus('loading', 'Loading data.json, custom-options.json & product-code-map.json...');
   initHistoryFromStorage();
   try {
-    const [dataResp, mapResp] = await Promise.all([
+    // 三源异步流：同时读取主文件、自定义扩展文件、产品映射表
+    const [dataResp, mapResp, customResp] = await Promise.all([
       fetch(DATA_URL + '?t=' + Date.now(), { cache: "no-store" }),
-      fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" })
+      fetch(MAP_URL + '?t=' + Date.now(), { cache: "no-store" }),
+      fetch(CUSTOM_JSON_URL + '?t=' + Date.now(), { cache: "no-store" }).catch(() => ({ ok: false }))
     ]);
+
     if (!dataResp.ok || !mapResp.ok) throw new Error('Network file lookup error');
 
-    const dataJson = await dataResp.json();
+    // Extract Last-Modified Header
+    const lastModifiedHeader = mapResp.headers.get('Last-Modified');
+    if (lastModifiedHeader) {
+      const d = new Date(lastModifiedHeader);
+      document.getElementById('map-last-modified').innerText = d.toLocaleString();
+    } else {
+      document.getElementById('map-last-modified').innerText = 'Synced ' + new Date().toLocaleTimeString();
+    }
+
+    rawDataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
+
+    // 如果根目录下存在 custom-options.json，则优先读取
+    if (customResp.ok) {
+      try { userCustomOptions = await customResp.json(); } catch(e){}
+    }
 
     OPTIONS = {};
     
-    if(dataJson["Ad-Campaign"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad-Campaign"])) {
+    if(rawDataJson["Ad-Campaign"]) {
+      for(const [col, vals] of Object.entries(rawDataJson["Ad-Campaign"])) {
         const k = cleanKey(col); FIELD_LABELS[k] = col; OPTIONS[k] = (k === 'product-code') ? [] : vals;
       }
     }
-    if(dataJson["Ad-Group"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad-Group"])) {
+    if(rawDataJson["Ad-Group"]) {
+      for(const [col, vals] of Object.entries(rawDataJson["Ad-Group"])) {
         const k = cleanKey(col);
         if(k === 'audience-tag-map' || k === 'data-source-map') { OPTIONS[k] = vals; }
         else if(k === 'custom') { FIELD_LABELS['ag-custom'] = "Custom"; OPTIONS['ag-custom'] = vals; }
         else { FIELD_LABELS[k] = col; OPTIONS[k] = vals; }
       }
     }
-    if(dataJson["Ad"]) {
-      for(const [col, vals] of Object.entries(dataJson["Ad"])) {
+    if(rawDataJson["Ad"]) {
+      for(const [col, vals] of Object.entries(rawDataJson["Ad"])) {
         const k = cleanKey(col); 
         if(k === 'custom') { FIELD_LABELS['ad-custom'] = "Custom"; OPTIONS['ad-custom'] = vals; }
         else { FIELD_LABELS[k] = col; OPTIONS[k] = vals; }
       }
     }
+
+    // 合并 LocalStorage 缓存与远程 custom-options.json
+    mergeCustomOptions();
 
     renderAllFields();
     renderHistory();
@@ -361,6 +398,34 @@ async function loadData() {
   } catch(err) {
     console.error(err);
     showDatasourceStatus('error', 'Sync structural breakdown.');
+  }
+}
+
+function mergeCustomOptions() {
+  try {
+    const localSaved = localStorage.getItem(LOCAL_CUSTOM_KEY);
+    if (localSaved) {
+      const localObj = JSON.parse(localSaved);
+      for (const [fKey, arr] of Object.entries(localObj)) {
+        if (!userCustomOptions[fKey]) userCustomOptions[fKey] = [];
+        arr.forEach(item => {
+          if (!userCustomOptions[fKey].some(i => i.value === item.value)) {
+            userCustomOptions[fKey].push(item);
+          }
+        });
+      }
+    }
+  } catch(e){}
+
+  // 将用户自定义的项注入到当前运行环境的 OPTIONS 中
+  for (const [fieldKey, newItems] of Object.entries(userCustomOptions)) {
+    if (OPTIONS[fieldKey] && Array.isArray(newItems)) {
+      newItems.forEach(item => {
+        if (!OPTIONS[fieldKey].some(o => (typeof o === 'object' ? o.value : o) === item.value)) {
+          OPTIONS[fieldKey].push(item);
+        }
+      });
+    }
   }
 }
 
@@ -373,13 +438,16 @@ function showDatasourceStatus(state, msg) {
 function renderFieldHTML(f) {
   const ft = FIELD_TYPES[f] || 'dropdown';
   const label = FIELD_LABELS[f] || f;
+  const allowNew = ALLOW_NEW_ENUM_FIELDS.includes(f);
 
   if (ft === 'dropdown') {
     const isFullWidth = (f === 'product-code' || f === 'audience-tag' || f === 'data-source-detail' || f === 'landing-page' || f === 'creative-product');
-    return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
+    let addBtnHTML = allowNew ? '<button class="btn-add-enum" title="Add custom enum & save to custom-options.json" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>' : '';
+    
+    return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><div class="field-label-left"><span class="req">*</span> ' + escHtml(label) + '</div>' + addBtnHTML + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
   } else if (ft === 'tag') {
     const opts = OPTIONS[f] || [];
-    return '<div class="field"><div class="field-label"><span class="req">*</span> ' + escHtml(label) + '</div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
+    return '<div class="field"><div class="field-label"><div class="field-label-left"><span class="req">*</span> ' + escHtml(label) + '</div></div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
   } else if (f === 'custom') {
     return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Auto-Fill Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div><div class="help-group" style="margin-top:10px;"><div class="help-group-title">Pmax Ad Tags</div><div class="help-tags">' + ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
   } else if (f === 'ag-custom') {
@@ -388,6 +456,55 @@ function renderFieldHTML(f) {
     return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ad-custom" placeholder="Lowercase, numbers and hyphens only..." oninput="handleAdCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Rule: Strict lowercase & hyphens (-). Underscores (_) forbidden.</div></div></div>';
   }
   return '';
+}
+
+function addNewEnumPrompt(fieldKey) {
+  const label = FIELD_LABELS[fieldKey] || fieldKey;
+  const val = prompt(`Add new custom option to [${label}]:`);
+  if (!val || !val.trim()) return;
+
+  const cleanVal = val.trim().toLowerCase();
+  const note = prompt(`(Optional) Enter short note explanation for [${cleanVal}]:`) || '';
+
+  const newItem = note ? { value: cleanVal, note: note.trim() } : { value: cleanVal };
+
+  if(!OPTIONS[fieldKey]) OPTIONS[fieldKey] = [];
+  if(OPTIONS[fieldKey].some(o => (typeof o==='object'? o.value: o) === cleanVal)) {
+    alert('Value already exists!');
+    return;
+  }
+
+  // 追加到运行内存
+  OPTIONS[fieldKey].push(newItem);
+
+  // 记录到独立的 userCustomOptions 对象中
+  if (!userCustomOptions[fieldKey]) userCustomOptions[fieldKey] = [];
+  userCustomOptions[fieldKey].push(newItem);
+
+  // 持久化到 LocalStorage
+  try {
+    localStorage.setItem(LOCAL_CUSTOM_KEY, JSON.stringify(userCustomOptions));
+  } catch(e) {}
+
+  // 自动选中新加的值
+  pickDropdown(fieldKey, cleanVal, null);
+  alert(`New enum [${cleanVal}] added and saved into custom-options memory!`);
+}
+
+// 💡 核心升级：仅导出用户新增的 custom-options.json，绝不影响 data.json
+function exportCustomJson() {
+  if (Object.keys(userCustomOptions).length === 0) {
+    alert("No custom options added yet. Click [+ Add] next to field labels to add custom enums.");
+    return;
+  }
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userCustomOptions, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", "custom-options.json");
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
 }
 
 function renderAllFields() {
@@ -483,10 +600,10 @@ function getFieldRuntimeOptions(field) {
       let merged = []; Object.values(map).forEach(arr => { merged = merged.concat(arr); });
       return [...new Map(merged.map(item => [item.value, item])).values()];
     }
-    if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(cat)) {
-      return map["Prospecting Mechanism (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || [];
+    if(cat === 'rm' || cat === 'lal') {
+      return map["Remarketing Mechanism (rm, lal)"] || map["重定向人群适用机制 (rm, lal)"] || [];
     } else {
-      return map["Remarketing Mechanism (rm, lal)"] || [];
+      return map["Prospecting Mechanism (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || map["拉新客人群适用机制 (cus, kwd, plcm, shop a+, scene, int, id, brd)"] || [];
     }
   }
 
@@ -552,7 +669,6 @@ function pickDropdown(field, val, e) {
      if (sel['creative-product'] && !allowed.includes(sel['creative-product'])) { resetInputNode('creative-product'); }
   }
 
-  // Force Lock Rule for Creative Type: pic or gif locks creative-source-type to unlisted
   if (field === 'creative-type') {
     if (val === 'pic' || val === 'gif') {
       forceFillInputNode('creative-source-type', 'unlisted');
@@ -568,12 +684,14 @@ function pickDropdown(field, val, e) {
      const tags = (OPTIONS['audience-tag-map'] || {})[val] || [];
      if(tags.length > 0) { forceFillInputNode('audience-tag', tags[0].value); } else { resetInputNode('audience-tag'); }
      
-     if(['cus', 'kwd', 'plcm', 'shop-a+', 'scene', 'int', 'id', 'brd'].includes(val)) {
+     if(val === 'rm' || val === 'lal') {
+       resetInputNode('data-source'); 
+       resetInputNode('data-source-detail'); 
+       resetInputNode('data-window');
+     } else {
        forceFillInputNode('data-source', 'n');
        forceFillInputNode('data-source-detail', 'n');
        forceFillInputNode('data-window', 'n');
-     } else {
-       resetInputNode('data-source'); resetInputNode('data-source-detail'); resetInputNode('data-window');
      }
   }
   updateAllPreviews();
@@ -625,7 +743,6 @@ function validateLayer(layer) {
 }
 
 function compileNames() {
-  // 1. Campaign Name
   const campaignParts = [];
   for (const f of CAMPAIGN_WHITELIST) {
     if (f === 'custom') {
@@ -635,7 +752,6 @@ function compileNames() {
   }
   const cName = campaignParts.join('_');
 
-  // 2. Ad Group Name
   const agParts = [];
   for (const f of ADGROUP_WHITELIST) {
     if (f === 'ag-custom') {
@@ -645,7 +761,6 @@ function compileNames() {
   }
   const gName = agParts.join('_');
 
-  // 3. Ad Name (12-Field Structure)
   const adParts = [];
   for (const f of AD_WHITELIST) {
     if (f === 'ad-custom') {
