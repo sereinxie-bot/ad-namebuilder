@@ -10,10 +10,15 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 .header{background:var(--primary);padding:20px 28px 16px;display:flex;flex-direction:column;gap:12px}
-.header-top{display:flex;align-items:center;gap:14px}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header-brand{display:flex;align-items:center;gap:14px}
 .header-icon{font-size:28px;line-height:1}
 .header-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em}
 .header-sub{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-family:monospace}
+
+.btn-admin-toggle{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-admin-toggle:hover{background:rgba(255,255,255,0.35)}
+.btn-admin-toggle.unlocked{background:var(--success);border-color:var(--success)}
 
 .datasource-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:12px;background:rgba(255,255,255,0.15);color:#fff;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2)}
 .datasource-bar .ds-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -51,6 +56,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .field-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;gap:5px}
 .field-label-left{display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
+
+/* Admin elements visibility control */
+.admin-only {display:none !important}
+body.is-admin .admin-only {display:inline-flex !important}
+body.is-admin div.admin-only {display:block !important}
 
 .btn-add-enum{background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:1px 7px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px;transition:all .15s}
 .btn-add-enum:hover{background:var(--primary);color:#fff}
@@ -117,7 +127,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 
-/* Product Manager Styles */
 .pm-add-box{display:grid;grid-template-columns:160px 1fr auto;gap:10px;margin-bottom:20px;align-items:center;background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border)}
 .pm-type-group{margin-bottom:16px;border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}
 .pm-type-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
@@ -131,11 +140,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
 <div class="header">
   <div class="header-top">
-    <div class="header-icon">📋</div>
-    <div>
-      <div class="header-title">Ad Namebuilder</div>
-      <div class="header-sub">product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+    <div class="header-brand">
+      <div class="header-icon">📋</div>
+      <div>
+        <div class="header-title">Ad Namebuilder</div>
+        <div class="header-sub">product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+      </div>
     </div>
+
+    <!-- Admin Password Lock Toggle Button -->
+    <button class="btn-admin-toggle" id="btn-admin-toggle" onclick="toggleAdminLock()">
+      <span id="admin-icon">🔒</span> <span id="admin-label">Admin Locked</span>
+    </button>
   </div>
   
   <div id="datasource-status" class="datasource-bar loading">
@@ -212,7 +228,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         <div id="fields-container-ad"></div>
         
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
-          <button class="btn-secondary" onclick="exportCustomJson()">📥 Export Custom JSON</button>
+          <button class="btn-secondary admin-only" onclick="exportCustomJson()">📥 Export Custom JSON</button>
+          <div></div>
           <button class="btn-primary" onclick="storeLayer('ad')" style="width:auto;padding:10px 24px;background:var(--success)">💾 Save Ad Name</button>
         </div>
       </div>
@@ -229,7 +246,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
           </div>
         </div>
 
-        <div class="pm-add-box">
+        <div class="pm-add-box admin-only">
           <select id="pm-add-type" class="custom-input" style="padding:7px 10px; cursor:pointer;">
             <option value="poe">poe</option>
             <option value="wifi">wifi</option>
@@ -250,7 +267,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
           <span style="font-size:12px; color:var(--muted)">Changes apply instantly to current session.</span>
-          <button class="btn-primary" onclick="exportProductCodeMapJson()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export product-code-map.json</button>
+          <button class="btn-primary admin-only" onclick="exportProductCodeMapJson()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export product-code-map.json</button>
         </div>
       </div>
     </div>
@@ -314,11 +331,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 </div>
 
 <script>
+// 🔑 管理员密码定义（随时可在代码里修改）
+const ADMIN_PASSWORD = 'admin123';
+let isAdminUnlocked = false;
+
 const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
 const CUSTOM_JSON_URL = './custom-options.json';
 
-const STORAGE_KEY = 'universal_tab_structure_history_v14';
+const STORAGE_KEY = 'universal_tab_structure_history_v15';
 const LOCAL_CUSTOM_KEY = 'ad_namebuilder_user_extensions_v1';
 const LOCAL_PRODUCT_MAP_KEY = 'ad_namebuilder_product_map_v1';
 
@@ -367,6 +388,31 @@ const sel = {};
 let copyHistory = [];
 
 const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
+
+/* ===== 管理员解锁逻辑 ===== */
+function toggleAdminLock() {
+  if (isAdminUnlocked) {
+    isAdminUnlocked = false;
+    document.body.classList.remove('is-admin');
+    document.getElementById('admin-icon').innerText = '🔒';
+    document.getElementById('admin-label').innerText = 'Admin Locked';
+    document.getElementById('btn-admin-toggle').classList.remove('unlocked');
+    renderProductManagerUI();
+  } else {
+    const pwd = prompt('Enter Admin Password to unlock edit & export permissions:');
+    if (pwd === ADMIN_PASSWORD) {
+      isAdminUnlocked = true;
+      document.body.classList.add('is-admin');
+      document.getElementById('admin-icon').innerText = '🔓';
+      document.getElementById('admin-label').innerText = 'Admin Unlocked';
+      document.getElementById('btn-admin-toggle').classList.add('unlocked');
+      renderProductManagerUI();
+      alert('Admin permissions unlocked!');
+    } else if (pwd !== null) {
+      alert('Incorrect Password!');
+    }
+  }
+}
 
 function switchTab(layer) {
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -419,7 +465,6 @@ async function loadData() {
     rawDataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
 
-    // Restore local product map overrides if present
     try {
       const savedMap = localStorage.getItem(LOCAL_PRODUCT_MAP_KEY);
       if(savedMap) PRODUCT_RELATION_MAP = JSON.parse(savedMap);
@@ -504,7 +549,7 @@ function renderFieldHTML(f) {
 
   if (ft === 'dropdown') {
     const isFullWidth = (f === 'product-code' || f === 'audience-tag' || f === 'data-source-detail' || f === 'landing-page' || f === 'creative-product');
-    let addBtnHTML = allowNew ? '<button class="btn-add-enum" title="Add custom enum & save to custom-options.json" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>' : '';
+    let addBtnHTML = allowNew ? '<button class="btn-add-enum admin-only" title="Add custom enum & save to custom-options.json" onclick="addNewEnumPrompt(\'' + f + '\')">+ Add</button>' : '';
     
     return '<div class="field ' + (isFullWidth ? 'field-full' : '') + '"><div class="field-label"><div class="field-label-left"><span class="req">*</span> ' + escHtml(label) + '</div>' + addBtnHTML + '</div><div class="select-wrap" id="wrap-' + f + '"><input class="select-search" id="search-' + f + '" placeholder="Search ' + escHtml(label) + '..." autocomplete="off" onfocus="openDropdown(\'' + f + '\')" oninput="filterDropdown(\'' + f + '\',this.value)" onblur="blurDropdown(\'' + f + '\')"><span class="select-arrow">&#9662;</span><div class="dropdown" id="drop-' + f + '"></div></div></div>';
   } else if (ft === 'tag') {
@@ -521,6 +566,7 @@ function renderFieldHTML(f) {
 }
 
 function addNewEnumPrompt(fieldKey) {
+  if (!isAdminUnlocked) return;
   const label = FIELD_LABELS[fieldKey] || fieldKey;
   const val = prompt(`Add new custom option to [${label}]:`);
   if (!val || !val.trim()) return;
@@ -550,6 +596,7 @@ function addNewEnumPrompt(fieldKey) {
 }
 
 function exportCustomJson() {
+  if (!isAdminUnlocked) return;
   if (Object.keys(userCustomOptions).length === 0) {
     alert("No custom options added yet. Click [+ Add] next to field labels to add custom enums.");
     return;
@@ -583,7 +630,8 @@ function renderProductManagerUI() {
 
     filteredCodes.forEach(code => {
       if(code === 'all') return;
-      html += '<span class="pm-item-tag">' + escHtml(code) + ' <span class="pm-item-del" title="Delete model" onclick="deleteProductCode(\'' + typeKey + '\', \'' + escJs(code) + '\')">&times;</span></span>';
+      let delBtn = isAdminUnlocked ? '<span class="pm-item-del" title="Delete model" onclick="deleteProductCode(\'' + typeKey + '\', \'' + escJs(code) + '\')">&times;</span>' : '';
+      html += '<span class="pm-item-tag">' + escHtml(code) + ' ' + delBtn + '</span>';
     });
 
     html += '</div></div>';
@@ -593,6 +641,7 @@ function renderProductManagerUI() {
 }
 
 function addNewProductCode() {
+  if (!isAdminUnlocked) return;
   const typeSelect = document.getElementById('pm-add-type');
   const codeInput = document.getElementById('pm-add-code');
   if(!typeSelect || !codeInput) return;
@@ -618,6 +667,7 @@ function addNewProductCode() {
 }
 
 function deleteProductCode(typeKey, code) {
+  if (!isAdminUnlocked) return;
   if(!confirm('Are you sure you want to remove [' + code + '] from [' + typeKey + ']?')) return;
 
   if(PRODUCT_RELATION_MAP[typeKey]) {
@@ -628,6 +678,7 @@ function deleteProductCode(typeKey, code) {
 }
 
 function exportProductCodeMapJson() {
+  if (!isAdminUnlocked) return;
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(PRODUCT_RELATION_MAP, null, 2));
   const dlAnchor = document.createElement('a');
   dlAnchor.setAttribute("href", dataStr);
@@ -1005,7 +1056,7 @@ function exportCSV(){
 function dlBlob(content,filename,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}
 function fmt(){const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
 function pickCustom(val){ const i=document.getElementById('custom-input'); if(i){ i.value=val; i.classList.add('ok'); handleCustomInput(i); } }
-function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
+function doClipboard(s){ navigator.clipboard.writeText(s).catch(function(){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t)})}
 
 function resetAll() {
   Object.keys(FIELD_TYPES).forEach(f => {
