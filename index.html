@@ -291,9 +291,12 @@ body.is-admin div.admin-only {display:block !important}
             <option value="int">int (interest tags)</option>
             <option value="id">id (identity tags)</option>
           </select>
-          <input type="text" id="aud-add-tag" class="custom-input" placeholder="Enter new tag value (e.g., smart-home)..." />
-          <input type="text" id="aud-add-label" class="custom-input" placeholder="(Optional) Label..." style="width:120px;" />
+          <input type="text" id="aud-add-tag" class="custom-input" placeholder="Enter new audience tag value (e.g., smart-home)..." />
           <button class="btn-primary" onclick="addNewAudienceTag()" style="width:auto; padding:8px 16px;">+ Add Tag</button>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <input type="text" id="aud-search-filter" class="custom-input" placeholder="🔍 Search audience tags across categories..." oninput="renderAudienceManagerUI()" />
         </div>
 
         <div id="aud-list-container"></div>
@@ -424,7 +427,15 @@ let copyHistory = [];
 
 const FUNNEL_GOAL_MAP = {'awareness':['impression','reach'],'consideration':['click','view','pageview','signup','atc','checkout','engagement','dpv','follow'],'conversion':['sales']};
 
-// 🤖 智能 Note 自动生成引擎 (AI Engine)
+// 🤖 智能 AI 标签与 Note 自动生成引擎
+function generateSmartLabel(fieldKey, value) {
+  const val = value.trim().toLowerCase().replace(/[-_]/g, ' ');
+  if (fieldKey === 'scene') return `${val} scene`;
+  if (fieldKey === 'int') return `${val} interests`;
+  if (fieldKey === 'id') return `${val} identity`;
+  return `${val} targeting`;
+}
+
 function generateSmartNote(fieldKey, value) {
   const val = value.trim().toLowerCase();
   
@@ -444,13 +455,13 @@ function generateSmartNote(fieldKey, value) {
   }
   
   if (fieldKey === 'scene' || fieldKey === 'int' || fieldKey === 'id') {
-    return `Contextual audience taxonomy mapping ${val} behaviors and user preferences.`;
+    return `Contextual audience taxonomy mapping ${val} behaviors, affinity, and user preferences.`;
   }
 
   return `Custom ${fieldKey} taxonomy tag for ${val}.`;
 }
 
-/* ===== 🚀 GITHUB API DIRECT COMMIT MODULE (实时 SHA 防冲突强化) ===== */
+/* ===== 🚀 GITHUB API DIRECT COMMIT MODULE ===== */
 function openGitHubSettings() {
   if (!isAdminUnlocked) return;
   const currentConfig = getGitHubConfig();
@@ -492,7 +503,6 @@ async function commitFileToGitHub(path, contentObj, commitMessage) {
       'Content-Type': 'application/json'
     };
 
-    // 💡 实时抓取远端最新的 SHA 值，彻底解决 SHA mismatch 错位问题
     let sha = '';
     const getResp = await fetch(`${apiBase}?ref=${cfg.branch || 'main'}&t=${Date.now()}`, { headers, cache: "no-store" });
     if (getResp.ok) {
@@ -858,39 +868,45 @@ function renderAudienceManagerUI() {
   const container = document.getElementById('aud-list-container');
   if(!container) return;
 
+  const query = (document.getElementById('aud-search-filter') ? document.getElementById('aud-search-filter').value : '').toLowerCase().trim();
   const targetCategories = ['scene', 'int', 'id'];
   let map = OPTIONS['audience-tag-map'] || {};
   let html = '';
 
   targetCategories.forEach(cat => {
     const list = map[cat] || [];
+    const filteredList = query ? list.filter(item => {
+      const v = typeof item === 'object' ? item.value : item;
+      return v.toLowerCase().includes(query);
+    }) : list;
+
+    if(query && filteredList.length === 0) return;
+
     html += '<div class="pm-type-group">';
-    html += '<div class="pm-type-title"><span>Audience Category: ' + escHtml(cat) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + list.length + ' tags</span></div>';
+    html += '<div class="pm-type-title"><span>Audience Category: ' + escHtml(cat) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + filteredList.length + ' tags</span></div>';
     html += '<div class="pm-tag-list">';
 
-    list.forEach(item => {
+    filteredList.forEach(item => {
       let valStr = typeof item === 'object' ? item.value : item;
-      let labelStr = typeof item === 'object' && item.label ? ' (' + item.label + ')' : '';
       let delBtn = isAdminUnlocked ? '<span class="pm-item-del" title="Delete audience tag" onclick="deleteAudienceTag(\'' + cat + '\', \'' + escJs(valStr) + '\')">&times;</span>' : '';
-      html += '<span class="pm-item-tag">' + escHtml(valStr) + escHtml(labelStr) + ' ' + delBtn + '</span>';
+      // 💡 仅显示 value，隐藏 label 和 note
+      html += '<span class="pm-item-tag">' + escHtml(valStr) + ' ' + delBtn + '</span>';
     });
 
     html += '</div></div>';
   });
 
-  container.innerHTML = html;
+  container.innerHTML = html || '<div class="empty-hint">No matching audience tags found...</div>';
 }
 
 async function addNewAudienceTag() {
   if (!isAdminUnlocked) return;
   const catSelect = document.getElementById('aud-add-category');
   const tagInput = document.getElementById('aud-add-tag');
-  const labelInput = document.getElementById('aud-add-label');
 
   if(!catSelect || !tagInput) return;
   const cat = catSelect.value;
   const newTag = tagInput.value.trim().toLowerCase();
-  const newLabel = labelInput.value ? labelInput.value.trim() : '';
 
   if(!newTag) { alert('Please enter a valid tag value!'); return; }
 
@@ -902,12 +918,14 @@ async function addNewAudienceTag() {
     return;
   }
 
+  // 🤖 AI 智能自动生成 Label 与 Note
+  const aiLabel = generateSmartLabel(cat, newTag);
   const aiNote = generateSmartNote(cat, newTag);
-  const itemObj = { value: newTag, label: newLabel || newTag, note: aiNote };
+
+  const itemObj = { value: newTag, label: aiLabel, note: aiNote };
   OPTIONS['audience-tag-map'][cat].push(itemObj);
 
   tagInput.value = '';
-  if(labelInput) labelInput.value = '';
   renderAudienceManagerUI();
 
   // 🚀 Direct Sync to GitHub data.json
