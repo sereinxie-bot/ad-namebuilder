@@ -41,13 +41,13 @@
       { "value": "id", "label": "identity tags", "note": "Demographics, profession, or persona identity mapping." }
     ],
 
-    "Match Type": [
-      "all", "exact", "phrase", "broad", "n-a"
-    ],
-
     "Audience Tag Map": {
-      "brd": [{ "value": "n", "label": "no behavior", "note": "Broad targeting with no specific behavioral pixel or tags applied." }],
-      "shop a+": [{ "value": "n", "label": "no behavior", "note": "Broad Advantage+ targeting with no specific behavioral pixel or tags applied." }],
+      "brd": [
+        { "value": "n", "label": "no behavior", "note": "Broad targeting with no specific behavioral pixel or tags applied." }
+      ],
+      "shop a+": [
+        { "value": "n", "label": "no behavior", "note": "Broad Advantage+ targeting with no specific behavioral pixel or tags applied." }
+      ],
       "rm": [
         { "value": "visit", "label": "visited website", "note": "Users who have landed on the website but triggered no deep actions." },
         { "value": "pageview", "label": "page view", "note": "Pixel logs tracking specific high-intent landing page views." },
@@ -74,7 +74,7 @@
         { "value": "competitor", "label": "lookalike of competitor targets", "note": "Lookalike expansion seeded from competitor keyword searchers." }
       ],
       "cus": [
-        { "value": "competitor", "label": "competitors intent", "note": "Custom intent targeting competitor brand keywords or website URLs." },
+        { "value": "competitor", "label": "competitors intent", "note": "Custom intent targeting competitor brand keywords or website URLs (e.g., Ring, Arlo)." },
         { "value": "poe", "label": "poe keywords targeting", "note": "Custom intent keywords or website positioning focused on PoE infrastructure." },
         { "value": "battery", "label": "battery keywords targeting", "note": "Custom intent keywords or website positioning focused on standalone battery cameras." },
         { "value": "battery wifi", "label": "battery wifi keywords targeting", "note": "Custom intent keywords or website positioning focused on wire-free battery Wi-Fi setups." },
@@ -87,7 +87,7 @@
         { "value": "prospect", "label": "criteo prospecting", "note": "Exclusive Criteo engine prospecting cold audience tag." }
       ],
       "kwd": [
-        { "value": "competitor", "label": "competitor keywords", "note": "Search campaign intent targeting competitor brand names." },
+        { "value": "competitor", "label": "competitor keywords", "note": "Search campaign intent targeting competitor brand names (e.g., Ring, Arlo)." },
         { "value": "poe", "label": "poe system keywords", "note": "Search campaign intent targeting PoE security cameras queries." },
         { "value": "battery", "label": "battery camera keywords", "note": "Search campaign intent targeting battery-powered wire-free camera queries." },
         { "value": "battery wifi", "label": "battery wi-fi keywords", "note": "Search campaign intent targeting wire-free battery Wi-Fi system queries." },
@@ -97,6 +97,78 @@
         { "value": "nvr", "label": "nvr recorder keywords", "note": "Search campaign intent targeting network video recorder queries." },
         { "value": "kit", "label": "multi-camera kit keywords", "note": "Search campaign intent targeting multi-camera bundle and kit queries." },
         { "value": "dual lens", "label": "dual-lens panoramic keywords", "note": "Search campaign intent targeting dual-lens wide-angle or dual-view camera queries." }
+      ],
+      "plcm": [
+        { "value": "competitor", "label": "competitor channel placements", "note": "Granular placement targeting competitor YouTube channels or related websites." },
+        { "value": "poe", "label": "poe category placements", "note": "Granular placement targeting PoE tech review channels or websites." },
+        { "value": "battery", "label": "battery camera placements", "note": "Granular placement targeting wireless security hardware review mediums." },
+        { "value": "battery wifi", "label": "battery wi-fi placements", "note": "Granular placement targeting wire-free home security setup blogs or apps." },
+        { "value": "battery 4g", "label": "4g cellular placements", "note": "Granular placement targeting off-grid, farm, or outdoor cellular security review portals." },
+        { "value": "wifi", "label": "wi-fi device placements", "note": "Granular placement targeting smart home integration forums or channels." },
+        { "value": "doorbell", "label": "smart doorbell placements", "note": "Granular placement targeting front-door automation and property improvement channels." },
+        { "value": "nvr", "label": "nvr infrastructure placements", "note": "Granular placement targeting professional DIY security system forums." },
+        { "value": "kit", "label": "security bundle placements", "note": "Granular placement targeting hardware comparison and wholesale product review mediums." },
+        { "value": "dual lens", "label": "dual-lens technology placements", "note": "Granular placement targeting cutting-edge consumer electronics channels." }
+      ],
+      "scene": [
+        { "value": "home security", "label": "home security intent", "note": "Contextual preset focused on smart alarms, house defense, and surveillance ecosystems." },
+        { "value": "home improvement", "label": "home improvement scenes", "note": "Contextual preset mapping residential upgrades, house modifications, and DIY tool usage." },
+        { "value": "home garden", "label": "home & garden context", "note": "Contextual preset mapping gardening tools, landscaping, and residential outdoor activity." },
+        { "value": "backyard", "label": "backyard & patio scenes", "note": "Contextual preset focused on courtyard maintenance, backyard design, and pool environments." },
+        { "value": "home safety", "label": "home safety & prevention", "note": "Contextual preset centered on child protection, elderly safety, and accident prevention." },
+        { "value": "home renovation", "label": "home renovations mapping", "note": "Contextual preset targeting home remodeling, interior renovations, and architectural restructuring." },
+        { "value": "home insurance", "label": "home insurance buyers", "note": "Contextual preset mapping properties protection, home warranty seekers, and risk mitigation." },
+        { "value": "warehouse&factory", "label": "warehouse & factory infrastructure", "note": "Contextual preset mapping commercial buildings, storage centers, and industrial security setups." },
+        { "value": "construction", "label": "construction sites context", "note": "Contextual preset focused on heavy equipment, building construction, and civil engineering tracking." }
+      ],
+      "int": [
+        { "value": "cleaning&maintenance", "label": "cleaning & house maintenance", "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation." },
+        { "value": "landscape design", "label": "landscape architecture design", "note": "Affinity maps targeting horticulture hobbyists, yard design, and landscape aesthetics." },
+        { "value": "outdoor", "label": "outdoor recreation interests", "note": "Affinity maps tracking hiking, wilderness camping, survival gear, and open-air activities." },
+        { "value": "rv", "label": "rv & caravan tracking", "note": "Affinity maps targeting mobile homes, campervans, road trip equipment, and caravan security." },
+        { "value": "grill", "label": "bbq & outdoor grilling", "note": "Affinity maps for backyard social hosting, outdoor grills, and culinary leisure." },
+        { "value": "consumer electronics", "label": "consumer electronics fans", "note": "Affinity maps tracking major global tech releases, consumer gadgets, and smart devices." },
+        { "value": "tech", "label": "technology enthusiasts", "note": "Affinity maps covering computational tech, cloud innovations, and cutting-edge digital trends." },
+        { "value": "audio", "label": "audio & sound acoustics", "note": "Affinity maps for high-fidelity audio gear, smart speakers, and home audio integration." },
+        { "value": "diy", "label": "do-it-yourself hardware", "note": "Affinity maps targeting active home crafters, self-installed hardware fans, and woodworkers." },
+        { "value": "home automation", "label": "smart home automation", "note": "Affinity maps tracking IoT protocols, automated lighting, voice control, and smart hubs." },
+        { "value": "health&fitness", "label": "health & active fitness", "note": "Affinity maps capturing wellness tracking, gym habits, home workouts, and nutritional tracking." },
+        { "value": "pet lover", "label": "pet owners & lovers", "note": "Affinity maps capturing pet tracking, smart pet feeders, dog/cat care, and animal safety." },
+        { "value": "luxury", "label": "luxury shoppers & travelers", "note": "Affinity maps tracking high-end consumer vehicles, premium travel, and top-tier retail brands." },
+        { "value": "gift", "label": "seasonal gifting habits", "note": "Affinity maps mapping holiday shoppers, e-commerce gift buyers, and registry builders." },
+        { "value": "programming", "label": "software & programming", "note": "Affinity maps for developers, system administrators, and tech-savvy coding professionals." },
+        { "value": "deals", "label": "coupons & promo shoppers", "note": "Affinity maps tracking Cyber Monday, Black Friday, flash sales, and discount department stores." },
+        { "value": "retailer", "label": "retailer network shoppers", "note": "Affinity maps mapping active Online Shoppers or frequent Best Buy network buyers." },
+        { "value": "news", "label": "breaking & tech news", "note": "Affinity maps tracking global breaking alerts, tech publications, and current event columns." },
+        { "value": "home decoration", "label": "interior design & decor", "note": "Affinity maps focused on home decoration websites, aesthetics, and architectural styling." },
+        { "value": "travel", "label": "frequent global travelers", "note": "Affinity maps capturing business trip logs, international commuters, and family vacations." },
+        { "value": "home appliance", "label": "major home appliances", "note": "Affinity maps tracking premium white goods, smart refrigerators, and kitchen installations." },
+        { "value": "sport", "label": "sports & stadium events", "note": "Affinity maps capturing mainstream sports, athletic associations, and event ticketing fields." },
+        { "value": "automotive", "label": "automotive & vehicles", "note": "Affinity maps tracking electric cars, vehicle maintenance, driving tech, and luxury automotive networks." },
+        { "value": "floriculture", "label": "floriculture & horticulture", "note": "Affinity maps targeting greenhouse operators, professional floriculture, and plant nurseries." },
+        { "value": "horse racing", "label": "equestrian & horse racing", "note": "Affinity maps tracking horse racing events, show jumping, and luxury horseback riding communities." },
+        { "value": "elite sports", "label": "elite athletic sports", "note": "Affinity maps covering premium sports networks including tennis, rugby, and golf." },
+        { "value": "yacht", "label": "yachting & premium sailing", "note": "Affinity maps tracking yacht clubs, premium sailing vessels, and maritime regatta metrics." },
+        { "value": "finance", "label": "personal finance & investing", "note": "Affinity maps capturing market tracking, investment instruments, and personal wealth advice." },
+        { "value": "music", "label": "music & rock culture", "note": "Affinity maps focused on rock music, entertainment ticketing, and audio streaming metrics." }
+      ],
+      "id": [
+        { "value": "business owner", "label": "small business owners", "note": "Persona taxonomy mapping store managers, local entrepreneurs, and commercial managers." },
+        { "value": "business product", "label": "b2b business procurement", "note": "Persona taxonomy capturing corporate purchasers, company inventory and facility managers." },
+        { "value": "landlord&host", "label": "property landlords & airbnb hosts", "note": "Persona taxonomy mapping income real estate investors and short-term rental managers." },
+        { "value": "recently moved", "label": "recently moved residents", "note": "Persona taxonomy targeting users who shifted properties within the last 0-6 months." },
+        { "value": "mom&baby", "label": "parents of newborn infants", "note": "Persona taxonomy focused on maternal healthcare, baby monitoring systems, and young families." },
+        { "value": "farmer", "label": "agricultural farmers", "note": "Persona taxonomy mapping traditional farmers, agricultural production managers, and rural fields owners." },
+        { "value": "homesteading", "label": "homesteading practitioners", "note": "Persona taxonomy targeting self-sufficiency living, residential farming, and off-grid property builders." },
+        { "value": "rural living", "label": "rural residential living", "note": "Persona taxonomy focused on non-urban residents, countryside housing, and open perimeter monitoring." },
+        { "value": "fish&forestry", "label": "fishery & forestry workers", "note": "Persona taxonomy mapping commercial forestry fields, wilderness logging, and deep-water fishery professionals." },
+        { "value": "rent", "label": "residential renters", "note": "Persona taxonomy capturing urban apartment renters and residential lease tenants." },
+        { "value": "real estate", "label": "real estate investors", "note": "Persona taxonomy mapping income or residential real property seekers and real estate brokers." },
+        { "value": "family", "label": "family households head", "note": "Persona taxonomy focused on multi-member households, domestic safety networks, and parenting circles." },
+        { "value": "procurement", "label": "commercial supply procurement", "note": "Persona taxonomy focused on corporate supply-chain execution, tech procurement, and logistics operations." },
+        { "value": "winery", "label": "winery & vineyard operators", "note": "Persona taxonomy mapping vineyard estate properties, boutique wine production, and premium cellar security." },
+        { "value": "installation&repair services", "label": "installation / field technicians", "note": "Persona taxonomy capturing maintenance services field specialists and construction helpers." },
+        { "value": "moving", "label": "active moving planning", "note": "Persona taxonomy targeting users currently planning or actively packing for property changes." }
       ]
     },
 
@@ -118,26 +190,11 @@
     },
 
     "Data Source Detail": [
-      { "value": "n", "label": "no detail", "note": "Default clean pass-through node for general prospecting cohorts." },
-      { "value": "all", "label": "all products coverage", "note": "Targeting generic multi-category brand search terms or broad array assets." },
-      { "value": "poe", "label": "poe technology series", "note": "Power over Ethernet structural camera hardware sub-category." },
-      { "value": "battery", "label": "battery-powered series", "note": "Wire-free eco standalone rechargeable battery camera solutions." },
-      { "value": "battery wifi", "label": "battery wi-fi standalone", "note": "Wire-free battery-powered standalone nodes working over residential Wi-Fi networks." },
-      { "value": "battery 4g", "label": "4g lte standalone cellular", "note": "Off-grid wire-free camera nodes transmitting data via 4G LTE mobile data bands." },
-      { "value": "wifi", "label": "wi-fi smart plugin", "note": "Continuous plug-in power hardware nodes working over residential Wi-Fi frequencies." },
-      { "value": "doorbell", "label": "smart video doorbells", "note": "Front-door entry protection, dual-power smart video doorbell systems." },
-      { "value": "nvr", "label": "network video recorders", "note": "Stand-alone multi-channel mass local storage recording servers." }
+      { "value": "n", "label": "no detail", "note": "Default clean pass-through node for general prospecting cohorts." }
     ],
 
     "Data Window": [
-      { "value": "n", "label": "no window specified", "note": "Default open-ended lifetime cookie cache tracking without time restrictions." },
-      { "value": "7d", "label": "7 days lookback", "note": "Ultra-fresh conversion windows, tracking recent hot intent signals inside a 7-day loop." },
-      { "value": "14d", "label": "14 days lookback", "note": "Standard e-commerce evaluation cycles matching immediate seasonal sales spikes." },
-      { "value": "30d", "label": "30 days lookback", "note": "Classic mid-funnel remarketing retargeting block capturing shopping consideration." },
-      { "value": "60d", "label": "60 days lookback", "note": "Extended consideration tracking window for major ecosystem bundles purchase cycles." },
-      { "value": "90d", "label": "90 days lookback", "note": "Quarterly operational lookback block mapping stable consumer brand awareness loops." },
-      { "value": "180d", "label": "180 days lookback", "note": "Maximum standard tracking pixel storage threshold mapping long-tail accessory sales." },
-      { "value": "365d", "label": "365 days lookback", "note": "Annual customer retention lookback, utilized for yearly upgrade or exclusion mapping." }
+      { "value": "n", "label": "no window specified", "note": "Default open-ended lifetime cookie cache tracking without time restrictions." }
     ]
   },
 
@@ -194,7 +251,7 @@
       { "value": "cut", "note": "Post-edited/cut-down KOL video uploaded to the official YouTube brand channel." }
     ],
     "creative-channel": [
-      { "value": "reolink", "note": "Official Reolink brand native channels, direct owned-media placements, and primary official ecosystem platforms." }
+      { "value": "reolink" }
     ],
     "creative-discount": [
       { "value": "no disc", "note": "Full-price standard creative without any discount callouts or promotional overlays." },
