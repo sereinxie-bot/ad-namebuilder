@@ -16,6 +16,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .header-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em}
 .header-sub{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;font-family:monospace}
 
+.header-controls{display:flex;align-items:center;gap:10px}
 .btn-admin-toggle{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;display:flex;align-items:center;gap:6px}
 .btn-admin-toggle:hover{background:rgba(255,255,255,0.35)}
 .btn-admin-toggle.unlocked{background:var(--success);border-color:var(--success)}
@@ -57,7 +58,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .field-label-left{display:flex;align-items:center;gap:5px}
 .field-label .req{color:var(--danger);font-size:14px;line-height:1}
 
-/* Admin elements visibility control */
 .admin-only {display:none !important}
 body.is-admin .admin-only {display:inline-flex !important}
 body.is-admin div.admin-only {display:block !important}
@@ -148,10 +148,12 @@ body.is-admin div.admin-only {display:block !important}
       </div>
     </div>
 
-    <!-- Admin Password Lock Toggle Button -->
-    <button class="btn-admin-toggle" id="btn-admin-toggle" onclick="toggleAdminLock()">
-      <span id="admin-icon">🔒</span> <span id="admin-label">Admin Locked</span>
-    </button>
+    <div class="header-controls">
+      <button class="btn-admin-toggle admin-only" onclick="openGitHubSettings()">⚙️ GitHub Config</button>
+      <button class="btn-admin-toggle" id="btn-admin-toggle" onclick="toggleAdminLock()">
+        <span id="admin-icon">🔒</span> <span id="admin-label">Admin Locked</span>
+      </button>
+    </div>
   </div>
   
   <div id="datasource-status" class="datasource-bar loading">
@@ -266,7 +268,7 @@ body.is-admin div.admin-only {display:block !important}
         <div id="pm-list-container"></div>
 
         <div class="tab-footer-row" style="justify-content:space-between; align-items:center;">
-          <span style="font-size:12px; color:var(--muted)">Changes apply instantly to current session.</span>
+          <span style="font-size:12px; color:var(--muted)">Changes sync directly to GitHub repository if configured.</span>
           <button class="btn-primary admin-only" onclick="exportProductCodeMapJson()" style="width:auto;padding:10px 24px;background:var(--primary)">📥 Export product-code-map.json</button>
         </div>
       </div>
@@ -370,10 +372,10 @@ const DATA_URL = './data.json';
 const MAP_URL = './product-code-map.json';
 const CUSTOM_JSON_URL = './custom-options.json';
 
-// 📌 锁定为永久存储 Key，防止版本更新丢失历史记录
 const STORAGE_KEY = 'ad_namebuilder_permanent_history';
 const LOCAL_CUSTOM_KEY = 'ad_namebuilder_user_extensions_v1';
 const LOCAL_PRODUCT_MAP_KEY = 'ad_namebuilder_product_map_v1';
+const GITHUB_CONFIG_KEY = 'ad_namebuilder_github_config_v1';
 
 const CAMPAIGN_WHITELIST = ['market', 'product-type', 'product-code', 'media-funnel', 'ad-product', 'bidding-goal', 'url', 'custom'];
 const ADGROUP_WHITELIST = ['audience-category', 'audience-tag', 'data-source', 'data-source-detail', 'data-window', 'ag-custom'];
@@ -385,9 +387,7 @@ const AD_WHITELIST = [
   'ksp', 'project', 'ad-custom'
 ];
 
-// 普通用户可以增加的字段
 const ALLOW_NEW_ENUM_FIELDS = ['creative-channel', 'ksp', 'project'];
-// 必须管理员才能增加的字段
 const ADMIN_ONLY_ADD_ENUM_FIELDS = ['landing-page'];
 
 const FIELD_TYPES = {
@@ -448,6 +448,88 @@ function generateSmartNote(fieldKey, value) {
   }
 
   return `Custom ${fieldKey} taxonomy tag for ${val}.`;
+}
+
+/* ===== 🚀 GITHUB API DIRECT COMMIT MODULE ===== */
+function openGitHubSettings() {
+  if (!isAdminUnlocked) return;
+  const currentConfig = getGitHubConfig();
+  
+  const owner = prompt('GitHub Owner / Username:', currentConfig.owner || '');
+  if (owner === null) return;
+  const repo = prompt('GitHub Repository Name:', currentConfig.repo || '');
+  if (repo === null) return;
+  const branch = prompt('Branch (e.g. main or master):', currentConfig.branch || 'main');
+  if (branch === null) return;
+  const token = prompt('GitHub Personal Access Token (PAT ghp_xxx):', currentConfig.token || '');
+  if (token === null) return;
+
+  const config = { owner: owner.trim(), repo: repo.trim(), branch: branch.trim(), token: token.trim() };
+  localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(config));
+  alert('GitHub Sync Settings Saved Successfully!');
+}
+
+function getGitHubConfig() {
+  try {
+    return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {};
+  } catch(e) { return {}; }
+}
+
+async function commitFileToGitHub(path, contentObj, commitMessage) {
+  const cfg = getGitHubConfig();
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    console.log('GitHub API not configured. Skipped remote commit.');
+    return false;
+  }
+
+  showDatasourceStatus('loading', `Committing ${path} to GitHub...`);
+
+  try {
+    const apiBase = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+    const headers = {
+      'Authorization': `Bearer ${cfg.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+
+    // Step 1: Get current file SHA
+    let sha = '';
+    const getResp = await fetch(`${apiBase}?ref=${cfg.branch || 'main'}`, { headers });
+    if (getResp.ok) {
+      const fileData = await getResp.json();
+      sha = fileData.sha;
+    }
+
+    // Step 2: Push update (Put request)
+    const jsonStr = JSON.stringify(contentObj, null, 2);
+    const contentEncoded = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    const bodyData = {
+      message: commitMessage || `Update ${path} via Ad Namebuilder Hub`,
+      content: contentEncoded,
+      branch: cfg.branch || 'main'
+    };
+    if (sha) bodyData.sha = sha;
+
+    const putResp = await fetch(apiBase, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(bodyData)
+    });
+
+    if (putResp.ok) {
+      showDatasourceStatus('ok', `🚀 GitHub Sync: Pushed ${path} successfully!`);
+      return true;
+    } else {
+      const errErr = await putResp.json();
+      showDatasourceStatus('error', `GitHub Push Failed: ${errErr.message}`);
+      return false;
+    }
+  } catch (e) {
+    console.error('GitHub API error', e);
+    showDatasourceStatus('error', 'GitHub API network connection error.');
+    return false;
+  }
 }
 
 function toggleAdminLock() {
@@ -635,7 +717,7 @@ function renderFieldHTML(f) {
   return '';
 }
 
-function addNewEnumPrompt(fieldKey) {
+async function addNewEnumPrompt(fieldKey) {
   if (ADMIN_ONLY_ADD_ENUM_FIELDS.includes(fieldKey) && !isAdminUnlocked) {
     alert("Admin permission required to add options to this field!");
     return;
@@ -648,15 +730,10 @@ function addNewEnumPrompt(fieldKey) {
   const cleanVal = val.trim().toLowerCase();
   let newItem = { value: cleanVal };
 
-  // Creative Channel 完全不处理 note
   if (fieldKey !== 'creative-channel') {
-    // 🤖 AI 预填 Note 生成，可按 Enter 直接跳过/确认
     const defaultAiNote = generateSmartNote(fieldKey, cleanVal);
     const note = prompt(`AI Auto-Generated Note for [${cleanVal}]:\n(Edit or press OK/Enter to accept default)`, defaultAiNote);
-    
-    if (note && note.trim()) {
-      newItem.note = note.trim();
-    }
+    if (note && note.trim()) newItem.note = note.trim();
   }
 
   if(!OPTIONS[fieldKey]) OPTIONS[fieldKey] = [];
@@ -675,7 +752,9 @@ function addNewEnumPrompt(fieldKey) {
   } catch(e) {}
 
   pickDropdown(fieldKey, cleanVal, null);
-  alert(`New enum [${cleanVal}] added and saved successfully!`);
+
+  // 🚀 Direct Sync to GitHub custom-options.json
+  await commitFileToGitHub('custom-options.json', userCustomOptions, `feat: Add new ${fieldKey} enum [${cleanVal}]`);
 }
 
 function exportCustomJson() {
@@ -722,7 +801,7 @@ function renderProductManagerUI() {
   container.innerHTML = html || '<div class="empty-hint">No matching product codes found...</div>';
 }
 
-function addNewProductCode() {
+async function addNewProductCode() {
   if (!isAdminUnlocked) return;
   const typeSelect = document.getElementById('pm-add-type');
   const codeInput = document.getElementById('pm-add-code');
@@ -745,10 +824,12 @@ function addNewProductCode() {
 
   codeInput.value = '';
   renderProductManagerUI();
-  alert('Product code [' + newCode + '] added successfully!');
+
+  // 🚀 Direct Sync to GitHub product-code-map.json
+  await commitFileToGitHub('product-code-map.json', PRODUCT_RELATION_MAP, `feat: Add product code [${newCode}] to [${targetType}]`);
 }
 
-function deleteProductCode(typeKey, code) {
+async function deleteProductCode(typeKey, code) {
   if (!isAdminUnlocked) return;
   if(!confirm('Are you sure you want to remove [' + code + '] from [' + typeKey + ']?')) return;
 
@@ -756,6 +837,9 @@ function deleteProductCode(typeKey, code) {
     PRODUCT_RELATION_MAP[typeKey] = PRODUCT_RELATION_MAP[typeKey].filter(c => c !== code);
     try { localStorage.setItem(LOCAL_PRODUCT_MAP_KEY, JSON.stringify(PRODUCT_RELATION_MAP)); } catch(e){}
     renderProductManagerUI();
+
+    // 🚀 Direct Sync to GitHub product-code-map.json
+    await commitFileToGitHub('product-code-map.json', PRODUCT_RELATION_MAP, `fix: Remove product code [${code}] from [${typeKey}]`);
   }
 }
 
@@ -798,7 +882,7 @@ function renderAudienceManagerUI() {
   container.innerHTML = html;
 }
 
-function addNewAudienceTag() {
+async function addNewAudienceTag() {
   if (!isAdminUnlocked) return;
   const catSelect = document.getElementById('aud-add-category');
   const tagInput = document.getElementById('aud-add-tag');
@@ -819,7 +903,6 @@ function addNewAudienceTag() {
     return;
   }
 
-  // 🤖 AI 智能自动预填生成 Audience Tag Note
   const aiNote = generateSmartNote(cat, newTag);
   const itemObj = { value: newTag, label: newLabel || newTag, note: aiNote };
   OPTIONS['audience-tag-map'][cat].push(itemObj);
@@ -827,16 +910,28 @@ function addNewAudienceTag() {
   tagInput.value = '';
   if(labelInput) labelInput.value = '';
   renderAudienceManagerUI();
-  alert('Audience tag [' + newTag + '] added to [' + cat + '] successfully!');
+
+  // 🚀 Direct Sync to GitHub data.json
+  const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
+  if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
+  exportCopy["Ad-Group"]["Audience Tag Map"] = OPTIONS['audience-tag-map'];
+
+  await commitFileToGitHub('data.json', exportCopy, `feat: Add audience tag [${newTag}] to [${cat}]`);
 }
 
-function deleteAudienceTag(cat, tagVal) {
+async function deleteAudienceTag(cat, tagVal) {
   if (!isAdminUnlocked) return;
   if(!confirm('Are you sure you want to delete tag [' + tagVal + '] from category [' + cat + ']?')) return;
 
   if(OPTIONS['audience-tag-map'] && OPTIONS['audience-tag-map'][cat]) {
     OPTIONS['audience-tag-map'][cat] = OPTIONS['audience-tag-map'][cat].filter(i => (typeof i === 'object' ? i.value : i) !== tagVal);
     renderAudienceManagerUI();
+
+    const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
+    if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
+    exportCopy["Ad-Group"]["Audience Tag Map"] = OPTIONS['audience-tag-map'];
+
+    await commitFileToGitHub('data.json', exportCopy, `fix: Remove audience tag [${tagVal}] from [${cat}]`);
   }
 }
 
