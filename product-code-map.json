@@ -237,7 +237,8 @@
     "doorbell battery+hub",
     "doorbell poe",
     "doorbell wifi",
-    "home hub mini+doorbell"
+    "home hub mini+doorbell",
+    "video doorbell-2nd gen"
   ],
   "nvr": [
     "all",
