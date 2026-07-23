@@ -1,299 +1,1108 @@
 {
   "Ad-Campaign": {
     "Market": [
-      "us", "ca", "de", "uk", "fr", "it", "es", "au", 
-      "eu other", "eu 2b", "at", "be", "nl", "pl", "fi", 
-      "ch", "dk", "ie", "ee", "bg", "cz", "hr", "lu", 
-      "ro", "mt", "pt", "se", "sk", "si", "gr", "hu", 
-      "im", "lv", "lt", "no"
+      "us",
+      "ca",
+      "de",
+      "uk",
+      "fr",
+      "it",
+      "es",
+      "au",
+      "eu other",
+      "eu 2b",
+      "at",
+      "be",
+      "nl",
+      "pl",
+      "fi",
+      "ch",
+      "dk",
+      "ie",
+      "ee",
+      "bg",
+      "cz",
+      "hr",
+      "lu",
+      "ro",
+      "mt",
+      "pt",
+      "se",
+      "sk",
+      "si",
+      "gr",
+      "hu",
+      "im",
+      "lv",
+      "lt",
+      "no"
     ],
     "Product Type": [
-      "all", "poe", "doorbell", "wifi", "battery wifi", "battery 4g", "nvr"
+      "all",
+      "poe",
+      "doorbell",
+      "wifi",
+      "battery wifi",
+      "battery 4g",
+      "nvr"
     ],
     "Media Funnel": [
-      "awareness", "consideration", "conversion"
+      "awareness",
+      "consideration",
+      "conversion"
     ],
     "Ad Product": [
-      "search", "ytb", "discovery", "dg", "pmax", "gdn", "fb", "ig", 
-      "tw", "reddit", "programmatic", "amg", "fb-ig", "tiktok", "linkedin", "criteo"
+      "search",
+      "ytb",
+      "discovery",
+      "dg",
+      "pmax",
+      "gdn",
+      "fb",
+      "ig",
+      "tw",
+      "reddit",
+      "programmatic",
+      "amg",
+      "fb-ig",
+      "tiktok",
+      "linkedin",
+      "criteo"
     ],
     "Bidding Goal": [
-      "impression", "reach", "click", "view", "pageview", "signup", 
-      "atc", "checkout", "sales", "engagement", "dpv", "follow"
+      "impression",
+      "reach",
+      "click",
+      "view",
+      "pageview",
+      "signup",
+      "atc",
+      "checkout",
+      "sales",
+      "engagement",
+      "dpv",
+      "follow"
     ],
     "URL": [
-      "dtc", "amz", "tkshop", "post"
+      "dtc",
+      "amz",
+      "tkshop",
+      "post"
     ],
     "Custom": []
   },
-
   "Ad-Group": {
     "Audience Category": [
-      { "value": "rm", "label": "remarketing", "note": "Users who previously interacted with the brand." },
-      { "value": "lal", "label": "lookalike audience / similar audience", "note": "Audience scaling based on algorithmic similarity." },
-      { "value": "cus", "label": "custom intent", "note": "URL visits or competitor search intent targeting." },
-      { "value": "kwd", "label": "keywords", "note": "Intent-based search results page targeting." },
-      { "value": "plcm", "label": "placement", "note": "Granular positioning on targeted websites or apps." },
-      { "value": "brd", "label": "broad", "note": "Unrestricted open targeting or automated optimization." },
-      { "value": "shop a+", "label": "shopping advantage+", "note": "Exclusive Meta Shopping Advantage+ audiences." },
-      { "value": "scene", "label": "scene tags", "note": "System preset taxonomy focused on situational usage." },
-      { "value": "int", "label": "interest tags", "note": "System preset taxonomy focused on affinity and hobbies." },
-      { "value": "id", "label": "identity tags", "note": "Demographics, profession, or persona identity mapping." }
+      {
+        "value": "rm",
+        "label": "remarketing",
+        "note": "Users who previously interacted with the brand."
+      },
+      {
+        "value": "lal",
+        "label": "lookalike audience / similar audience",
+        "note": "Audience scaling based on algorithmic similarity."
+      },
+      {
+        "value": "cus",
+        "label": "custom intent",
+        "note": "URL visits or competitor search intent targeting."
+      },
+      {
+        "value": "kwd",
+        "label": "keywords",
+        "note": "Intent-based search results page targeting."
+      },
+      {
+        "value": "plcm",
+        "label": "placement",
+        "note": "Granular positioning on targeted websites or apps."
+      },
+      {
+        "value": "brd",
+        "label": "broad",
+        "note": "Unrestricted open targeting or automated optimization."
+      },
+      {
+        "value": "shop a+",
+        "label": "shopping advantage+",
+        "note": "Exclusive Meta Shopping Advantage+ audiences."
+      },
+      {
+        "value": "scene",
+        "label": "scene tags",
+        "note": "System preset taxonomy focused on situational usage."
+      },
+      {
+        "value": "int",
+        "label": "interest tags",
+        "note": "System preset taxonomy focused on affinity and hobbies."
+      },
+      {
+        "value": "id",
+        "label": "identity tags",
+        "note": "Demographics, profession, or persona identity mapping."
+      }
     ],
-
     "Audience Tag Map": {
       "brd": [
-        { "value": "n", "label": "no behavior", "note": "Broad targeting with no specific behavioral pixel or tags applied." }
+        {
+          "value": "n",
+          "label": "no behavior",
+          "note": "Broad targeting with no specific behavioral pixel or tags applied."
+        }
       ],
       "shop a+": [
-        { "value": "n", "label": "no behavior", "note": "Broad Advantage+ targeting with no specific behavioral pixel or tags applied." }
+        {
+          "value": "n",
+          "label": "no behavior",
+          "note": "Broad Advantage+ targeting with no specific behavioral pixel or tags applied."
+        }
       ],
       "rm": [
-        { "value": "visit", "label": "visited website", "note": "Users who have landed on the website but triggered no deep actions." },
-        { "value": "pageview", "label": "page view", "note": "Pixel logs tracking specific high-intent landing page views." },
-        { "value": "click", "label": "click events", "note": "Users who clicked specific outbound or key transactional links." },
-        { "value": "lead", "label": "lead submission", "note": "Users who completed sign-ups, registrations, or info forms." },
-        { "value": "subscribe", "label": "newsletter subscriber", "note": "Active subscribers signed up for marketing communications." },
-        { "value": "atc", "label": "add to cart", "note": "High-intent users who added products to their shopping cart." },
-        { "value": "checkout", "label": "initiated checkout", "note": "Users who started checkout funnel but abandoned the purchase." },
-        { "value": "purchase", "label": "purchased customers", "note": "Historical buyers, used for retargeting accessories or exclusion." },
-        { "value": "engaged", "label": "post / page engaged", "note": "Social media engagers who liked, commented, or shared brand posts." },
-        { "value": "view", "label": "video view", "note": "Users who watched brand videos or social video ads." }
+        {
+          "value": "visit",
+          "label": "visited website",
+          "note": "Users who have landed on the website but triggered no deep actions."
+        },
+        {
+          "value": "pageview",
+          "label": "page view",
+          "note": "Pixel logs tracking specific high-intent landing page views."
+        },
+        {
+          "value": "click",
+          "label": "click events",
+          "note": "Users who clicked specific outbound or key transactional links."
+        },
+        {
+          "value": "lead",
+          "label": "lead submission",
+          "note": "Users who completed sign-ups, registrations, or info forms."
+        },
+        {
+          "value": "subscribe",
+          "label": "newsletter subscriber",
+          "note": "Active subscribers signed up for marketing communications."
+        },
+        {
+          "value": "atc",
+          "label": "add to cart",
+          "note": "High-intent users who added products to their shopping cart."
+        },
+        {
+          "value": "checkout",
+          "label": "initiated checkout",
+          "note": "Users who started checkout funnel but abandoned the purchase."
+        },
+        {
+          "value": "purchase",
+          "label": "purchased customers",
+          "note": "Historical buyers, used for retargeting accessories or exclusion."
+        },
+        {
+          "value": "engaged",
+          "label": "post / page engaged",
+          "note": "Social media engagers who liked, commented, or shared brand posts."
+        },
+        {
+          "value": "view",
+          "label": "video view",
+          "note": "Users who watched brand videos or social video ads."
+        }
       ],
       "lal": [
-        { "value": "visit", "label": "lookalike of visitors", "note": "Algorithmic lookalike expansion based on website visitors matrix." },
-        { "value": "pageview", "label": "lookalike of pageviewers", "note": "Algorithmic lookalike expansion based on landing page visitors." },
-        { "value": "click", "label": "lookalike of link-clikers", "note": "Algorithmic lookalike expansion based on active link-clikers." },
-        { "value": "lead", "label": "lookalike of leads", "note": "Algorithmic lookalike expansion based on form submitters." },
-        { "value": "subscribe", "label": "lookalike of subscribers", "note": "Algorithmic lookalike expansion based on newsletter subscribers." },
-        { "value": "atc", "label": "lookalike of cart-adders", "note": "Algorithmic lookalike expansion based on add-to-cart audience." },
-        { "value": "checkout", "label": "lookalike of checkouts", "note": "Algorithmic lookalike expansion based on checkout initiators." },
-        { "value": "purchase", "label": "lookalike of purchasers", "note": "Algorithmic lookalike expansion based on high-value buyer list." },
-        { "value": "engaged", "label": "lookalike of page engagers", "note": "Algorithmic lookalike expansion based on social page engagers." },
-        { "value": "view", "label": "lookalike of video viewers", "note": "Algorithmic lookalike expansion based on video view audience." },
-        { "value": "competitor", "label": "lookalike of competitor targets", "note": "Lookalike expansion seeded from competitor keyword searchers." }
+        {
+          "value": "visit",
+          "label": "lookalike of visitors",
+          "note": "Algorithmic lookalike expansion based on website visitors matrix."
+        },
+        {
+          "value": "pageview",
+          "label": "lookalike of pageviewers",
+          "note": "Algorithmic lookalike expansion based on landing page visitors."
+        },
+        {
+          "value": "click",
+          "label": "lookalike of link-clikers",
+          "note": "Algorithmic lookalike expansion based on active link-clikers."
+        },
+        {
+          "value": "lead",
+          "label": "lookalike of leads",
+          "note": "Algorithmic lookalike expansion based on form submitters."
+        },
+        {
+          "value": "subscribe",
+          "label": "lookalike of subscribers",
+          "note": "Algorithmic lookalike expansion based on newsletter subscribers."
+        },
+        {
+          "value": "atc",
+          "label": "lookalike of cart-adders",
+          "note": "Algorithmic lookalike expansion based on add-to-cart audience."
+        },
+        {
+          "value": "checkout",
+          "label": "lookalike of checkouts",
+          "note": "Algorithmic lookalike expansion based on checkout initiators."
+        },
+        {
+          "value": "purchase",
+          "label": "lookalike of purchasers",
+          "note": "Algorithmic lookalike expansion based on high-value buyer list."
+        },
+        {
+          "value": "engaged",
+          "label": "lookalike of page engagers",
+          "note": "Algorithmic lookalike expansion based on social page engagers."
+        },
+        {
+          "value": "view",
+          "label": "lookalike of video viewers",
+          "note": "Algorithmic lookalike expansion based on video view audience."
+        },
+        {
+          "value": "competitor",
+          "label": "lookalike of competitor targets",
+          "note": "Lookalike expansion seeded from competitor keyword searchers."
+        }
       ],
       "cus": [
-        { "value": "competitor", "label": "competitors intent", "note": "Custom intent targeting competitor brand keywords or website URLs (e.g., Ring, Arlo)." },
-        { "value": "poe", "label": "poe keywords targeting", "note": "Custom intent keywords or website positioning focused on PoE infrastructure." },
-        { "value": "battery", "label": "battery keywords targeting", "note": "Custom intent keywords or website positioning focused on standalone battery cameras." },
-        { "value": "battery wifi", "label": "battery wifi keywords targeting", "note": "Custom intent keywords or website positioning focused on wire-free battery Wi-Fi setups." },
-        { "value": "battery 4g", "label": "battery 4g keywords targeting", "note": "Custom intent keywords or website positioning focused on 4G LTE cellular battery cameras." },
-        { "value": "wifi", "label": "wi-fi keywords targeting", "note": "Custom intent keywords or website positioning focused on plug-in Wi-Fi security smart cameras." },
-        { "value": "doorbell", "label": "doorbell keywords targeting", "note": "Custom intent keywords or website positioning focused on smart video doorbells." },
-        { "value": "nvr", "label": "nvr system targeting", "note": "Custom intent keywords or website positioning focused on NVR recording servers." },
-        { "value": "kit", "label": "security kit systems", "note": "Custom intent keywords or website positioning focused on multi-camera security kit systems." },
-        { "value": "dual lens", "label": "dual-lens camera technology", "note": "Custom intent keywords or website positioning focused on dual-lens wide-angle cameras." },
-        { "value": "prospect", "label": "criteo prospecting", "note": "Exclusive Criteo engine prospecting cold audience tag." }
+        {
+          "value": "competitor",
+          "label": "competitors intent",
+          "note": "Custom intent targeting competitor brand keywords or website URLs (e.g., Ring, Arlo)."
+        },
+        {
+          "value": "poe",
+          "label": "poe keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on PoE infrastructure."
+        },
+        {
+          "value": "battery",
+          "label": "battery keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on standalone battery cameras."
+        },
+        {
+          "value": "battery wifi",
+          "label": "battery wifi keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on wire-free battery Wi-Fi setups."
+        },
+        {
+          "value": "battery 4g",
+          "label": "battery 4g keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on 4G LTE cellular battery cameras."
+        },
+        {
+          "value": "wifi",
+          "label": "wi-fi keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on plug-in Wi-Fi security smart cameras."
+        },
+        {
+          "value": "doorbell",
+          "label": "doorbell keywords targeting",
+          "note": "Custom intent keywords or website positioning focused on smart video doorbells."
+        },
+        {
+          "value": "nvr",
+          "label": "nvr system targeting",
+          "note": "Custom intent keywords or website positioning focused on NVR recording servers."
+        },
+        {
+          "value": "kit",
+          "label": "security kit systems",
+          "note": "Custom intent keywords or website positioning focused on multi-camera security kit systems."
+        },
+        {
+          "value": "dual lens",
+          "label": "dual-lens camera technology",
+          "note": "Custom intent keywords or website positioning focused on dual-lens wide-angle cameras."
+        },
+        {
+          "value": "prospect",
+          "label": "criteo prospecting",
+          "note": "Exclusive Criteo engine prospecting cold audience tag."
+        }
       ],
       "kwd": [
-        { "value": "competitor", "label": "competitor keywords", "note": "Search campaign intent targeting competitor brand names (e.g., Ring, Arlo)." },
-        { "value": "poe", "label": "poe system keywords", "note": "Search campaign intent targeting PoE security cameras queries." },
-        { "value": "battery", "label": "battery camera keywords", "note": "Search campaign intent targeting battery-powered wire-free camera queries." },
-        { "value": "battery wifi", "label": "battery wi-fi keywords", "note": "Search campaign intent targeting wire-free battery Wi-Fi system queries." },
-        { "value": "battery 4g", "label": "4g lte cellular keywords", "note": "Search campaign intent targeting 4G cellular standalone camera queries." },
-        { "value": "wifi", "label": "wi-fi security keywords", "note": "Search campaign intent targeting smart plug-in Wi-Fi camera queries." },
-        { "value": "doorbell", "label": "video doorbell keywords", "note": "Search campaign intent targeting video smart doorbell queries." },
-        { "value": "nvr", "label": "nvr recorder keywords", "note": "Search campaign intent targeting network video recorder queries." },
-        { "value": "kit", "label": "multi-camera kit keywords", "note": "Search campaign intent targeting multi-camera bundle and kit queries." },
-        { "value": "dual lens", "label": "dual-lens panoramic keywords", "note": "Search campaign intent targeting dual-lens wide-angle or dual-view camera queries." }
+        {
+          "value": "competitor",
+          "label": "competitor keywords",
+          "note": "Search campaign intent targeting competitor brand names (e.g., Ring, Arlo)."
+        },
+        {
+          "value": "poe",
+          "label": "poe system keywords",
+          "note": "Search campaign intent targeting PoE security cameras queries."
+        },
+        {
+          "value": "battery",
+          "label": "battery camera keywords",
+          "note": "Search campaign intent targeting battery-powered wire-free camera queries."
+        },
+        {
+          "value": "battery wifi",
+          "label": "battery wi-fi keywords",
+          "note": "Search campaign intent targeting wire-free battery Wi-Fi system queries."
+        },
+        {
+          "value": "battery 4g",
+          "label": "4g lte cellular keywords",
+          "note": "Search campaign intent targeting 4G cellular standalone camera queries."
+        },
+        {
+          "value": "wifi",
+          "label": "wi-fi security keywords",
+          "note": "Search campaign intent targeting smart plug-in Wi-Fi camera queries."
+        },
+        {
+          "value": "doorbell",
+          "label": "video doorbell keywords",
+          "note": "Search campaign intent targeting video smart doorbell queries."
+        },
+        {
+          "value": "nvr",
+          "label": "nvr recorder keywords",
+          "note": "Search campaign intent targeting network video recorder queries."
+        },
+        {
+          "value": "kit",
+          "label": "multi-camera kit keywords",
+          "note": "Search campaign intent targeting multi-camera bundle and kit queries."
+        },
+        {
+          "value": "dual lens",
+          "label": "dual-lens panoramic keywords",
+          "note": "Search campaign intent targeting dual-lens wide-angle or dual-view camera queries."
+        }
       ],
       "plcm": [
-        { "value": "competitor", "label": "competitor channel placements", "note": "Granular placement targeting competitor YouTube channels or related websites." },
-        { "value": "poe", "label": "poe category placements", "note": "Granular placement targeting PoE tech review channels or websites." },
-        { "value": "battery", "label": "battery camera placements", "note": "Granular placement targeting wireless security hardware review mediums." },
-        { "value": "battery wifi", "label": "battery wi-fi placements", "note": "Granular placement targeting wire-free home security setup blogs or apps." },
-        { "value": "battery 4g", "label": "4g cellular placements", "note": "Granular placement targeting off-grid, farm, or outdoor cellular security review portals." },
-        { "value": "wifi", "label": "wi-fi device placements", "note": "Granular placement targeting smart home integration forums or channels." },
-        { "value": "doorbell", "label": "smart doorbell placements", "note": "Granular placement targeting front-door automation and property improvement channels." },
-        { "value": "nvr", "label": "nvr infrastructure placements", "note": "Granular placement targeting professional DIY security system forums." },
-        { "value": "kit", "label": "security bundle placements", "note": "Granular placement targeting hardware comparison and wholesale product review mediums." },
-        { "value": "dual lens", "label": "dual-lens technology placements", "note": "Granular placement targeting cutting-edge consumer electronics channels." }
+        {
+          "value": "competitor",
+          "label": "competitor channel placements",
+          "note": "Granular placement targeting competitor YouTube channels or related websites."
+        },
+        {
+          "value": "poe",
+          "label": "poe category placements",
+          "note": "Granular placement targeting PoE tech review channels or websites."
+        },
+        {
+          "value": "battery",
+          "label": "battery camera placements",
+          "note": "Granular placement targeting wireless security hardware review mediums."
+        },
+        {
+          "value": "battery wifi",
+          "label": "battery wi-fi placements",
+          "note": "Granular placement targeting wire-free home security setup blogs or apps."
+        },
+        {
+          "value": "battery 4g",
+          "label": "4g cellular placements",
+          "note": "Granular placement targeting off-grid, farm, or outdoor cellular security review portals."
+        },
+        {
+          "value": "wifi",
+          "label": "wi-fi device placements",
+          "note": "Granular placement targeting smart home integration forums or channels."
+        },
+        {
+          "value": "doorbell",
+          "label": "smart doorbell placements",
+          "note": "Granular placement targeting front-door automation and property improvement channels."
+        },
+        {
+          "value": "nvr",
+          "label": "nvr infrastructure placements",
+          "note": "Granular placement targeting professional DIY security system forums."
+        },
+        {
+          "value": "kit",
+          "label": "security bundle placements",
+          "note": "Granular placement targeting hardware comparison and wholesale product review mediums."
+        },
+        {
+          "value": "dual lens",
+          "label": "dual-lens technology placements",
+          "note": "Granular placement targeting cutting-edge consumer electronics channels."
+        }
       ],
       "scene": [
-        { "value": "home security", "label": "home security intent", "note": "Contextual preset focused on smart alarms, house defense, and surveillance ecosystems." },
-        { "value": "home improvement", "label": "home improvement scenes", "note": "Contextual preset mapping residential upgrades, house modifications, and DIY tool usage." },
-        { "value": "home garden", "label": "home & garden context", "note": "Contextual preset mapping gardening tools, landscaping, and residential outdoor activity." },
-        { "value": "backyard", "label": "backyard & patio scenes", "note": "Contextual preset focused on courtyard maintenance, backyard design, and pool environments." },
-        { "value": "home safety", "label": "home safety & prevention", "note": "Contextual preset centered on child protection, elderly safety, and accident prevention." },
-        { "value": "home renovation", "label": "home renovations mapping", "note": "Contextual preset targeting home remodeling, interior renovations, and architectural restructuring." },
-        { "value": "home insurance", "label": "home insurance buyers", "note": "Contextual preset mapping properties protection, home warranty seekers, and risk mitigation." },
-        { "value": "warehouse&factory", "label": "warehouse & factory infrastructure", "note": "Contextual preset mapping commercial buildings, storage centers, and industrial security setups." },
-        { "value": "construction", "label": "construction sites context", "note": "Contextual preset focused on heavy equipment, building construction, and civil engineering tracking." }
+        {
+          "value": "home security",
+          "label": "home security intent",
+          "note": "Contextual preset focused on smart alarms, house defense, and surveillance ecosystems."
+        },
+        {
+          "value": "home improvement",
+          "label": "home improvement scenes",
+          "note": "Contextual preset mapping residential upgrades, house modifications, and DIY tool usage."
+        },
+        {
+          "value": "home garden",
+          "label": "home & garden context",
+          "note": "Contextual preset mapping gardening tools, landscaping, and residential outdoor activity."
+        },
+        {
+          "value": "backyard",
+          "label": "backyard & patio scenes",
+          "note": "Contextual preset focused on courtyard maintenance, backyard design, and pool environments."
+        },
+        {
+          "value": "home safety",
+          "label": "home safety & prevention",
+          "note": "Contextual preset centered on child protection, elderly safety, and accident prevention."
+        },
+        {
+          "value": "home renovation",
+          "label": "home renovations mapping",
+          "note": "Contextual preset targeting home remodeling, interior renovations, and architectural restructuring."
+        },
+        {
+          "value": "home insurance",
+          "label": "home insurance buyers",
+          "note": "Contextual preset mapping properties protection, home warranty seekers, and risk mitigation."
+        },
+        {
+          "value": "warehouse&factory",
+          "label": "warehouse & factory infrastructure",
+          "note": "Contextual preset mapping commercial buildings, storage centers, and industrial security setups."
+        },
+        {
+          "value": "construction",
+          "label": "construction sites context",
+          "note": "Contextual preset focused on heavy equipment, building construction, and civil engineering tracking."
+        }
       ],
       "int": [
-        { "value": "cleaning&maintenance", "label": "cleaning & house maintenance", "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation." },
-        { "value": "landscape design", "label": "landscape architecture design", "note": "Affinity maps targeting horticulture hobbyists, yard design, and landscape aesthetics." },
-        { "value": "outdoor", "label": "outdoor recreation interests", "note": "Affinity maps tracking hiking, wilderness camping, survival gear, and open-air activities." },
-        { "value": "rv", "label": "rv & caravan tracking", "note": "Affinity maps targeting mobile homes, campervans, road trip equipment, and caravan security." },
-        { "value": "grill", "label": "bbq & outdoor grilling", "note": "Affinity maps for backyard social hosting, outdoor grills, and culinary leisure." },
-        { "value": "consumer electronics", "label": "consumer electronics fans", "note": "Affinity maps tracking major global tech releases, consumer gadgets, and smart devices." },
-        { "value": "tech", "label": "technology enthusiasts", "note": "Affinity maps covering computational tech, cloud innovations, and cutting-edge digital trends." },
-        { "value": "audio", "label": "audio & sound acoustics", "note": "Affinity maps for high-fidelity audio gear, smart speakers, and home audio integration." },
-        { "value": "diy", "label": "do-it-yourself hardware", "note": "Affinity maps targeting active home crafters, self-installed hardware fans, and woodworkers." },
-        { "value": "home automation", "label": "smart home automation", "note": "Affinity maps tracking IoT protocols, automated lighting, voice control, and smart hubs." },
-        { "value": "health&fitness", "label": "health & active fitness", "note": "Affinity maps capturing wellness tracking, gym habits, home workouts, and nutritional tracking." },
-        { "value": "pet lover", "label": "pet owners & lovers", "note": "Affinity maps capturing pet tracking, smart pet feeders, dog/cat care, and animal safety." },
-        { "value": "luxury", "label": "luxury shoppers & travelers", "note": "Affinity maps tracking high-end consumer vehicles, premium travel, and top-tier retail brands." },
-        { "value": "gift", "label": "seasonal gifting habits", "note": "Affinity maps mapping holiday shoppers, e-commerce gift buyers, and registry builders." },
-        { "value": "programming", "label": "software & programming", "note": "Affinity maps for developers, system administrators, and tech-savvy coding professionals." },
-        { "value": "deals", "label": "coupons & promo shoppers", "note": "Affinity maps tracking Cyber Monday, Black Friday, flash sales, and discount department stores." },
-        { "value": "retailer", "label": "retailer network shoppers", "note": "Affinity maps mapping active Online Shoppers or frequent Best Buy network buyers." },
-        { "value": "news", "label": "breaking & tech news", "note": "Affinity maps tracking global breaking alerts, tech publications, and current event columns." },
-        { "value": "home decoration", "label": "interior design & decor", "note": "Affinity maps focused on home decoration websites, aesthetics, and architectural styling." },
-        { "value": "travel", "label": "frequent global travelers", "note": "Affinity maps capturing business trip logs, international commuters, and family vacations." },
-        { "value": "home appliance", "label": "major home appliances", "note": "Affinity maps tracking premium white goods, smart refrigerators, and kitchen installations." },
-        { "value": "sport", "label": "sports & stadium events", "note": "Affinity maps capturing mainstream sports, athletic associations, and event ticketing fields." },
-        { "value": "automotive", "label": "automotive & vehicles", "note": "Affinity maps tracking electric cars, vehicle maintenance, driving tech, and luxury automotive networks." },
-        { "value": "floriculture", "label": "floriculture & horticulture", "note": "Affinity maps targeting greenhouse operators, professional floriculture, and plant nurseries." },
-        { "value": "horse racing", "label": "equestrian & horse racing", "note": "Affinity maps tracking horse racing events, show jumping, and luxury horseback riding communities." },
-        { "value": "elite sports", "label": "elite athletic sports", "note": "Affinity maps covering premium sports networks including tennis, rugby, and golf." },
-        { "value": "yacht", "label": "yachting & premium sailing", "note": "Affinity maps tracking yacht clubs, premium sailing vessels, and maritime regatta metrics." },
-        { "value": "finance", "label": "personal finance & investing", "note": "Affinity maps capturing market tracking, investment instruments, and personal wealth advice." },
-        { "value": "music", "label": "music & rock culture", "note": "Affinity maps focused on rock music, entertainment ticketing, and audio streaming metrics." }
+        {
+          "value": "cleaning&maintenance",
+          "label": "cleaning & house maintenance",
+          "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation."
+        },
+        {
+          "value": "landscape design",
+          "label": "landscape architecture design",
+          "note": "Affinity maps targeting horticulture hobbyists, yard design, and landscape aesthetics."
+        },
+        {
+          "value": "outdoor",
+          "label": "outdoor recreation interests",
+          "note": "Affinity maps tracking hiking, wilderness camping, survival gear, and open-air activities."
+        },
+        {
+          "value": "rv",
+          "label": "rv & caravan tracking",
+          "note": "Affinity maps targeting mobile homes, campervans, road trip equipment, and caravan security."
+        },
+        {
+          "value": "grill",
+          "label": "bbq & outdoor grilling",
+          "note": "Affinity maps for backyard social hosting, outdoor grills, and culinary leisure."
+        },
+        {
+          "value": "consumer electronics",
+          "label": "consumer electronics fans",
+          "note": "Affinity maps tracking major global tech releases, consumer gadgets, and smart devices."
+        },
+        {
+          "value": "tech",
+          "label": "technology enthusiasts",
+          "note": "Affinity maps covering computational tech, cloud innovations, and cutting-edge digital trends."
+        },
+        {
+          "value": "audio",
+          "label": "audio & sound acoustics",
+          "note": "Affinity maps for high-fidelity audio gear, smart speakers, and home audio integration."
+        },
+        {
+          "value": "diy",
+          "label": "do-it-yourself hardware",
+          "note": "Affinity maps targeting active home crafters, self-installed hardware fans, and woodworkers."
+        },
+        {
+          "value": "home automation",
+          "label": "smart home automation",
+          "note": "Affinity maps tracking IoT protocols, automated lighting, voice control, and smart hubs."
+        },
+        {
+          "value": "health&fitness",
+          "label": "health & active fitness",
+          "note": "Affinity maps capturing wellness tracking, gym habits, home workouts, and nutritional tracking."
+        },
+        {
+          "value": "pet lover",
+          "label": "pet owners & lovers",
+          "note": "Affinity maps capturing pet tracking, smart pet feeders, dog/cat care, and animal safety."
+        },
+        {
+          "value": "luxury",
+          "label": "luxury shoppers & travelers",
+          "note": "Affinity maps tracking high-end consumer vehicles, premium travel, and top-tier retail brands."
+        },
+        {
+          "value": "gift",
+          "label": "seasonal gifting habits",
+          "note": "Affinity maps mapping holiday shoppers, e-commerce gift buyers, and registry builders."
+        },
+        {
+          "value": "programming",
+          "label": "software & programming",
+          "note": "Affinity maps for developers, system administrators, and tech-savvy coding professionals."
+        },
+        {
+          "value": "deals",
+          "label": "coupons & promo shoppers",
+          "note": "Affinity maps tracking Cyber Monday, Black Friday, flash sales, and discount department stores."
+        },
+        {
+          "value": "retailer",
+          "label": "retailer network shoppers",
+          "note": "Affinity maps mapping active Online Shoppers or frequent Best Buy network buyers."
+        },
+        {
+          "value": "news",
+          "label": "breaking & tech news",
+          "note": "Affinity maps tracking global breaking alerts, tech publications, and current event columns."
+        },
+        {
+          "value": "home decoration",
+          "label": "interior design & decor",
+          "note": "Affinity maps focused on home decoration websites, aesthetics, and architectural styling."
+        },
+        {
+          "value": "travel",
+          "label": "frequent global travelers",
+          "note": "Affinity maps capturing business trip logs, international commuters, and family vacations."
+        },
+        {
+          "value": "home appliance",
+          "label": "major home appliances",
+          "note": "Affinity maps tracking premium white goods, smart refrigerators, and kitchen installations."
+        },
+        {
+          "value": "sport",
+          "label": "sports & stadium events",
+          "note": "Affinity maps capturing mainstream sports, athletic associations, and event ticketing fields."
+        },
+        {
+          "value": "automotive",
+          "label": "automotive & vehicles",
+          "note": "Affinity maps tracking electric cars, vehicle maintenance, driving tech, and luxury automotive networks."
+        },
+        {
+          "value": "floriculture",
+          "label": "floriculture & horticulture",
+          "note": "Affinity maps targeting greenhouse operators, professional floriculture, and plant nurseries."
+        },
+        {
+          "value": "horse racing",
+          "label": "equestrian & horse racing",
+          "note": "Affinity maps tracking horse racing events, show jumping, and luxury horseback riding communities."
+        },
+        {
+          "value": "elite sports",
+          "label": "elite athletic sports",
+          "note": "Affinity maps covering premium sports networks including tennis, rugby, and golf."
+        },
+        {
+          "value": "yacht",
+          "label": "yachting & premium sailing",
+          "note": "Affinity maps tracking yacht clubs, premium sailing vessels, and maritime regatta metrics."
+        },
+        {
+          "value": "finance",
+          "label": "personal finance & investing",
+          "note": "Affinity maps capturing market tracking, investment instruments, and personal wealth advice."
+        },
+        {
+          "value": "music",
+          "label": "music & rock culture",
+          "note": "Affinity maps focused on rock music, entertainment ticketing, and audio streaming metrics."
+        },
+        {
+          "value": "holiday & vacation",
+          "label": "holiday & vacation interests",
+          "note": "Contextual audience taxonomy mapping holiday & vacation behaviors, affinity, and user preferences."
+        }
       ],
       "id": [
-        { "value": "business owner", "label": "small business owners", "note": "Persona taxonomy mapping store managers, local entrepreneurs, and commercial managers." },
-        { "value": "business product", "label": "b2b business procurement", "note": "Persona taxonomy capturing corporate purchasers, company inventory and facility managers." },
-        { "value": "landlord&host", "label": "property landlords & airbnb hosts", "note": "Persona taxonomy mapping income real estate investors and short-term rental managers." },
-        { "value": "recently moved", "label": "recently moved residents", "note": "Persona taxonomy targeting users who shifted properties within the last 0-6 months." },
-        { "value": "mom&baby", "label": "parents of newborn infants", "note": "Persona taxonomy focused on maternal healthcare, baby monitoring systems, and young families." },
-        { "value": "farmer", "label": "agricultural farmers", "note": "Persona taxonomy mapping traditional farmers, agricultural production managers, and rural fields owners." },
-        { "value": "homesteading", "label": "homesteading practitioners", "note": "Persona taxonomy targeting self-sufficiency living, residential farming, and off-grid property builders." },
-        { "value": "rural living", "label": "rural residential living", "note": "Persona taxonomy focused on non-urban residents, countryside housing, and open perimeter monitoring." },
-        { "value": "fish&forestry", "label": "fishery & forestry workers", "note": "Persona taxonomy mapping commercial forestry fields, wilderness logging, and deep-water fishery professionals." },
-        { "value": "rent", "label": "residential renters", "note": "Persona taxonomy capturing urban apartment renters and residential lease tenants." },
-        { "value": "real estate", "label": "real estate investors", "note": "Persona taxonomy mapping income or residential real property seekers and real estate brokers." },
-        { "value": "family", "label": "family households head", "note": "Persona taxonomy focused on multi-member households, domestic safety networks, and parenting circles." },
-        { "value": "procurement", "label": "commercial supply procurement", "note": "Persona taxonomy focused on corporate supply-chain execution, tech procurement, and logistics operations." },
-        { "value": "winery", "label": "winery & vineyard operators", "note": "Persona taxonomy mapping vineyard estate properties, boutique wine production, and premium cellar security." },
-        { "value": "installation&repair services", "label": "installation / field technicians", "note": "Persona taxonomy capturing maintenance services field specialists and construction helpers." },
-        { "value": "moving", "label": "active moving planning", "note": "Persona taxonomy targeting users currently planning or actively packing for property changes." }
+        {
+          "value": "business owner",
+          "label": "small business owners",
+          "note": "Persona taxonomy mapping store managers, local entrepreneurs, and commercial managers."
+        },
+        {
+          "value": "business product",
+          "label": "b2b business procurement",
+          "note": "Persona taxonomy capturing corporate purchasers, company inventory and facility managers."
+        },
+        {
+          "value": "landlord&host",
+          "label": "property landlords & airbnb hosts",
+          "note": "Persona taxonomy mapping income real estate investors and short-term rental managers."
+        },
+        {
+          "value": "recently moved",
+          "label": "recently moved residents",
+          "note": "Persona taxonomy targeting users who shifted properties within the last 0-6 months."
+        },
+        {
+          "value": "mom&baby",
+          "label": "parents of newborn infants",
+          "note": "Persona taxonomy focused on maternal healthcare, baby monitoring systems, and young families."
+        },
+        {
+          "value": "farmer",
+          "label": "agricultural farmers",
+          "note": "Persona taxonomy mapping traditional farmers, agricultural production managers, and rural fields owners."
+        },
+        {
+          "value": "homesteading",
+          "label": "homesteading practitioners",
+          "note": "Persona taxonomy targeting self-sufficiency living, residential farming, and off-grid property builders."
+        },
+        {
+          "value": "rural living",
+          "label": "rural residential living",
+          "note": "Persona taxonomy focused on non-urban residents, countryside housing, and open perimeter monitoring."
+        },
+        {
+          "value": "fish&forestry",
+          "label": "fishery & forestry workers",
+          "note": "Persona taxonomy mapping commercial forestry fields, wilderness logging, and deep-water fishery professionals."
+        },
+        {
+          "value": "rent",
+          "label": "residential renters",
+          "note": "Persona taxonomy capturing urban apartment renters and residential lease tenants."
+        },
+        {
+          "value": "real estate",
+          "label": "real estate investors",
+          "note": "Persona taxonomy mapping income or residential real property seekers and real estate brokers."
+        },
+        {
+          "value": "family",
+          "label": "family households head",
+          "note": "Persona taxonomy focused on multi-member households, domestic safety networks, and parenting circles."
+        },
+        {
+          "value": "procurement",
+          "label": "commercial supply procurement",
+          "note": "Persona taxonomy focused on corporate supply-chain execution, tech procurement, and logistics operations."
+        },
+        {
+          "value": "winery",
+          "label": "winery & vineyard operators",
+          "note": "Persona taxonomy mapping vineyard estate properties, boutique wine production, and premium cellar security."
+        },
+        {
+          "value": "installation&repair services",
+          "label": "installation / field technicians",
+          "note": "Persona taxonomy capturing maintenance services field specialists and construction helpers."
+        },
+        {
+          "value": "moving",
+          "label": "active moving planning",
+          "note": "Persona taxonomy targeting users currently planning or actively packing for property changes."
+        }
       ]
     },
-
     "Data Source Map": {
       "Prospecting Mechanism (cus, kwd, plcm, shop a+, scene, int, id, brd)": [
-        { "value": "n", "label": "no source", "note": "Prospecting and prospecting-lookalike setups without explicit secondary analytics data sources." }
+        {
+          "value": "n",
+          "label": "no source",
+          "note": "Prospecting and prospecting-lookalike setups without explicit secondary analytics data sources."
+        }
       ],
       "Remarketing Mechanism (rm, lal)": [
-        { "value": "dtc", "label": "dtc tracking pixel", "note": "DTC official website custom tracking infrastructure, embedded scripts, and native web pixels." },
-        { "value": "amz", "label": "amazon attribution data", "note": "Amazon marketing engine tracking endpoints, stored brand referral tokens, and native attribution streams." },
-        { "value": "ga4", "label": "google analytics 4 logs", "note": "Google Analytics 4 multi-channel funnels tracking tags and cloud dashboard audience buckets." },
-        { "value": "meta", "label": "meta platform fans", "note": "Meta network system followers, community asset profiles engagers, and catalog interaction records." },
-        { "value": "ytb", "label": "youtube channel viewers", "note": "Google Video network channel subscribers and long-form video viewer tracking lists." },
-        { "value": "app", "label": "mobile app custom events", "note": "Mobile native application analytics SDK signals and granular tracking endpoints." },
-        { "value": "crm", "label": "customer crm registry", "note": "Manual customer registry list, including cryptographically hashed email and phone databases." },
-        { "value": "criteo", "label": "criteo engine targeting", "note": "Criteo re-engagement engine audience segments, applicable for prospecting seed pools." },
-        { "value": "newsbreak", "label": "newsbreak interactive users", "note": "NewsBreak hyperlocal platform ad engagers, clickers, and native article savers." }
+        {
+          "value": "dtc",
+          "label": "dtc tracking pixel",
+          "note": "DTC official website custom tracking infrastructure, embedded scripts, and native web pixels."
+        },
+        {
+          "value": "amz",
+          "label": "amazon attribution data",
+          "note": "Amazon marketing engine tracking endpoints, stored brand referral tokens, and native attribution streams."
+        },
+        {
+          "value": "ga4",
+          "label": "google analytics 4 logs",
+          "note": "Google Analytics 4 multi-channel funnels tracking tags and cloud dashboard audience buckets."
+        },
+        {
+          "value": "meta",
+          "label": "meta platform fans",
+          "note": "Meta network system followers, community asset profiles engagers, and catalog interaction records."
+        },
+        {
+          "value": "ytb",
+          "label": "youtube channel viewers",
+          "note": "Google Video network channel subscribers and long-form video viewer tracking lists."
+        },
+        {
+          "value": "app",
+          "label": "mobile app custom events",
+          "note": "Mobile native application analytics SDK signals and granular tracking endpoints."
+        },
+        {
+          "value": "crm",
+          "label": "customer crm registry",
+          "note": "Manual customer registry list, including cryptographically hashed email and phone databases."
+        },
+        {
+          "value": "criteo",
+          "label": "criteo engine targeting",
+          "note": "Criteo re-engagement engine audience segments, applicable for prospecting seed pools."
+        },
+        {
+          "value": "newsbreak",
+          "label": "newsbreak interactive users",
+          "note": "NewsBreak hyperlocal platform ad engagers, clickers, and native article savers."
+        }
       ]
     },
-
     "Data Source Detail": [
-      { "value": "n", "label": "no detail", "note": "Default clean pass-through node for general prospecting cohorts." }
+      {
+        "value": "n",
+        "label": "no detail",
+        "note": "Default clean pass-through node for general prospecting cohorts."
+      }
     ],
-
     "Data Window": [
-      { "value": "n", "label": "no window specified", "note": "Default open-ended lifetime cookie cache tracking without time restrictions." }
+      {
+        "value": "n",
+        "label": "no window specified",
+        "note": "Default open-ended lifetime cookie cache tracking without time restrictions."
+      }
     ]
   },
-
   "Ad": {
     "landing-page": [
-      { "value": "deal page", "note": "Promotional landing catalog featuring discounted prices, seasonal holiday sales, and special bundles for security cameras." },
-      { "value": "web home page", "note": "The primary root storefront homepage showcasing flagship security camera models and new technology launches." },
-      { "value": "store home page", "note": "The main catalog landing page for the marketplace storefront filtering active security camera inventory." },
-      { "value": "store poe page", "note": "Collection page dedicated to Power over Ethernet (PoE) wired security cameras and local recording network infrastructures." },
-      { "value": "store doorbell page", "note": "Collection page concentrating on smart video doorbells, front-door entry security, and chime hardware accessories." },
-      { "value": "store battery wifi page", "note": "Collection page tracking standalone wire-free rechargeable battery security cameras powered via residential Wi-Fi." },
-      { "value": "store battery 4g page", "note": "Collection page filtering off-grid wire-free cellular LTE battery security cameras built for remote or rural locations." },
-      { "value": "store wifi page", "note": "Collection page mapping continuous plug-in powered security cameras connecting via Wi-Fi networks." },
-      { "value": "store system page", "note": "Collection page focusing on multi-camera security system kits bundled with local storage NVR servers." },
-      { "value": "store dual lens page", "note": "Collection page centered on dual-lens wide-angle stitch technology security cameras for panoramic coverage." },
-      { "value": "store home hub page", "note": "Collection page highlighting next-generation smart automation base hubs coordinating multiple security cameras." },
-      { "value": "store floodlight page", "note": "Collection page targeting ultra-bright motion-activated protective lighting security cameras for active night defense." },
-      { "value": "reseller page", "note": "B2B intake lead portals for wholesale operations, distribution partners, or certified security custom installers." },
-      { "value": "ptz wifi page", "note": "Collection page tracking motorized pan-tilt-zoom smart tracking Wi-Fi cameras with auto-patrol features." },
-      { "value": "vp series page", "note": "Exclusive showcase landing page for high-performance Value-Plus series security cameras targeting premium configurations." },
-      { "value": "prof series page", "note": "Dedicated landing catalog mapping professional-grade heavy DIY security cameras for commercial and enterprise setups." },
-      { "value": "event page", "note": "Custom localized campaign hubs for massive brand milestones, collaborative product rollouts, or new security camera launches." },
-      { "value": "16mp page", "note": "E-commerce category section capturing next-level ultra-HD 16-megapixel panoramic sensor security cameras." },
-      { "value": "floodlight page", "note": "Standalone hardware landing page focusing exclusively on outdoor motion-triggered floodlight surveillance cameras." },
-      { "value": "hub mini series page", "note": "Collection page targeting compact local network sync hosts designed to manage smaller residential security camera nodes." },
-      { "value": "omvi series page", "note": "Exclusive tech showcase filtering the Omvi smart security ecosystem with advanced cloud AI software integrations." },
-      { "value": "anniversary page", "note": "High-conversion clearance event page celebrating the annual brand anniversary milestone with major site-wide camera deals." }
+      {
+        "value": "deal page",
+        "note": "Promotional landing catalog featuring discounted prices, seasonal holiday sales, and special bundles for security cameras."
+      },
+      {
+        "value": "web home page",
+        "note": "The primary root storefront homepage showcasing flagship security camera models and new technology launches."
+      },
+      {
+        "value": "store home page",
+        "note": "The main catalog landing page for the marketplace storefront filtering active security camera inventory."
+      },
+      {
+        "value": "store poe page",
+        "note": "Collection page dedicated to Power over Ethernet (PoE) wired security cameras and local recording network infrastructures."
+      },
+      {
+        "value": "store doorbell page",
+        "note": "Collection page concentrating on smart video doorbells, front-door entry security, and chime hardware accessories."
+      },
+      {
+        "value": "store battery wifi page",
+        "note": "Collection page tracking standalone wire-free rechargeable battery security cameras powered via residential Wi-Fi."
+      },
+      {
+        "value": "store battery 4g page",
+        "note": "Collection page filtering off-grid wire-free cellular LTE battery security cameras built for remote or rural locations."
+      },
+      {
+        "value": "store wifi page",
+        "note": "Collection page mapping continuous plug-in powered security cameras connecting via Wi-Fi networks."
+      },
+      {
+        "value": "store system page",
+        "note": "Collection page focusing on multi-camera security system kits bundled with local storage NVR servers."
+      },
+      {
+        "value": "store dual lens page",
+        "note": "Collection page centered on dual-lens wide-angle stitch technology security cameras for panoramic coverage."
+      },
+      {
+        "value": "store home hub page",
+        "note": "Collection page highlighting next-generation smart automation base hubs coordinating multiple security cameras."
+      },
+      {
+        "value": "store floodlight page",
+        "note": "Collection page targeting ultra-bright motion-activated protective lighting security cameras for active night defense."
+      },
+      {
+        "value": "reseller page",
+        "note": "B2B intake lead portals for wholesale operations, distribution partners, or certified security custom installers."
+      },
+      {
+        "value": "ptz wifi page",
+        "note": "Collection page tracking motorized pan-tilt-zoom smart tracking Wi-Fi cameras with auto-patrol features."
+      },
+      {
+        "value": "vp series page",
+        "note": "Exclusive showcase landing page for high-performance Value-Plus series security cameras targeting premium configurations."
+      },
+      {
+        "value": "prof series page",
+        "note": "Dedicated landing catalog mapping professional-grade heavy DIY security cameras for commercial and enterprise setups."
+      },
+      {
+        "value": "event page",
+        "note": "Custom localized campaign hubs for massive brand milestones, collaborative product rollouts, or new security camera launches."
+      },
+      {
+        "value": "16mp page",
+        "note": "E-commerce category section capturing next-level ultra-HD 16-megapixel panoramic sensor security cameras."
+      },
+      {
+        "value": "floodlight page",
+        "note": "Standalone hardware landing page focusing exclusively on outdoor motion-triggered floodlight surveillance cameras."
+      },
+      {
+        "value": "hub mini series page",
+        "note": "Collection page targeting compact local network sync hosts designed to manage smaller residential security camera nodes."
+      },
+      {
+        "value": "omvi series page",
+        "note": "Exclusive tech showcase filtering the Omvi smart security ecosystem with advanced cloud AI software integrations."
+      },
+      {
+        "value": "anniversary page",
+        "note": "High-conversion clearance event page celebrating the annual brand anniversary milestone with major site-wide camera deals."
+      }
     ],
     "creative-product-type": [
-      "all", "poe", "doorbell", "wifi", "battery wifi", "battery 4g", "nvr"
+      "all",
+      "poe",
+      "doorbell",
+      "wifi",
+      "battery wifi",
+      "battery 4g",
+      "nvr"
     ],
     "creative-product": [
       "all"
     ],
     "creative-type": [
-      { "value": "vid", "note": "Standard video ad creative covering product features, unboxing, security camera installations, or real defense footage clips." },
-      { "value": "pic", "note": "Static single-image creative used for showcasing security camera industrial design or hardware crisp details." },
-      { "value": "carousel pic", "note": "Multi-card image carousel displaying a series of different security cameras or sequential lifestyle setups." },
-      { "value": "carousel vid", "note": "Multi-card video carousel ad displaying sequential hardware operations, tracking tech, or multi-scenario camera feature breakdowns." },
-      { "value": "text", "note": "Pure text copy variations reserved primarily for intent-driven search engine ad extensions or textual forum segments." },
-      { "value": "gif", "note": "Short animated looping graphic highlighting quick key app interactions or security camera motion sensor triggers." },
-      { "value": "adaptive", "note": "Criteo adaptive ad format that intelligently modifies layout, imagery, and copywriting variations to fit different app placement sizes." },
-      { "value": "feed", "note": "Criteo dynamic ad format utilizing automated catalog feeds to dynamically retarget viewers based on viewed security camera SKUs." }
+      {
+        "value": "vid",
+        "note": "Standard video ad creative covering product features, unboxing, security camera installations, or real defense footage clips."
+      },
+      {
+        "value": "pic",
+        "note": "Static single-image creative used for showcasing security camera industrial design or hardware crisp details."
+      },
+      {
+        "value": "carousel pic",
+        "note": "Multi-card image carousel displaying a series of different security cameras or sequential lifestyle setups."
+      },
+      {
+        "value": "carousel vid",
+        "note": "Multi-card video carousel ad displaying sequential hardware operations, tracking tech, or multi-scenario camera feature breakdowns."
+      },
+      {
+        "value": "text",
+        "note": "Pure text copy variations reserved primarily for intent-driven search engine ad extensions or textual forum segments."
+      },
+      {
+        "value": "gif",
+        "note": "Short animated looping graphic highlighting quick key app interactions or security camera motion sensor triggers."
+      },
+      {
+        "value": "adaptive",
+        "note": "Criteo adaptive ad format that intelligently modifies layout, imagery, and copywriting variations to fit different app placement sizes."
+      },
+      {
+        "value": "feed",
+        "note": "Criteo dynamic ad format utilizing automated catalog feeds to dynamically retarget viewers based on viewed security camera SKUs."
+      }
     ],
     "creative-source": [
-      { "value": "bgc", "note": "Brand Generated Content: Official high-production studio assets, product renders, and slick marketing videos showcasing security camera industrial design." },
-      { "value": "ugc", "note": "User Generated Content: Highly authentic, native-style creator videos demonstrating security camera unboxing, home installation, or real-life backyard capture footage." },
-      { "value": "kol", "note": "Key Opinion Leader: Professional influencer collaborations and tech reviewer content lending authority and deep technical walkthroughs for the security camera." }
+      {
+        "value": "bgc",
+        "note": "Brand Generated Content: Official high-production studio assets, product renders, and slick marketing videos showcasing security camera industrial design."
+      },
+      {
+        "value": "ugc",
+        "note": "User Generated Content: Highly authentic, native-style creator videos demonstrating security camera unboxing, home installation, or real-life backyard capture footage."
+      },
+      {
+        "value": "kol",
+        "note": "Key Opinion Leader: Professional influencer collaborations and tech reviewer content lending authority and deep technical walkthroughs for the security camera."
+      }
     ],
     "creative-source-type": [
-      { "value": "unlisted", "note": "Non-public BGC video on official YouTube channel, pic/gif, or native video on other platforms." },
-      { "value": "public", "note": "Public BGC video published on the official YouTube brand channel." },
-      { "value": "boost", "note": "Original security camera video hosted on the YouTube KOL's own channel." },
-      { "value": "cut", "note": "Post-edited/cut-down KOL video uploaded to the official YouTube brand channel." }
+      {
+        "value": "unlisted",
+        "note": "Non-public BGC video on official YouTube channel, pic/gif, or native video on other platforms."
+      },
+      {
+        "value": "public",
+        "note": "Public BGC video published on the official YouTube brand channel."
+      },
+      {
+        "value": "boost",
+        "note": "Original security camera video hosted on the YouTube KOL's own channel."
+      },
+      {
+        "value": "cut",
+        "note": "Post-edited/cut-down KOL video uploaded to the official YouTube brand channel."
+      }
     ],
     "creative-channel": [
-      { "value": "reolink" }
+      {
+        "value": "reolink"
+      },
+      {
+        "value": "giftgecko"
+      },
+      {
+        "value": "gadgetcrunch"
+      }
     ],
     "creative-discount": [
-      { "value": "no disc", "note": "Full-price standard creative without any discount callouts or promotional overlays." },
-      { "value": "flat disc", "note": "Dollar-off discount creative showing a specific monetary reduction (e.g., Save $50 / $30 Off)." },
-      { "value": "percent disc", "note": "Percentage-off discount creative showing a proportional price cut (e.g., 20% OFF / 30% OFF)." },
-      { "value": "spend save", "note": "Tiered threshold discount creative incentivizing higher spend (e.g., Spend $200 Save $40)." },
-      { "value": "bundle disc", "note": "Package deal creative offering bundled savings when purchasing cameras with accessories or NVR kits." },
-      { "value": "bogo", "note": "Buy-One-Get-One or multi-buy promo creative (e.g., Buy a camera, get a free solar panel)." },
-      { "value": "free gift", "note": "Value-add promotional creative highlighting complimentary hardware, accessories, or cloud service trials." }
+      {
+        "value": "no disc",
+        "note": "Full-price standard creative without any discount callouts or promotional overlays."
+      },
+      {
+        "value": "flat disc",
+        "note": "Dollar-off discount creative showing a specific monetary reduction (e.g., Save $50 / $30 Off)."
+      },
+      {
+        "value": "percent disc",
+        "note": "Percentage-off discount creative showing a proportional price cut (e.g., 20% OFF / 30% OFF)."
+      },
+      {
+        "value": "spend save",
+        "note": "Tiered threshold discount creative incentivizing higher spend (e.g., Spend $200 Save $40)."
+      },
+      {
+        "value": "bundle disc",
+        "note": "Package deal creative offering bundled savings when purchasing cameras with accessories or NVR kits."
+      },
+      {
+        "value": "bogo",
+        "note": "Buy-One-Get-One or multi-buy promo creative (e.g., Buy a camera, get a free solar panel)."
+      },
+      {
+        "value": "free gift",
+        "note": "Value-add promotional creative highlighting complimentary hardware, accessories, or cloud service trials."
+      }
     ],
     "creative-size": [
-      { "value": "all", "note": "Universal asset bundle accommodating cross-platform responsive sizes and multi-ratio aspect configurations." },
-      { "value": "16:9", "note": "Horizontal widescreen aspect ratio optimized for YouTube desktop feeds, TV displays, and traditional landscape camera video previews." },
-      { "value": "9:16", "note": "Full-screen vertical mobile aspect ratio tailored for TikTok, Instagram Reels, YouTube Shorts, and Meta Stories." },
-      { "value": "1:1", "note": "Square aspect ratio standard for Meta feed image carousels, Criteo dynamic feeds, and desktop shopping placements." }
+      {
+        "value": "all",
+        "note": "Universal asset bundle accommodating cross-platform responsive sizes and multi-ratio aspect configurations."
+      },
+      {
+        "value": "16:9",
+        "note": "Horizontal widescreen aspect ratio optimized for YouTube desktop feeds, TV displays, and traditional landscape camera video previews."
+      },
+      {
+        "value": "9:16",
+        "note": "Full-screen vertical mobile aspect ratio tailored for TikTok, Instagram Reels, YouTube Shorts, and Meta Stories."
+      },
+      {
+        "value": "1:1",
+        "note": "Square aspect ratio standard for Meta feed image carousels, Criteo dynamic feeds, and desktop shopping placements."
+      }
     ],
     "ksp": [
-      { "value": "allksp" },
-      { "value": "360" },
-      { "value": "180" },
-      { "value": "16mp" },
-      { "value": "4k" },
-      { "value": "solar" },
-      { "value": "continuous recording" },
-      { "value": "magnetic" }
+      {
+        "value": "allksp"
+      },
+      {
+        "value": "360"
+      },
+      {
+        "value": "180"
+      },
+      {
+        "value": "16mp"
+      },
+      {
+        "value": "4k"
+      },
+      {
+        "value": "solar"
+      },
+      {
+        "value": "continuous recording"
+      },
+      {
+        "value": "magnetic"
+      },
+      {
+        "value": "ptz"
+      }
     ],
     "project": [
-      { "value": "aon", "note": "Always-On: Ever-green perpetual advertising campaign running continuously outside major promotional events." },
-      { "value": "new", "note": "New Product Launch: Go-to-market campaign introducing a newly released security camera model." },
-      { "value": "relaunch", "note": "Re-launch Campaign: Strategic marketing push to reignite demand and sales momentum for mature camera models." },
-      { "value": "26spring", "note": "2026 Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season." },
-      { "value": "26summer", "note": "2026 Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling." },
-      { "value": "26fall", "note": "2026 Fall Sale: Autumn home prep and shoulder-season promotional campaign." },
-      { "value": "26winter", "note": "2026 Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign." },
-      { "value": "26anni", "note": "2026 Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles." },
-      { "value": "26pd", "note": "2026 Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion." },
-      { "value": "26fpd", "note": "2026 Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign." },
-      { "value": "26bfcm", "note": "2026 Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign." },
-      { "value": "26easter", "note": "2026 Easter Sale: Spring holiday family and safety promo event." },
-      { "value": "26father", "note": "2026 Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics." },
-      { "value": "26mother", "note": "2026 Mother's Day Sale: Smart home peace-of-mind gift campaign." },
-      { "value": "26school", "note": "2026 Back to School: Late-summer home and dorm/rental security campaign." }
+      {
+        "value": "aon",
+        "note": "Always-On: Ever-green perpetual advertising campaign running continuously outside major promotional events."
+      },
+      {
+        "value": "new",
+        "note": "New Product Launch: Go-to-market campaign introducing a newly released security camera model."
+      },
+      {
+        "value": "relaunch",
+        "note": "Re-launch Campaign: Strategic marketing push to reignite demand and sales momentum for mature camera models."
+      },
+      {
+        "value": "26spring",
+        "note": "2026 Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season."
+      },
+      {
+        "value": "26summer",
+        "note": "2026 Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling."
+      },
+      {
+        "value": "26fall",
+        "note": "2026 Fall Sale: Autumn home prep and shoulder-season promotional campaign."
+      },
+      {
+        "value": "26winter",
+        "note": "2026 Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign."
+      },
+      {
+        "value": "26anni",
+        "note": "2026 Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles."
+      },
+      {
+        "value": "26pd",
+        "note": "2026 Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion."
+      },
+      {
+        "value": "26fpd",
+        "note": "2026 Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign."
+      },
+      {
+        "value": "26bfcm",
+        "note": "2026 Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign."
+      },
+      {
+        "value": "26easter",
+        "note": "2026 Easter Sale: Spring holiday family and safety promo event."
+      },
+      {
+        "value": "26father",
+        "note": "2026 Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics."
+      },
+      {
+        "value": "26mother",
+        "note": "2026 Mother's Day Sale: Smart home peace-of-mind gift campaign."
+      },
+      {
+        "value": "26school",
+        "note": "2026 Back to School: Late-summer home and dorm/rental security campaign."
+      },
+      {
+        "value": "26holiday"
+      }
     ],
     "custom": []
   }
