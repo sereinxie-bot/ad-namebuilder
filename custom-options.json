@@ -1,1 +1,24 @@
-{}
+{
+  "creative-channel": [
+    {
+      "value": "giftgecko"
+    },
+    {
+      "value": "gadgetcrunch"
+    }
+  ],
+  "ksp": [
+    {
+      "value": "ptz"
+    },
+    {
+      "value": "kv",
+      "note": "Key Selling Point highlighting KV camera hardware or AI software feature integration."
+    }
+  ],
+  "project": [
+    {
+      "value": "26holiday"
+    }
+  ]
+}
