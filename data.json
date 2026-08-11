@@ -717,6 +717,11 @@
           "value": "parents",
           "label": "parents identity",
           "note": "Contextual audience taxonomy mapping parents behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "teacher",
+          "label": "teacher identity",
+          "note": "Contextual audience taxonomy mapping teacher behaviors, affinity, and user preferences."
         }
       ]
     },
