@@ -712,6 +712,11 @@
           "value": "moving",
           "label": "active moving planning",
           "note": "Persona taxonomy targeting users currently planning or actively packing for property changes."
+        },
+        {
+          "value": "parents",
+          "label": "parents identity",
+          "note": "Contextual audience taxonomy mapping parents behaviors, affinity, and user preferences."
         }
       ]
     },
@@ -1041,6 +1046,12 @@
       },
       {
         "value": "ptz"
+      },
+      {
+        "value": "kv"
+      },
+      {
+        "value": "big sales"
       }
     ],
     "project": [
