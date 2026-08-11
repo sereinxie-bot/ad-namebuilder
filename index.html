@@ -393,6 +393,9 @@ const AD_WHITELIST = [
 const ALLOW_NEW_ENUM_FIELDS = ['creative-channel', 'ksp', 'project'];
 const ADMIN_ONLY_ADD_ENUM_FIELDS = ['landing-page'];
 
+// 💡 声明不需要 Note 提示的字段列表（加入了 ksp）
+const NO_NOTE_FIELDS = ['creative-channel', 'ksp'];
+
 const FIELD_TYPES = {
   "market": "dropdown", "product-type": "dropdown", "product-code": "dropdown",
   "media-funnel": "tag", "ad-product": "tag", "bidding-goal": "tag", "url": "tag", "custom": "custom",
@@ -444,10 +447,6 @@ function generateSmartNote(fieldKey, value) {
     let topic = val.replace(/\d+/, '').replace(/[-_]/g, ' ');
     topic = topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : 'Marketing';
     return `${year} ${topic} Campaign: Promotional marketing push targeting seasonal security camera sales events.`;
-  }
-  
-  if (fieldKey === 'ksp') {
-    return `Key Selling Point highlighting ${val.toUpperCase()} camera hardware or AI software feature integration.`;
   }
   
   if (fieldKey === 'landing-page') {
@@ -739,7 +738,8 @@ async function addNewEnumPrompt(fieldKey) {
   const cleanVal = val.trim().toLowerCase();
   let newItem = { value: cleanVal };
 
-  if (fieldKey !== 'creative-channel') {
+  // 💡 如果字段在 NO_NOTE_FIELDS 列表（如 creative-channel, ksp）中，完全不提示/生成 Note
+  if (!NO_NOTE_FIELDS.includes(fieldKey)) {
     const defaultAiNote = generateSmartNote(fieldKey, cleanVal);
     const note = prompt(`AI Auto-Generated Note for [${cleanVal}]:\n(Edit or press OK/Enter to accept default)`, defaultAiNote);
     if (note && note.trim()) newItem.note = note.trim();
@@ -889,7 +889,6 @@ function renderAudienceManagerUI() {
     filteredList.forEach(item => {
       let valStr = typeof item === 'object' ? item.value : item;
       let delBtn = isAdminUnlocked ? '<span class="pm-item-del" title="Delete audience tag" onclick="deleteAudienceTag(\'' + cat + '\', \'' + escJs(valStr) + '\')">&times;</span>' : '';
-      // 💡 仅显示 value，隐藏 label 和 note
       html += '<span class="pm-item-tag">' + escHtml(valStr) + ' ' + delBtn + '</span>';
     });
 
@@ -918,7 +917,6 @@ async function addNewAudienceTag() {
     return;
   }
 
-  // 🤖 AI 智能自动生成 Label 与 Note
   const aiLabel = generateSmartLabel(cat, newTag);
   const aiNote = generateSmartNote(cat, newTag);
 
@@ -928,7 +926,6 @@ async function addNewAudienceTag() {
   tagInput.value = '';
   renderAudienceManagerUI();
 
-  // 🚀 Direct Sync to GitHub data.json
   const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
   if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
   exportCopy["Ad-Group"]["Audience Tag Map"] = OPTIONS['audience-tag-map'];
@@ -1078,7 +1075,7 @@ function buildDropdown(field) {
     const o = opts[i];
     if(typeof o === 'object') {
       let labelText = o.label ? ' (' + escHtml(o.label) + ')' : '';
-      let noteText = (o.note && field !== 'creative-channel') ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
+      let noteText = (o.note && !NO_NOTE_FIELDS.includes(field)) ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
       html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + labelText + '</div>' + noteText + '</div>';
     } else {
       html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
@@ -1103,7 +1100,7 @@ function filterDropdown(field, q) {
     const o = filtered[i];
     if(typeof o === 'object') {
       let labelText = o.label ? ' (' + escHtml(o.label) + ')' : '';
-      let noteText = (o.note && field !== 'creative-channel') ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
+      let noteText = (o.note && !NO_NOTE_FIELDS.includes(field)) ? '<div class="dropdown-item-note">💡 ' + escHtml(o.note) + '</div>' : '';
       html += '<div class="dropdown-item' + (sel[field]===o.value ? ' selected' : '') + '" data-val="' + escAttr(o.value) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o.value) + '\', event)"><div class="dropdown-item-title">' + escHtml(o.value) + labelText + '</div>' + noteText + '</div>';
     } else {
       html += '<div class="dropdown-item' + (sel[field]===o ? ' selected' : '') + '" data-val="' + escAttr(o) + '" onmousedown="pickDropdown(\'' + field + '\', \'' + escJs(o) + '\', event)"><div class="dropdown-item-title">' + escHtml(o) + '</div></div>';
