@@ -127,7 +127,7 @@ body.is-admin div.admin-only {display:block !important}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 
-.pm-add-box{display:grid;grid-template-columns:160px 1fr auto;gap:10px;margin-bottom:20px;align-items:center;background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border)}
+.pm-add-box{display:grid;grid-template-columns:180px 1fr auto;gap:10px;margin-bottom:20px;align-items:center;background:var(--bg);padding:12px;border-radius:10px;border:1px solid var(--border)}
 .pm-type-group{margin-bottom:16px;border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}
 .pm-type-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
 .pm-tag-list{display:flex;flex-wrap:wrap;gap:6px}
@@ -243,26 +243,27 @@ body.is-admin div.admin-only {display:block !important}
         <div class="card-header">
           <div class="card-icon">🛠️</div>
           <div>
-            <div class="card-title">Product Code Map Manager</div>
-            <div class="card-desc">View, add, or delete product codes dynamically. Export updated product-code-map.json.</div>
+            <div class="card-title">Product Code & Collections Manager</div>
+            <div class="card-desc">View, add, or delete product codes and landing page collections dynamically.</div>
           </div>
         </div>
 
         <div class="pm-add-box admin-only">
           <select id="pm-add-type" class="custom-input" style="padding:7px 10px; cursor:pointer;">
-            <option value="poe">poe</option>
-            <option value="wifi">wifi</option>
-            <option value="battery wifi">battery wifi</option>
-            <option value="battery 4g">battery 4g</option>
-            <option value="doorbell">doorbell</option>
-            <option value="nvr">nvr</option>
+            <option value="collections">collections (Landing Page)</option>
+            <option value="poe">poe (hardware)</option>
+            <option value="wifi">wifi (hardware)</option>
+            <option value="battery wifi">battery wifi (hardware)</option>
+            <option value="battery 4g">battery 4g (hardware)</option>
+            <option value="doorbell">doorbell (hardware)</option>
+            <option value="nvr">nvr (hardware)</option>
           </select>
-          <input type="text" id="pm-add-code" class="custom-input" placeholder="Enter new product code (e.g., rlc-999a)..." />
-          <button class="btn-primary" onclick="addNewProductCode()" style="width:auto; padding:8px 16px;">+ Add Product</button>
+          <input type="text" id="pm-add-code" class="custom-input" placeholder="Enter new item (e.g., store solar page / rlc-999a)..." />
+          <button class="btn-primary" onclick="addNewProductCode()" style="width:auto; padding:8px 16px;">+ Add Item</button>
         </div>
 
         <div style="margin-bottom:14px;">
-          <input type="text" id="pm-search-filter" class="custom-input" placeholder="🔍 Search product model across categories..." oninput="renderProductManagerUI()" />
+          <input type="text" id="pm-search-filter" class="custom-input" placeholder="🔍 Search collections or product models..." oninput="renderProductManagerUI()" />
         </div>
 
         <div id="pm-list-container"></div>
@@ -392,8 +393,6 @@ const AD_WHITELIST = [
 
 const ALLOW_NEW_ENUM_FIELDS = ['creative-channel', 'ksp', 'project'];
 const ADMIN_ONLY_ADD_ENUM_FIELDS = ['landing-page'];
-
-// 💡 声明不需要 Note 提示的字段列表（加入了 ksp）
 const NO_NOTE_FIELDS = ['creative-channel', 'ksp'];
 
 const FIELD_TYPES = {
@@ -449,7 +448,7 @@ function generateSmartNote(fieldKey, value) {
     return `${year} ${topic} Campaign: Promotional marketing push targeting seasonal security camera sales events.`;
   }
   
-  if (fieldKey === 'landing-page') {
+  if (fieldKey === 'landing-page' || fieldKey === 'collections') {
     return `Dedicated landing catalog page filtering security cameras for ${val} solutions.`;
   }
   
@@ -738,7 +737,6 @@ async function addNewEnumPrompt(fieldKey) {
   const cleanVal = val.trim().toLowerCase();
   let newItem = { value: cleanVal };
 
-  // 💡 如果字段在 NO_NOTE_FIELDS 列表（如 creative-channel, ksp）中，完全不提示/生成 Note
   if (!NO_NOTE_FIELDS.includes(fieldKey)) {
     const defaultAiNote = generateSmartNote(fieldKey, cleanVal);
     const note = prompt(`AI Auto-Generated Note for [${cleanVal}]:\n(Edit or press OK/Enter to accept default)`, defaultAiNote);
@@ -781,7 +779,7 @@ function exportCustomJson() {
   dlAnchor.remove();
 }
 
-/* ===== PRODUCT MAP MANAGER MODULE ===== */
+/* ===== PRODUCT MAP & LANDING PAGE MANAGER MODULE ===== */
 function renderProductManagerUI() {
   const container = document.getElementById('pm-list-container');
   if(!container) return;
@@ -789,13 +787,32 @@ function renderProductManagerUI() {
   const query = (document.getElementById('pm-search-filter') ? document.getElementById('pm-search-filter').value : '').toLowerCase().trim();
   let html = '';
 
+  // 1. 先渲染置顶卡片：Landing Page Collections (集合页)
+  const collectionsList = OPTIONS['landing-page'] || [];
+  const filteredCollections = query ? collectionsList.filter(i => (typeof i === 'object' ? i.value : i).toLowerCase().includes(query)) : collectionsList;
+
+  if (!query || filteredCollections.length > 0) {
+    html += '<div class="pm-type-group" style="border:1.5px solid var(--primary); background:#F8FAFC">';
+    html += '<div class="pm-type-title"><span>📂 Landing Page Collections (集合页)</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + filteredCollections.length + ' collections</span></div>';
+    html += '<div class="pm-tag-list">';
+
+    filteredCollections.forEach(item => {
+      let valStr = typeof item === 'object' ? item.value : item;
+      let delBtn = isAdminUnlocked ? '<span class="pm-item-del" title="Delete collection" onclick="deleteLandingPageCollection(\'' + escJs(valStr) + '\')">&times;</span>' : '';
+      html += '<span class="pm-item-tag" style="background:#EEF2FF; border-color:#C7D2FE;">' + escHtml(valStr) + ' ' + delBtn + '</span>';
+    });
+
+    html += '</div></div>';
+  }
+
+  // 2. 再渲染具体的硬件型号分类 (poe, wifi, battery wifi, etc.)
   for (const [typeKey, codes] of Object.entries(PRODUCT_RELATION_MAP)) {
     if(typeKey === 'all') continue;
     const filteredCodes = query ? codes.filter(c => c.toLowerCase().includes(query)) : codes;
     if(query && filteredCodes.length === 0) continue;
 
     html += '<div class="pm-type-group">';
-    html += '<div class="pm-type-title"><span>' + escHtml(typeKey) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + filteredCodes.length + ' models</span></div>';
+    html += '<div class="pm-type-title"><span>📷 Hardware Model: ' + escHtml(typeKey) + '</span><span style="font-size:11px;color:var(--muted); font-weight:normal;">' + filteredCodes.length + ' models</span></div>';
     html += '<div class="pm-tag-list">';
 
     filteredCodes.forEach(code => {
@@ -807,7 +824,7 @@ function renderProductManagerUI() {
     html += '</div></div>';
   }
 
-  container.innerHTML = html || '<div class="empty-hint">No matching product codes found...</div>';
+  container.innerHTML = html || '<div class="empty-hint">No matching items found...</div>';
 }
 
 async function addNewProductCode() {
@@ -819,8 +836,33 @@ async function addNewProductCode() {
   const targetType = typeSelect.value;
   let newCode = codeInput.value.trim().toLowerCase();
 
-  if(!newCode) { alert('Please enter a valid product code!'); return; }
+  if(!newCode) { alert('Please enter a valid value!'); return; }
 
+  // 💡 分流处理 1: 添加集合页 (collections) -> 写入 data.json
+  if (targetType === 'collections') {
+    if (!OPTIONS['landing-page']) OPTIONS['landing-page'] = [];
+    if (OPTIONS['landing-page'].some(i => (typeof i === 'object' ? i.value : i) === newCode)) {
+      alert('Collection page already exists!');
+      return;
+    }
+
+    const aiNote = generateSmartNote('landing-page', newCode);
+    const newItem = { value: newCode, note: aiNote };
+    OPTIONS['landing-page'].push(newItem);
+
+    codeInput.value = '';
+    renderProductManagerUI();
+
+    // Commit 到 data.json
+    const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
+    if(!exportCopy["Ad"]) exportCopy["Ad"] = {};
+    exportCopy["Ad"]["landing-page"] = OPTIONS['landing-page'];
+
+    await commitFileToGitHub('data.json', exportCopy, `feat: Add landing page collection [${newCode}]`);
+    return;
+  }
+
+  // 💡 分流处理 2: 添加硬件产品型号 -> 写入 product-code-map.json
   if(!PRODUCT_RELATION_MAP[targetType]) PRODUCT_RELATION_MAP[targetType] = ['all'];
   if(PRODUCT_RELATION_MAP[targetType].includes(newCode)) {
     alert('Product code already exists in category [' + targetType + ']!');
@@ -834,8 +876,24 @@ async function addNewProductCode() {
   codeInput.value = '';
   renderProductManagerUI();
 
-  // 🚀 Direct Sync to GitHub product-code-map.json
+  // Commit 到 product-code-map.json
   await commitFileToGitHub('product-code-map.json', PRODUCT_RELATION_MAP, `feat: Add product code [${newCode}] to [${targetType}]`);
+}
+
+async function deleteLandingPageCollection(valStr) {
+  if (!isAdminUnlocked) return;
+  if(!confirm('Are you sure you want to delete collection page [' + valStr + ']?')) return;
+
+  if(OPTIONS['landing-page']) {
+    OPTIONS['landing-page'] = OPTIONS['landing-page'].filter(i => (typeof i === 'object' ? i.value : i) !== valStr);
+    renderProductManagerUI();
+
+    const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
+    if(!exportCopy["Ad"]) exportCopy["Ad"] = {};
+    exportCopy["Ad"]["landing-page"] = OPTIONS['landing-page'];
+
+    await commitFileToGitHub('data.json', exportCopy, `fix: Remove landing page collection [${valStr}]`);
+  }
 }
 
 async function deleteProductCode(typeKey, code) {
@@ -847,7 +905,6 @@ async function deleteProductCode(typeKey, code) {
     try { localStorage.setItem(LOCAL_PRODUCT_MAP_KEY, JSON.stringify(PRODUCT_RELATION_MAP)); } catch(e){}
     renderProductManagerUI();
 
-    // 🚀 Direct Sync to GitHub product-code-map.json
     await commitFileToGitHub('product-code-map.json', PRODUCT_RELATION_MAP, `fix: Remove product code [${code}] from [${typeKey}]`);
   }
 }
