@@ -630,6 +630,11 @@
           "value": "holiday & vacation",
           "label": "holiday & vacation interests",
           "note": "Contextual audience taxonomy mapping holiday & vacation behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "event",
+          "label": "event interests",
+          "note": "Contextual audience taxonomy mapping event behaviors, affinity, and user preferences."
         }
       ],
       "id": [
