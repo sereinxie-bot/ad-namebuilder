@@ -1009,6 +1009,10 @@
       {
         "value": "free gift",
         "note": "Value-add promotional creative highlighting complimentary hardware, accessories, or cloud service trials."
+      },
+      {
+        "value": "lowest price",
+        "note": "Promotional creative highlighting the lowest starting price point (e.g., From $99 / Low as $49)."
       }
     ],
     "creative-size": [
