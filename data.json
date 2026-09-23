@@ -478,6 +478,11 @@
           "value": "construction",
           "label": "construction sites context",
           "note": "Contextual preset focused on heavy equipment, building construction, and civil engineering tracking."
+        },
+        {
+          "value": "cleaning&maintenance",
+          "label": "cleaning&maintenance scene",
+          "note": "Contextual audience taxonomy mapping cleaning&maintenance behaviors, affinity, and user preferences."
         }
       ],
       "int": [
