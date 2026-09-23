@@ -144,7 +144,7 @@ body.is-admin div.admin-only {display:block !important}
       <div class="header-icon">📋</div>
       <div>
         <div class="header-title">Ad Namebuilder</div>
-        <div class="header-sub">v1.1 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+        <div class="header-sub">v1.2 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
       </div>
     </div>
 
@@ -488,6 +488,7 @@ async function commitFileToGitHub(path, contentObj, commitMessage) {
   const cfg = getGitHubConfig();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
     console.log('GitHub API not configured. Skipped remote commit.');
+    showDatasourceStatus('error', `⚠ ${path} NOT pushed: GitHub config incomplete (owner / repo / token). This change exists in your browser only!`);
     return false;
   }
 
@@ -525,7 +526,7 @@ async function commitFileToGitHub(path, contentObj, commitMessage) {
     });
 
     if (putResp.ok) {
-      showDatasourceStatus('ok', `🚀 GitHub Sync: Pushed ${path} successfully!`);
+      showDatasourceStatus('ok', `🚀 Pushed ${path} to GitHub. GitHub Pages needs ~30-60s to serve it (local view already updated).`);
       return true;
     } else {
       const errErr = await putResp.json();
@@ -593,6 +594,49 @@ function cleanKey(str) {
   return str.toLowerCase().replace(/ \/ /g, '-').replace(/ /g, '-');
 }
 
+/* ===== AUDIENCE LOCAL OVERLAY (v1.2) =====
+   管理员在 Audience 面板的增删，会立即写一份本地快照。
+   原因：改动是通过 GitHub API 提交 data.json 的，而 GitHub Pages 需要 30-60 秒重建，
+   这期间刷新页面拿到的还是旧 data.json，看起来就像"没保存成功"。
+   有了本地快照后：远端没追上时以本地为准（你永远看到自己的改动）；
+   远端一旦追上，自动切回远端为准并清掉快照。 */
+const LOCAL_AUDIENCE_KEY = 'ad_namebuilder_audience_overlay_v1';
+let AUDIENCE_OVERLAY_ACTIVE = false;
+
+function stableStringify(v) {
+  if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
+  return JSON.stringify(v);
+}
+
+function saveAudienceOverlay() {
+  try {
+    localStorage.setItem(LOCAL_AUDIENCE_KEY, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      map: OPTIONS['audience-tag-map'] || {}
+    }));
+  } catch(e) {}
+}
+
+function clearAudienceOverlay() {
+  try { localStorage.removeItem(LOCAL_AUDIENCE_KEY); } catch(e) {}
+}
+
+function applyAudienceOverlay() {
+  AUDIENCE_OVERLAY_ACTIVE = false;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LOCAL_AUDIENCE_KEY) || 'null'); } catch(e) {}
+  if (!saved || !saved.map) return;
+  if (stableStringify(OPTIONS['audience-tag-map'] || {}) === stableStringify(saved.map)) {
+    clearAudienceOverlay();
+    return;
+  }
+  OPTIONS['audience-tag-map'] = saved.map;
+  AUDIENCE_OVERLAY_ACTIVE = true;
+  const t = saved.savedAt ? new Date(saved.savedAt).toLocaleString() : 'unknown';
+  showDatasourceStatus('loading', `Showing LOCAL version: remote data.json has not caught up yet (saved ${t}). If this persists after ~2 min, the GitHub push failed - check GitHub Config.`);
+}
+
 async function loadData() {
   showDatasourceStatus('loading', 'Loading data.json, custom-options.json & product-code-map.json...');
   initHistoryFromStorage();
@@ -649,11 +693,12 @@ async function loadData() {
     }
 
     mergeCustomOptions();
+    applyAudienceOverlay();
 
     renderAllFields();
     renderHistory();
     DATA_READY = true;
-    showDatasourceStatus('ok', 'Data synchronized.');
+    if (!AUDIENCE_OVERLAY_ACTIVE) showDatasourceStatus('ok', 'Data synchronized.');
   } catch(err) {
     console.error(err);
     showDatasourceStatus('error', 'Sync structural breakdown.');
@@ -982,6 +1027,7 @@ async function addNewAudienceTag() {
 
   tagInput.value = '';
   renderAudienceManagerUI();
+  saveAudienceOverlay();
 
   const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
   if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
@@ -997,6 +1043,7 @@ async function deleteAudienceTag(cat, tagVal) {
   if(OPTIONS['audience-tag-map'] && OPTIONS['audience-tag-map'][cat]) {
     OPTIONS['audience-tag-map'][cat] = OPTIONS['audience-tag-map'][cat].filter(i => (typeof i === 'object' ? i.value : i) !== tagVal);
     renderAudienceManagerUI();
+    saveAudienceOverlay();
 
     const exportCopy = JSON.parse(JSON.stringify(rawDataJson));
     if(!exportCopy["Ad-Group"]) exportCopy["Ad-Group"] = {};
