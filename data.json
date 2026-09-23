@@ -487,11 +487,6 @@
       ],
       "int": [
         {
-          "value": "cleaning&maintenance",
-          "label": "cleaning & house maintenance",
-          "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation."
-        },
-        {
           "value": "landscape design",
           "label": "landscape architecture design",
           "note": "Affinity maps targeting horticulture hobbyists, yard design, and landscape aesthetics."
