@@ -1082,56 +1082,56 @@
         "note": "Re-launch Campaign: Strategic marketing push to reignite demand and sales momentum for mature camera models."
       },
       {
-        "value": "26spring",
-        "note": "2026 Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season."
+        "value": "spring",
+        "note": "Spring Sale: Promotional campaign targeting home renovation, garden, and outdoor security upgrade season."
       },
       {
-        "value": "26summer",
-        "note": "2026 Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling."
+        "value": "summer",
+        "note": "Summer Sale: Vacation and outdoor security campaign focusing on home protection while traveling."
       },
       {
-        "value": "26fall",
-        "note": "2026 Fall Sale: Autumn home prep and shoulder-season promotional campaign."
+        "value": "fall",
+        "note": "Fall Sale: Autumn home prep and shoulder-season promotional campaign."
       },
       {
-        "value": "26winter",
-        "note": "2026 Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign."
+        "value": "winter",
+        "note": "Winter Sale: Year-end clear-out and cold-weather outdoor monitoring campaign."
       },
       {
-        "value": "26anni",
-        "note": "2026 Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles."
+        "value": "anni",
+        "note": "Anniversary Sale: Brand anniversary celebration event featuring site-wide discount bundles."
       },
       {
-        "value": "26pd",
-        "note": "2026 Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion."
+        "value": "pd",
+        "note": "Prime Day: Mid-year marquee Amazon/DTC shopping festival promotion."
       },
       {
-        "value": "26fpd",
-        "note": "2026 Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign."
+        "value": "fpd",
+        "note": "Fall Prime Day: Autumn Prime Big Deals / Fall shopping event campaign."
       },
       {
-        "value": "26bfcm",
-        "note": "2026 Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign."
+        "value": "bfcm",
+        "note": "Black Friday & Cyber Monday: Q4 peak holiday shopping mega event campaign."
       },
       {
-        "value": "26easter",
-        "note": "2026 Easter Sale: Spring holiday family and safety promo event."
+        "value": "easter",
+        "note": "Easter Sale: Spring holiday family and safety promo event."
       },
       {
-        "value": "26father",
-        "note": "2026 Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics."
+        "value": "father",
+        "note": "Father's Day Sale: Tech and smart home gift campaign targeting DIY and dad demographics."
       },
       {
-        "value": "26mother",
-        "note": "2026 Mother's Day Sale: Smart home peace-of-mind gift campaign."
+        "value": "mother",
+        "note": "Mother's Day Sale: Smart home peace-of-mind gift campaign."
       },
       {
-        "value": "26school",
-        "note": "2026 Back to School: Late-summer home and dorm/rental security campaign."
+        "value": "school",
+        "note": "Back to School: Late-summer home and dorm/rental security campaign."
       },
       {
-        "value": "26holiday",
-        "note": "2026 Year-End Holiday Sale: Christmas and New Year promotional campaign targeting peak festive shopping demand and gift buyers."
+        "value": "holiday",
+        "note": "Year-End Holiday Sale: Christmas and New Year promotional campaign targeting peak festive shopping demand and gift buyers."
       }
     ],
     "custom": []
