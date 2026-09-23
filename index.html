@@ -144,7 +144,7 @@ body.is-admin div.admin-only {display:block !important}
       <div class="header-icon">📋</div>
       <div>
         <div class="header-title">Ad Namebuilder</div>
-        <div class="header-sub">product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+        <div class="header-sub">v1.1 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
       </div>
     </div>
 
@@ -715,11 +715,11 @@ function renderFieldHTML(f) {
     const opts = OPTIONS[f] || [];
     return '<div class="field"><div class="field-label"><div class="field-label-left"><span class="req">*</span> ' + escHtml(label) + '</div></div><div class="tag-wrap" id="tags-' + f + '">' + renderTagOptions(f, opts) + '</div></div>';
   } else if (f === 'custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase & spaces..." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Auto-Fill Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div><div class="help-group" style="margin-top:10px;"><div class="help-group-title">Pmax Ad Tags</div><div class="help-tags">' + ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="custom-input" placeholder="Auto-fixes uppercase &amp; spaces. % allowed." oninput="handleCustomInput(this)" maxlength="50"></div><div class="custom-help"><div class="custom-help-header">💡 Auto-Fill Custom Recommendations</div><div class="custom-help-body" id="help-body" style="display:block;"><div class="help-group"><div class="help-group-title">Search Ad Tags</div><div class="help-tags">' + ['dsa','dsa-brand','dsa-product','dsa-generic','brand','product','generic','competitor'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div><div class="help-group" style="margin-top:10px;"><div class="help-group-title">Pmax Ad Tags</div><div class="help-tags">' + ['brand-feed','brand-asset','nonbrand-feed','nonbrand-asset','brand-all','nonbrand-all'].map(v => '<span class="help-tag" onclick="pickCustom(\''+v+'\')">'+v+'</span>').join('') + '</div></div></div></div></div>';
   } else if (f === 'ag-custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Variables..." oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Omitted if empty.</div></div></div>';
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ag-custom" placeholder="Variables... (% allowed)" oninput="handleAgCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Notes: Omitted if empty.</div></div></div>';
   } else if (f === 'ad-custom') {
-    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ad-custom" placeholder="Lowercase, numbers and hyphens only..." oninput="handleAdCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Rule: Strict lowercase & hyphens (-). Underscores (_) forbidden.</div></div></div>';
+    return '<div class="field field-full"><div class="field-label">Custom<span class="optional">Optional</span></div><div class="custom-input-wrap"><input type="text" class="custom-input" id="ad-custom" placeholder="Lowercase, numbers, hyphens and % only..." oninput="handleAdCustomInput(this)" maxlength="60"></div><div class="custom-rules"><div class="rule">💡 Rule: Strict lowercase, numbers, hyphens (-) and percent (%). Underscores (_) forbidden.</div></div></div>';
   }
   return '';
 }
@@ -1052,19 +1052,19 @@ function renderTagOptions(fieldKey, opts) {
 }
 
 function handleCustomInput(inp) {
-  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
+  inp.value = inp.value.replace(/\s*%\s*/g, '%').toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+%]/g, '');
   if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
   updateAllPreviews();
 }
 
 function handleAgCustomInput(inp) {
-  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
+  inp.value = inp.value.replace(/\s*%\s*/g, '%').toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+%]/g, '');
   if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
   updateAllPreviews();
 }
 
 function handleAdCustomInput(inp) {
-  inp.value = inp.value.toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+]/g, '');
+  inp.value = inp.value.replace(/\s*%\s*/g, '%').toLowerCase().replace(/[_\s]+/g, '-').replace(/[^a-z0-9\-+%]/g, '');
   if(inp.value !== '') inp.classList.add('ok'); else inp.classList.remove('ok');
   updateAllPreviews();
 }
