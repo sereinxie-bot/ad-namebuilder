@@ -482,11 +482,6 @@
       ],
       "int": [
         {
-          "value": "cleaning&maintenance",
-          "label": "cleaning & house maintenance",
-          "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation."
-        },
-        {
           "value": "landscape design",
           "label": "landscape architecture design",
           "note": "Affinity maps targeting horticulture hobbyists, yard design, and landscape aesthetics."
@@ -1066,6 +1061,9 @@
       },
       {
         "value": "big sales"
+      },
+      {
+        "value": "no text"
       }
     ],
     "project": [
@@ -1132,6 +1130,9 @@
       {
         "value": "holiday",
         "note": "Year-End Holiday Sale: Christmas and New Year promotional campaign targeting peak festive shopping demand and gift buyers."
+      },
+      {
+        "value": "26holiday"
       }
     ],
     "custom": []
