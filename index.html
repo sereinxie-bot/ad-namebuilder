@@ -144,7 +144,7 @@ body.is-admin div.admin-only {display:block !important}
       <div class="header-icon">📋</div>
       <div>
         <div class="header-title">Ad Namebuilder</div>
-        <div class="header-sub">v1.2 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+        <div class="header-sub">v1.3 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
       </div>
     </div>
 
@@ -1168,6 +1168,15 @@ function getFieldRuntimeOptions(field) {
     }
   }
 
+  if (field === 'data-source-detail' || field === 'data-window') {
+    const cat = sel['audience-category'];
+    if (cat === 'int' || cat === 'scene' || cat === 'id') {
+      const all = OPTIONS[field] || [];
+      return all.filter(o => (typeof o === 'object' ? o.value : o) === 'n');
+    }
+    return OPTIONS[field] || [];
+  }
+
   return OPTIONS[field] || [];
 }
 
@@ -1247,13 +1256,13 @@ function pickDropdown(field, val, e) {
      
      if(val === 'rm' || val === 'lal') {
        resetInputNode('data-source'); 
-       resetInputNode('data-source-detail'); 
-       resetInputNode('data-window');
      } else {
        forceFillInputNode('data-source', 'n');
-       forceFillInputNode('data-source-detail', 'n');
-       forceFillInputNode('data-window', 'n');
      }
+     // detail & window: default to n on every category switch; available options are gated
+     // in getFieldRuntimeOptions (locked to n only for int/scene/id, full list otherwise)
+     forceFillInputNode('data-source-detail', 'n');
+     forceFillInputNode('data-window', 'n');
   }
   updateAllPreviews();
 }
