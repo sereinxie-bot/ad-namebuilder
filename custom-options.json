@@ -5,6 +5,9 @@
     },
     {
       "value": "gadgetcrunch"
+    },
+    {
+      "value": "leo techmaker"
     }
   ],
   "ksp": [
@@ -19,6 +22,11 @@
     },
     {
       "value": "no text"
+    }
+  ],
+  "project": [
+    {
+      "value": "26holiday"
     }
   ]
 }
