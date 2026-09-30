@@ -483,6 +483,11 @@
           "value": "cleaning&maintenance",
           "label": "cleaning & house maintenance",
           "note": "Affinity maps centered on property upkeep, smart appliances, and janitorial preservation."
+        },
+        {
+          "value": "crime",
+          "label": "crime scene",
+          "note": "Contextual audience taxonomy mapping crime behaviors, affinity, and user preferences."
         }
       ],
       "int": [
