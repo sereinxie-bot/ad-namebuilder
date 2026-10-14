@@ -123,6 +123,9 @@ body.is-admin div.admin-only {display:block !important}
 .history-name{font-size:11px;font-weight:600;word-break:break-all;color:var(--text);margin-bottom:2px}
 .history-subnames-box {font-size:10px;color:var(--muted);background:#F9FAFB;padding:4px 8px;border-radius:6px;border:1px solid var(--border);margin-top:2px}
 .history-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin-top:4px}
+.history-actions{display:flex;align-items:center;gap:8px}
+.mini-btn{font-size:9px;font-weight:700;padding:2px 7px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--primary);cursor:pointer;font-family:inherit;line-height:1.4;transition:background .1s,border-color .1s}
+.mini-btn:hover{background:var(--primary-light);border-color:var(--primary)}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:8px}
 @keyframes skeleton-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .tab-footer-row {display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
@@ -144,7 +147,7 @@ body.is-admin div.admin-only {display:block !important}
       <div class="header-icon">📋</div>
       <div>
         <div class="header-title">Ad Namebuilder</div>
-        <div class="header-sub">v1.4 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+        <div class="header-sub">v1.5 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
       </div>
     </div>
 
@@ -1399,9 +1402,17 @@ function renderHistory(){
     if(h.cCol) html += '<div>🚀 C: ' + escHtml(h.cCol) + '</div>';
     if(h.gCol) html += '<div>📦 G: ' + escHtml(h.gCol) + '</div>';
     if(h.aCol) html += '<div>🖼️ A: ' + escHtml(h.aCol) + '</div>';
-    html += '</div><div class="history-meta"><span>🕒 ' + h.time + '</span><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></div></div>';
+    html += '</div><div class="history-meta"><span>🕒 ' + h.time + '</span><span class="history-actions"><button type="button" class="mini-btn" title="Copy this name" onclick="copyHistoryName(event,' + i + ')">📋 COPY</button><span style="color:var(--primary); font-weight:700;">ROLLBACK 🔁</span></span></div></div>';
   }
   el.innerHTML = html;
+}
+
+function copyHistoryName(ev, idx){
+  if(ev){ ev.stopPropagation(); ev.preventDefault(); }
+  const r = copyHistory[idx]; if(!r || !r.name) return;
+  doClipboard(r.name);
+  const btn = ev ? ev.currentTarget : null;
+  if(btn){ const old = btn.textContent; btn.textContent = '✅ Copied!'; setTimeout(function(){ btn.textContent = old; }, 1200); }
 }
 
 function restoreUniversalSnapshot(idx) {
