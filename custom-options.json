@@ -42,6 +42,10 @@
   "project": [
     {
       "value": "26holiday"
+    },
+    {
+      "value": "halloween",
+      "note": "Halloween Campaign: Promotional marketing push targeting seasonal security camera sales events."
     }
   ]
 }
