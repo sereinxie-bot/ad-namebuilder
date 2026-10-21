@@ -147,7 +147,7 @@ body.is-admin div.admin-only {display:block !important}
       <div class="header-icon">📋</div>
       <div>
         <div class="header-title">Ad Namebuilder</div>
-        <div class="header-sub">v1.5 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
+        <div class="header-sub">v1.6 &middot; product-code-map.json [<span id="map-last-modified">Checking...</span>]</div>
       </div>
     </div>
 
@@ -663,10 +663,10 @@ async function loadData() {
     rawDataJson = await dataResp.json();
     PRODUCT_RELATION_MAP = await mapResp.json();
 
-    try {
-      const savedMap = localStorage.getItem(LOCAL_PRODUCT_MAP_KEY);
-      if(savedMap) PRODUCT_RELATION_MAP = JSON.parse(savedMap);
-    } catch(e){}
+    // v1.6: remote product-code-map.json is ALWAYS authoritative (fixes "new products
+    // invisible on other computers"). localStorage is kept fresh purely as an offline
+    // fallback, and is only consumed when the network fetch fails (see catch block).
+    try { localStorage.setItem(LOCAL_PRODUCT_MAP_KEY, JSON.stringify(PRODUCT_RELATION_MAP)); } catch(e){}
 
     if (customResp.ok) {
       try { userCustomOptions = await customResp.json(); } catch(e){}
@@ -704,6 +704,18 @@ async function loadData() {
     if (!AUDIENCE_OVERLAY_ACTIVE) showDatasourceStatus('ok', 'Data synchronized.');
   } catch(err) {
     console.error(err);
+    // Offline fallback: restore the cached product map so the form stays usable.
+    // This is the ONLY path where localStorage may supply PRODUCT_RELATION_MAP.
+    try {
+      if (Object.keys(PRODUCT_RELATION_MAP || {}).length === 0) {
+        const fallbackMap = localStorage.getItem(LOCAL_PRODUCT_MAP_KEY);
+        if (fallbackMap) {
+          PRODUCT_RELATION_MAP = JSON.parse(fallbackMap);
+          showDatasourceStatus('error', 'Sync failed - offline. Using cached product map.');
+          return;
+        }
+      }
+    } catch(e){}
     showDatasourceStatus('error', 'Sync structural breakdown.');
   }
 }
