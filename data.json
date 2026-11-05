@@ -748,6 +748,11 @@
           "value": "business services",
           "label": "business services identity",
           "note": "Contextual audience taxonomy mapping business services behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "newly married",
+          "label": "newly married identity",
+          "note": "Contextual audience taxonomy mapping newly married behaviors, affinity, and user preferences."
         }
       ]
     },
