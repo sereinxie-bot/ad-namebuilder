@@ -646,6 +646,11 @@
           "value": "caravan",
           "label": "caravan interests",
           "note": "Contextual audience taxonomy mapping caravan behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "cloud service",
+          "label": "cloud service interests",
+          "note": "Contextual audience taxonomy mapping cloud service behaviors, affinity, and user preferences."
         }
       ],
       "id": [
@@ -972,6 +977,10 @@
       {
         "value": "anniversary page",
         "note": "High-conversion clearance event page celebrating the annual brand anniversary milestone with major site-wide camera deals."
+      },
+      {
+        "value": "trackmix series page",
+        "note": "Dedicated landing catalog page filtering security cameras for trackmix series page solutions."
       }
     ],
     "creative-product-type": [
@@ -1166,6 +1175,9 @@
       },
       {
         "value": "ai video search"
+      },
+      {
+        "value": "no monthly fee"
       }
     ],
     "project": [
@@ -1235,6 +1247,10 @@
       },
       {
         "value": "26holiday"
+      },
+      {
+        "value": "halloween",
+        "note": "Halloween Campaign: Promotional marketing push targeting seasonal security camera sales events."
       }
     ],
     "custom": []
