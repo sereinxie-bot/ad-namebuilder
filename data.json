@@ -651,6 +651,11 @@
           "value": "cloud service",
           "label": "cloud service interests",
           "note": "Contextual audience taxonomy mapping cloud service behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "ski & skate",
+          "label": "ski & skate interests",
+          "note": "Contextual audience taxonomy mapping ski & skate behaviors, affinity, and user preferences."
         }
       ],
       "id": [
@@ -1183,6 +1188,36 @@
       },
       {
         "value": "no monthly fee"
+      },
+      {
+        "value": "multi-charge"
+      },
+      {
+        "value": "hdr"
+      },
+      {
+        "value": "prerecord"
+      },
+      {
+        "value": "long-lasting"
+      },
+      {
+        "value": "anti-theft"
+      },
+      {
+        "value": "package detection"
+      },
+      {
+        "value": "18mp"
+      },
+      {
+        "value": "zoom"
+      },
+      {
+        "value": "vandal proof"
+      },
+      {
+        "value": "auto-track"
       }
     ],
     "project": [
@@ -1256,6 +1291,10 @@
       {
         "value": "halloween",
         "note": "Halloween Campaign: Promotional marketing push targeting seasonal security camera sales events."
+      },
+      {
+        "value": "11.11",
+        "note": "11 .11 Campaign: Promotional marketing push targeting seasonal security camera sales events."
       }
     ],
     "custom": []
