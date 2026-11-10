@@ -656,6 +656,11 @@
           "value": "ski & skate",
           "label": "ski & skate interests",
           "note": "Contextual audience taxonomy mapping ski & skate behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "home entertainment",
+          "label": "home entertainment interests",
+          "note": "Contextual audience taxonomy mapping home entertainment behaviors, affinity, and user preferences."
         }
       ],
       "id": [
