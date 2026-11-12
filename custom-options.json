@@ -17,6 +17,9 @@
     },
     {
       "value": "quentinponcelet"
+    },
+    {
+      "value": "@john visser cv-optimalisatie"
     }
   ],
   "ksp": [
@@ -37,6 +40,36 @@
     },
     {
       "value": "no monthly fee"
+    },
+    {
+      "value": "multi-charge"
+    },
+    {
+      "value": "hdr"
+    },
+    {
+      "value": "prerecord"
+    },
+    {
+      "value": "long-lasting"
+    },
+    {
+      "value": "anti-theft"
+    },
+    {
+      "value": "package detection"
+    },
+    {
+      "value": "18mp"
+    },
+    {
+      "value": "zoom"
+    },
+    {
+      "value": "vandal proof"
+    },
+    {
+      "value": "auto-track"
     }
   ],
   "project": [
@@ -46,6 +79,10 @@
     {
       "value": "halloween",
       "note": "Halloween Campaign: Promotional marketing push targeting seasonal security camera sales events."
+    },
+    {
+      "value": "11.11",
+      "note": "11 .11 Campaign: Promotional marketing push targeting seasonal security camera sales events."
     }
   ],
   "landing-page": [
