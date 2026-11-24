@@ -661,6 +661,11 @@
           "value": "home entertainment",
           "label": "home entertainment interests",
           "note": "Contextual audience taxonomy mapping home entertainment behaviors, affinity, and user preferences."
+        },
+        {
+          "value": "birdwatching",
+          "label": "birdwatching interests",
+          "note": "Contextual audience taxonomy mapping birdwatching behaviors, affinity, and user preferences."
         }
       ],
       "id": [
