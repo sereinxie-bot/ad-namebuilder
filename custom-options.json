@@ -29,12 +29,6 @@
     },
     {
       "value": "life on the left rein"
-    },
-    {
-      "value": "collar"
-    },
-    {
-      "value": "blue collar"
     }
   ],
   "ksp": [
@@ -85,6 +79,9 @@
     },
     {
       "value": "auto-track"
+    },
+    {
+      "value": "local storage"
     }
   ],
   "project": [
